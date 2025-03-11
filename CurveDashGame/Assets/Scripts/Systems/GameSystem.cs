@@ -167,7 +167,7 @@ namespace STG.CurveDash
         private float GetBallSpeedForCurrentLevel()
         {
             ref var playerStatComponent = ref playerStatService.GetPlayerStat();
-            return gameSettings.BallInitialSpeed + playerStatComponent.Level * 1.1f;
+            return gameSettings.BallInitialSpeed + playerStatComponent.Level - 1f;
         }
 
         private void ShowTitle(bool clearScene = true)
