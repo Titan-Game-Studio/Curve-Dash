@@ -29,7 +29,7 @@ Material:
   - _ALPHATEST_ON
   - _APPROXIMATE_THICKNESS_NONE
   - _GEOMETRIC_SPECULAR_AA
-  - _RAYMISS_FALLBACK_REFLECTION_PROBES
+  - _RAYMISS_FALLBACK_SCENE_COLOR
   - _REFRACTION_MODEL_SPHERE
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -135,12 +135,12 @@ Material:
     - _Parallax: 0.005
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _RAYMISS_FALLBACK: 0
+    - _RAYMISS_FALLBACK: 1
     - _REFRACTION_MODEL: 0
     - _ReceiveShadows: 1
     - _Screen_Edge_Fade_Distance: 0.1
     - _Screen_Space_Variance: 0.1
-    - _Smoothness: 0.9
+    - _Smoothness: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1

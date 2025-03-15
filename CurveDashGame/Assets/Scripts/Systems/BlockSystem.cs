@@ -88,7 +88,8 @@ namespace STG.CurveDash
 
             lastSpawnPos += rightDirection ? Vector3.right : Vector3.forward;
             
-            var color = new Color(Random.value, Random.value, Random.value, 1.0f);
+            float hue = Random.Range(0f, 1f);
+            Color color = Color.HSVToRGB(hue, 1f, 1f);
             var group = SpawnBlockWithCrystalAndHole(lastSpawnPos, rightDirection, color);
             liveBlocksEntities.Enqueue(group);
         }
