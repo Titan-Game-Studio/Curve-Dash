@@ -23,6 +23,7 @@ namespace STG.CurveDash
             
             Container.BindInterfacesTo<AndroidRefreshRateFix>().AsSingle();
             Container.BindInterfacesTo<CameraFollowSystem>().AsSingle();
+            Container.BindInterfacesTo<TerrainSystem>().AsSingle();
             Container.BindInterfacesTo<BackgroundColorSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<ObjectSpawner>().AsSingle();
             Container.Bind<GameplayStrategiesProvider>().AsSingle();
