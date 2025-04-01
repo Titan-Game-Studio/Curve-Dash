@@ -16,6 +16,7 @@ namespace STG.CurveDash
         public float BackgroundChangeDuration = 5.0f;
         
         public float CameraLerpRate = 5.0f;
+        public float TerrainLerpRate = 0.1f;
         public LayerMask CrystalMask; 
     }
 }
