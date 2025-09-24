@@ -1,4 +1,4 @@
-﻿AmazingTrack/
+﻿CurveDashGame/
 ├───Audio/
 ├───Font/
 ├───Logo/

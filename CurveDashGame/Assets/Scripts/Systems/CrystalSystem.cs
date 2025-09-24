@@ -26,10 +26,14 @@ namespace STG.CurveDash
 
         public void Tick()
         {
+            float delta = RotationSpeed * Time.deltaTime;
             foreach (var crystal in crystalFilter)
             {
                 ref var viewLinkComponent = ref viewLinkPool.Get(crystal);
-                viewLinkComponent.Transform.Rotate(Vector3.up, RotationSpeed * Time.deltaTime);
+                
+                Transform transform = viewLinkComponent.Transform;
+
+                transform.Rotate(Vector3.up, delta, Space.World);
             }
 
             foreach (var crystal in ballHitCrystalFilter)

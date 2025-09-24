@@ -124,6 +124,11 @@ namespace STG.CurveDash
             crystalView.GetComponent<Rigidbody>().isKinematic = true;
             crystalView.GetComponent<Rigidbody>().position = crystalView.transform.position;
             
+            float hue = Random.Range(0f, 1f);
+            Color color = Color.HSVToRGB(hue, 1f, 1f);
+            
+            crystalView.GetComponent<Renderer>().material.color = color;
+            
             return entity;
         }
         
