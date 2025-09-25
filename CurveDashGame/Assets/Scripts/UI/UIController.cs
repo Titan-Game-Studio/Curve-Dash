@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using STG.CurveDash.AdsMob;
 using UnityEngine;
 using Zenject;
 
@@ -12,6 +14,9 @@ namespace STG.CurveDash
         
         [Inject]
         private GameSystem gameSystem;
+        
+        [Inject] 
+        private IAdManager adManager;
 
         private GameState gameState;
         private Dictionary<GameState, GameObject> uiDictionary;
@@ -22,6 +27,12 @@ namespace STG.CurveDash
             {
                 { GameState.Title, titleUI }, { GameState.Playing, playingUI }, { GameState.GameEnd, gameEndUI }
             };
+        }
+
+        private void Start()
+        {
+            adManager.Initialize();
+            adManager.ShowBanner();
         }
 
         private void Update()

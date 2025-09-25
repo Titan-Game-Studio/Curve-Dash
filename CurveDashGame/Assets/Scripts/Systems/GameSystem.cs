@@ -1,4 +1,5 @@
 ﻿using Leopotam.EcsLite;
+using STG.CurveDash.AdsMob;
 using UnityEngine;
 using Zenject;
 
@@ -22,7 +23,7 @@ namespace STG.CurveDash
         private readonly ObjectSpawner spawner;
         private readonly BlockSystem blockSystem;
         private readonly AudioPlayer audioPlayer;
-        
+
         private readonly EcsPool<BallComponent> ballPool;
         private readonly EcsFilter ballFilter;
 
@@ -30,14 +31,16 @@ namespace STG.CurveDash
         private readonly EcsFilter ballHitCrystalFilter;
         private readonly EcsFilter ballFallingFilter;
         private readonly EcsFilter playerLevelUpFilter;
-        
+
         private readonly EcsFilter gameStateFilter;
         private readonly EcsPool<GameStateComponent> gameStatePool;
 
+        [Inject] private IAdManager adManager;
+
         private const float BallSpawnHeight = 0.75f;
 
-        public GameSystem(EcsWorld world, GameSettings gameSettings, AudioPlayer audioPlayer, 
-            AudioSettings audioSettings, BallSystem ballSystem, PlayerStatService playerStatService, 
+        public GameSystem(EcsWorld world, GameSettings gameSettings, AudioPlayer audioPlayer,
+            AudioSettings audioSettings, BallSystem ballSystem, PlayerStatService playerStatService,
             ObjectSpawner spawner, BlockSystem blockSystem)
         {
             this.world = world;
@@ -51,17 +54,17 @@ namespace STG.CurveDash
 
             ballPool = world.GetPool<BallComponent>();
             ballFilter = world.Filter<BallComponent>().End();
-            
+
             ballPassedFilter = world.Filter<BallPassedComponent>().End();
             ballHitCrystalFilter = world.Filter<BallHitComponent>().End();
             ballFallingFilter = world.Filter<BallComponent>().Inc<FallingComponent>().End();
-            
+
             gameStatePool = world.GetPool<GameStateComponent>();
             gameStateFilter = world.Filter<GameStateComponent>().End();
 
             playerLevelUpFilter = world.Filter<PlayerLevelUpComponent>().End();
         }
-        
+
         public ref GameStateComponent GetGameState()
         {
             var playerStat = gameStateFilter.GetRawEntities()[0];
@@ -77,7 +80,7 @@ namespace STG.CurveDash
         {
             var gameState = gameStateFilter.GetRawEntities()[0];
             ref var gameStateComponent = ref gameStatePool.Get(gameState);
-            
+
             switch (gameStateComponent.State)
             {
                 case GameState.Title:
@@ -97,7 +100,7 @@ namespace STG.CurveDash
 
                     foreach (var _ in ballFallingFilter)
                         GameOver();
-                    
+
                     break;
                 case GameState.GameOver:
                     gameStateComponent.GameOverTimer -= Time.deltaTime;
@@ -116,12 +119,12 @@ namespace STG.CurveDash
                 default:
                     break;
             }
-            
+
             foreach (var _ in ballPassedFilter)
             {
                 playerStatService.AddScore(PlayerStatService.ScoreForStep);
             }
-            
+
             foreach (var _ in ballHitCrystalFilter)
             {
                 playerStatService.AddScore(PlayerStatService.ScoreForCrystal);
@@ -131,7 +134,7 @@ namespace STG.CurveDash
             foreach (var _ in playerLevelUpFilter)
             {
                 audioPlayer.Play(audioSettings.NextLevelSound);
-            
+
                 var ball = ballFilter.GetRawEntities()[0];
                 ref var ballComponent = ref ballPool.Get(ball);
                 ballComponent.Speed = GetBallSpeedForCurrentLevel();
@@ -142,27 +145,27 @@ namespace STG.CurveDash
         {
             blockSystem.ClearBlocks();
             spawner.Clear();
-            
+
             playerStatService.Clear();
         }
-        
+
         private void InitScene()
         {
             var gameState = world.NewEntity();
             gameStatePool.Add(gameState);
-            
+
             playerStatService.GameStart(gameSettings.Level);
 
             blockSystem.CreateStartBlocks(GetPartsCountInBlock());
             spawner.SpawnBall(new Vector3(0, BallSpawnHeight, 0), GetBallSpeedForCurrentLevel());
         }
-        
+
         private void ChangeState(GameState state)
         {
             var gameState = gameStateFilter.GetRawEntities()[0];
             ref var gameStateComponent = ref gameStatePool.Get(gameState);
             gameStateComponent.State = state;
-         }
+        }
 
         private float GetBallSpeedForCurrentLevel()
         {
@@ -200,15 +203,17 @@ namespace STG.CurveDash
 
         private void GameOver()
         {
-            playerStatService.GameEnd();
+            adManager.ShowInterstitial(() =>
+            {
+                playerStatService.GameEnd();
 
-            audioPlayer.Play(audioSettings.BallFallSound);
+                audioPlayer.Play(audioSettings.BallFallSound);
 
-            var gameState = gameStateFilter.GetRawEntities()[0];
-            ref var gameStateComponent = ref gameStatePool.Get(gameState);
-            gameStateComponent.GameOverTimer = 1.0f;
-            
-            ChangeState(GameState.GameOver);
+                var gameState = gameStateFilter.GetRawEntities()[0];
+                ref var gameStateComponent = ref gameStatePool.Get(gameState);
+                gameStateComponent.GameOverTimer = 1.0f;
+                ChangeState(GameState.GameOver);
+            });
         }
 
         private int GetPartsCountInBlock()

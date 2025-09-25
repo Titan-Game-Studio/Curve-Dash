@@ -1,5 +1,6 @@
 using Zenject;
 using Leopotam.EcsLite;
+using STG.CurveDash.AdsMob;
 
 namespace STG.CurveDash
 {
@@ -30,6 +31,7 @@ namespace STG.CurveDash
             Container.BindInterfacesAndSelfTo<BallSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<BlockSystem>().AsSingle();
             Container.BindInterfacesTo<FallingSystem>().AsSingle();
+            Container.Bind<IAdManager>().To<AdManager>().AsSingle();
             Container.Bind<AudioPlayer>().AsSingle();
             Container.Bind<PlayerStatService>().AsSingle();
             Container.BindInterfacesAndSelfTo<GameSystem>().AsSingle();
