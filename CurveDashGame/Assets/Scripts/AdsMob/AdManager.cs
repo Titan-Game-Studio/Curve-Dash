@@ -10,8 +10,10 @@ namespace STG.CurveDash.AdsMob
 #if UNITY_ANDROID
         // ReSharper disable once InconsistentNaming
         private const string BANNER_AD_UNIT_ID = "ca-app-pub-3601008096580983/9155124929";
+
         // ReSharper disable once InconsistentNaming
         private const string INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3601008096580983/6101763781";
+
         // ReSharper disable once InconsistentNaming
         private const string REWARDED_AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917";
 #elif UNITY_IPHONE
@@ -28,9 +30,11 @@ namespace STG.CurveDash.AdsMob
         private InterstitialAd interstitialAd;
         private RewardedAd rewardedAd;
 
+        private bool isInitialized = false;
+
         public void Initialize()
         {
-            MobileAds.Initialize(initStatus => { });
+            MobileAds.Initialize(initStatus => { isInitialized = true; });
             RequestBanner();
             RequestInterstitial();
             // RequestRewardedAd();
@@ -38,12 +42,17 @@ namespace STG.CurveDash.AdsMob
 
         public void ShowBanner()
         {
+            if (!isInitialized)
+            {
+                return;
+            }
+
             bannerView?.Show();
         }
 
         public void ShowInterstitial(Action onAdClosed = null)
         {
-            if (interstitialAd.CanShowAd())
+            if (isInitialized && interstitialAd.CanShowAd())
             {
                 interstitialAd.OnAdFullScreenContentClosed += () =>
                 {
