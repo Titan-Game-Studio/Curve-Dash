@@ -22,6 +22,8 @@ namespace STG.CurveDash
 
         private readonly Collider[] hitColliders = new Collider[1];
 
+        private float ballSize = 1f;
+
         public BallSystem(EcsWorld world, AudioPlayer audioPlayer, AudioSettings audioSettings,
             GameSettings gameSettings)
         {
@@ -101,8 +103,11 @@ namespace STG.CurveDash
                 ballTransform.rotation = Quaternion.LookRotation(ballComponent.Direction, Vector3.up);
             }
 
-            float rotationSpeed = speed * 360 * Time.deltaTime;
-            ballTransform.Rotate(Vector3.right, rotationSpeed, Space.Self);
+            if (!Mathf.Approximately(ballSize, ballComponent.Size))
+            {
+                ballSize = ballComponent.Size;
+                ballTransform.GetChild(0).localScale = Vector3.one + (Vector3.one * (ballComponent.Size / 5f));
+            }
         }
 
         private bool CheckEntityUnder(Vector3 position, out int hitEntity)

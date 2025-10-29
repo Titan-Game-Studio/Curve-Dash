@@ -1,6 +1,7 @@
 using Zenject;
 using Leopotam.EcsLite;
 using STG.CurveDash.AdsMob;
+using STG.CurveDash.Views;
 
 namespace STG.CurveDash
 {
@@ -22,6 +23,9 @@ namespace STG.CurveDash
 
             // systems
             
+            Container.BindInstance(Prefabs.AssetCatalog).AsSingle();
+            Container.Bind<AddressablesController>().AsSingle().NonLazy();
+            Container.Bind<AssetManager>().AsSingle();
             Container.BindInterfacesTo<AndroidRefreshRateFix>().AsSingle();
             Container.BindInterfacesTo<CameraFollowSystem>().AsSingle();
             Container.BindInterfacesTo<TerrainSystem>().AsSingle();
@@ -53,6 +57,9 @@ namespace STG.CurveDash
                 .UnderTransformGroup("ObjectsPool");
             Container.BindMemoryPool<CrystalView, CrystalViewPool>()
                 .WithInitialSize(5).FromComponentInNewPrefab(Prefabs.CrystalPrefab)
+                .UnderTransformGroup("ObjectsPool");            
+            Container.BindMemoryPool<ObstacleView, ObstacleViewPool>()
+                .WithInitialSize(5).FromComponentInNewPrefab(Prefabs.ObstaclePrefab)
                 .UnderTransformGroup("ObjectsPool");
         }
     }

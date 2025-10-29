@@ -10,5 +10,7 @@ namespace STG.CurveDash
         public GameObject BlockPartPrefab;
         public GameObject BlockPrefab;
         public GameObject CrystalPrefab;
+        public GameObject ObstaclePrefab;
+        public AssetCatalog AssetCatalog;
     }
 }

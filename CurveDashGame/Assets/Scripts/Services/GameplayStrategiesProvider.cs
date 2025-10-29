@@ -4,6 +4,7 @@
     {
         private readonly GameSettings gameSettings;
         private CrystalSpawnStrategy crystalSpawnStrategy;
+        private ObstacleSpawnStrategy obstacleSpawnStrategy;
         private BlockHolesStrategy blockHolesStrategy;
 
         public GameplayStrategiesProvider(GameSettings gameSettings)
@@ -27,6 +28,11 @@
         public BlockHolesStrategy GetBlockHolesStrategy()
         {
             return blockHolesStrategy ??= new BlockHolesStrategy();
+        }
+
+        public ObstacleSpawnStrategy GetObstacleSpawnStrategy()
+        {
+            return obstacleSpawnStrategy ??= new RandomObstacleSpawnStrategy();
         }
 
         public void Reset()

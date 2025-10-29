@@ -105,7 +105,13 @@ namespace STG.CurveDash
             }
 
             if (gameplayStrategies.GetCrystalSpawnStrategy().ShouldSpawn())
+            {
                 SpawnCrystal(block);
+            }
+            else if (gameplayStrategies.GetObstacleSpawnStrategy().ShouldSpawn())
+            {
+                SpawnObstacle(block);
+            }
 
             return block;
         }
@@ -125,6 +131,17 @@ namespace STG.CurveDash
             if (child.gameObject.activeSelf)
             {
                 int crystal = spawner.SpawnCrystal(child.position);
+                ref var blockComponent = ref blockPool.Get(block);
+                blockComponent.Crystal = world.PackEntity(crystal);
+            }
+        }
+        private void SpawnObstacle(int block)
+        {
+            ref var viewLinkComponent = ref viewLinkPool.Get(block);
+            var child = viewLinkComponent.Transform.GetChild(Random.Range(0, BlockPartsCount - 1));
+            if (child.gameObject.activeSelf)
+            {
+                int crystal = spawner.SpawnObstacle(child.position);
                 ref var blockComponent = ref blockPool.Get(block);
                 blockComponent.Crystal = world.PackEntity(crystal);
             }

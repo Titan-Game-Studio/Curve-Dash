@@ -7,6 +7,7 @@ namespace STG.CurveDash
     public class GameSettings
     {
         public float BallInitialSpeed = 5f;
+        public float BallInitialSize = 1f;
         public GameMode GameMode = GameMode.Normal;
         [Range(1, 10)] public int Level = 1;
         public bool RandomCrystals;

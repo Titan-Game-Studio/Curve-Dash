@@ -1,4 +1,5 @@
 ﻿using Leopotam.EcsLite;
+using STG.CurveDash.Views;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Object = UnityEngine.Object;
@@ -9,30 +10,35 @@ namespace STG.CurveDash
     {
         private readonly EcsWorld world;
         private readonly CrystalViewPool crystalViewPool;
+        private readonly ObstacleViewPool obstacleViewPool;
         private readonly BlockViewPool blockViewPool;
         private readonly BlockPartViewFactory blockPartViewFactory;
         private readonly BallViewFactory ballViewFactory;
 
         private readonly Vector3 CrystalOffset = new Vector3(0, 0.8f, 0);
-        
+        private readonly Vector3 ObstacleOffset = new Vector3(0, 0.5f, 0);
+
         private readonly EcsPool<BallComponent> ballPool;
         private readonly EcsPool<CrystalComponent> crystalPool;
+        private readonly EcsPool<ObstacleComponent> obstaclePool;
         private readonly EcsPool<BlockComponent> blockPool;
-        
+
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
         private readonly EcsFilter viewLinkFilter;
 
         public ObjectSpawner(EcsWorld world, BlockViewPool blockViewPool, BlockPartViewFactory blockPartViewFactory,
-            CrystalViewPool crystalViewPool, BallViewFactory ballViewFactory)
+            CrystalViewPool crystalViewPool, ObstacleViewPool obstacleViewPool, BallViewFactory ballViewFactory)
         {
             this.world = world;
             this.blockViewPool = blockViewPool;
             this.blockPartViewFactory = blockPartViewFactory;
             this.crystalViewPool = crystalViewPool;
+            this.obstacleViewPool = obstacleViewPool;
             this.ballViewFactory = ballViewFactory;
 
             ballPool = world.GetPool<BallComponent>();
             crystalPool = world.GetPool<CrystalComponent>();
+            obstaclePool = world.GetPool<ObstacleComponent>();
             blockPool = world.GetPool<BlockComponent>();
 
             viewLinkPool = world.GetPool<ViewLinkComponent>();
@@ -45,6 +51,7 @@ namespace STG.CurveDash
                 DespawnObject(entity);
 
             crystalViewPool.Clear();
+            obstacleViewPool.Clear();
             blockViewPool.Clear();
         }
 
@@ -58,13 +65,13 @@ namespace STG.CurveDash
             gameObject.transform.position = pos;
             return entity;
         }
-        
+
         public int SpawnStartPlatform(Color color)
         {
             var gameObject = new GameObject("StartBlocks");
             gameObject.AddComponent<BlockView>();
             gameObject.AddComponent<EntityLinkView>();
-            
+
             var entity = CreateEntity<BlockComponent>(gameObject);
 
             for (int i = -1; i <= 1; i++)
@@ -77,28 +84,28 @@ namespace STG.CurveDash
 
             return entity;
         }
-        
+
         public int SpawnBlock(int count, Vector3 spawnPos, bool rightSide, Color color)
         {
             var gameObject = blockViewPool.Spawn().gameObject;
             var entity = CreateEntity<BlockComponent>(gameObject);
-            
+
             AddChildBlocks(entity, count, rightSide, spawnPos, color);
-            
+
             Assert.IsTrue(gameObject.transform.childCount == count);
             return entity;
         }
-        
+
         private void AddChildBlocks(int blocks, int count, bool rightSide, Vector3 spawnPos, Color color)
         {
             Vector3 turnDirection = rightSide ? Vector3.forward : Vector3.right;
-            
+
             ref var viewLinkComponent = ref viewLinkPool.Get(blocks);
             var parent = viewLinkComponent.Transform;
             bool childExists = parent.childCount > 0;
-            
+
             for (int i = 0; i < count; i++)
-                AddBlockChild(spawnPos + turnDirection * -i, blocks, color, 
+                AddBlockChild(spawnPos + turnDirection * -i, blocks, color,
                     childExists ? parent.GetChild(i).GetComponent<BlockPartView>() : null);
         }
 
@@ -107,7 +114,7 @@ namespace STG.CurveDash
             ref var viewLinkComponent = ref viewLinkPool.Get(blocks);
 
             var blockView = cachedBlockPartView != null ? cachedBlockPartView : blockPartViewFactory.Create();
-            
+
             blockView.GetComponent<Rigidbody>().isKinematic = true;
             blockView.GetComponent<Renderer>().material.color = color;
             blockView.transform.parent = viewLinkComponent.Transform;
@@ -119,19 +126,36 @@ namespace STG.CurveDash
         {
             var crystalView = crystalViewPool.Spawn();
             var entity = CreateEntity<CrystalComponent>(crystalView.gameObject);
-            
+
             crystalView.transform.position = blockPosition + CrystalOffset;
             crystalView.GetComponent<Rigidbody>().isKinematic = true;
             crystalView.GetComponent<Rigidbody>().position = crystalView.transform.position;
-            
+
             float hue = Random.Range(0f, 1f);
             Color color = Color.HSVToRGB(hue, 1f, 1f);
-            
+
             crystalView.GetComponent<Renderer>().material.color = color;
-            
+
             return entity;
         }
-        
+
+        public int SpawnObstacle(Vector3 blockPosition)
+        {
+            var crystalView = obstacleViewPool.Spawn();
+            var entity = CreateEntity<ObstacleComponent>(crystalView.gameObject);
+
+            crystalView.transform.position = blockPosition + ObstacleOffset;
+            crystalView.GetComponent<Rigidbody>().isKinematic = true;
+            crystalView.GetComponent<Rigidbody>().position = crystalView.transform.position;
+
+            float hue = Random.Range(0f, 1f);
+            Color color = Color.HSVToRGB(hue, 1f, 1f);
+
+            crystalView.GetComponent<Renderer>().material.color = color;
+
+            return entity;
+        }
+
         private int CreateEntity<T>(GameObject gameObject) where T : struct
         {
             var entity = world.NewEntity();
@@ -141,14 +165,14 @@ namespace STG.CurveDash
             viewLinkComponent.View = gameObject;
             viewLinkComponent.View.GetComponent<EntityLinkView>().Entity = world.PackEntity(entity);
             viewLinkComponent.Transform = gameObject.transform;
-            
+
             return entity;
         }
 
         public void DespawnObject(int entity)
         {
             ref var viewLinkComponent = ref viewLinkPool.Get(entity);
-            
+
             if (ballPool.Has(entity))
             {
                 Object.Destroy(viewLinkComponent.View);
@@ -158,7 +182,7 @@ namespace STG.CurveDash
             {
                 crystalViewPool.Despawn(viewLinkComponent.View.GetComponent<CrystalView>());
             }
-            
+
             if (blockPool.Has(entity))
             {
                 if (viewLinkComponent.Transform.childCount > 3) // start block

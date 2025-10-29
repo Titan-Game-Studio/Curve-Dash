@@ -13,6 +13,12 @@ namespace STG.CurveDash
         Holes
     }
 
+    public struct PartsCountInBlock
+    {
+        public int Min;
+        public int Max;
+    }
+
     public class GameSystem : IInitializable, ITickable
     {
         private readonly EcsWorld world;
@@ -37,7 +43,7 @@ namespace STG.CurveDash
 
         [Inject] private IAdManager adManager;
 
-        private const float BallSpawnHeight = 0.75f;
+        private const float BallSpawnHeight = 0.65f;
 
         public GameSystem(EcsWorld world, GameSettings gameSettings, AudioPlayer audioPlayer,
             AudioSettings audioSettings, BallSystem ballSystem, PlayerStatService playerStatService,
@@ -138,6 +144,7 @@ namespace STG.CurveDash
                 var ball = ballFilter.GetRawEntities()[0];
                 ref var ballComponent = ref ballPool.Get(ball);
                 ballComponent.Speed = GetBallSpeedForCurrentLevel();
+                ballComponent.Size = GetBallSizeForCurrentLevel();
             }
         }
 
@@ -171,6 +178,11 @@ namespace STG.CurveDash
         {
             ref var playerStatComponent = ref playerStatService.GetPlayerStat();
             return gameSettings.BallInitialSpeed + playerStatComponent.Level - 1f;
+        }
+        private float GetBallSizeForCurrentLevel()
+        {
+            ref var playerStatComponent = ref playerStatService.GetPlayerStat();
+            return gameSettings.BallInitialSize + playerStatComponent.Level - 1f;
         }
 
         private void ShowTitle(bool clearScene = true)
@@ -221,15 +233,15 @@ namespace STG.CurveDash
             switch (gameSettings.GameMode)
             {
                 case GameMode.Easy:
-                    return 3;
+                    return 5;
                 case GameMode.Normal:
-                    return 2;
+                    return 4;
                 case GameMode.Hard:
-                    return 1;
+                    return 3;
                 case GameMode.Holes:
                     return 3;
                 default:
-                    return 2;
+                    return 5;
             }
         }
     }

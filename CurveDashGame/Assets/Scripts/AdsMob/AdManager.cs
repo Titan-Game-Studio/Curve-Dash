@@ -9,10 +9,12 @@ namespace STG.CurveDash.AdsMob
     {
 #if UNITY_ANDROID
         // ReSharper disable once InconsistentNaming
-        private const string BANNER_AD_UNIT_ID = "ca-app-pub-3601008096580983/9155124929";
+        private const string BANNER_AD_UNIT_ID = "ca-app-pub-3940256099942544/6300978111";
+        // private const string BANNER_AD_UNIT_ID = "ca-app-pub-3601008096580983/9155124929";
 
         // ReSharper disable once InconsistentNaming
-        private const string INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3601008096580983/6101763781";
+        private const string INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712";
+        // private const string INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3601008096580983/6101763781";
 
         // ReSharper disable once InconsistentNaming
         private const string REWARDED_AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917";
