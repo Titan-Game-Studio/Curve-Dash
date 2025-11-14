@@ -1,4 +1,5 @@
-﻿using Leopotam.EcsLite;
+﻿using System;
+using Leopotam.EcsLite;
 using UnityEngine;
 
 namespace STG.CurveDash
@@ -6,15 +7,17 @@ namespace STG.CurveDash
     public class PlayerStatService
     {
         private readonly EcsWorld world;
-        
-        public const int ScoreForCrystal = 10;
+
+        public const int ScoreForCrystal = 1;
+        public const int Damege = 1;
+        public const int MaxHeart = 5;
         public const int ScoreForStep = 1;
         private const int ScoreForNextLevel = 300;
-        
+
         private readonly EcsPool<PlayerStatComponent> playerStatPool;
         private readonly EcsPool<PlayerLevelUpComponent> playerLevelUpPool;
         private readonly EcsFilter playerStatFilter;
-        
+
         public PlayerStatService(EcsWorld world)
         {
             this.world = world;
@@ -39,16 +42,51 @@ namespace STG.CurveDash
             {
                 playerStatComponent.Level++;
                 playerLevelUpPool.Add(playerStat);
+                AddHeart(1);
+            }
+        }
+
+        public void AddGold(int gold)
+        {
+            var playerStat = playerStatFilter.GetRawEntities()[0];
+            ref var playerStatComponent = ref playerStatPool.Get(playerStat);
+            playerStatComponent.Gold += gold;
+            AddScore(10);
+        }
+
+        public void AddHeart(int heart)
+        {
+            var playerStat = playerStatFilter.GetRawEntities()[0];
+            ref var playerStatComponent = ref playerStatPool.Get(playerStat);
+            if (playerStatComponent.Heart + heart > MaxHeart)
+            {
+                return;
+            }
+
+            playerStatComponent.Heart += heart;
+        }
+
+        public void TakeDamage(int damage, Action onDeath = null)
+        {
+            var playerStat = playerStatFilter.GetRawEntities()[0];
+            ref var playerStatComponent = ref playerStatPool.Get(playerStat);
+            playerStatComponent.Heart -= damage;
+
+            if (playerStatComponent.Heart <= 0)
+            {
+                onDeath?.Invoke();
             }
         }
 
         public void GameStart(int level)
         {
             var playerStat = world.NewEntity();
-            
+
             ref var playerStatComponent = ref playerStatPool.Add(playerStat);
             playerStatComponent.Level = level;
             playerStatComponent.Score = 0;
+            playerStatComponent.Gold = 0;
+            playerStatComponent.Heart = MaxHeart;
             RestoreResult(ref playerStatComponent);
         }
 

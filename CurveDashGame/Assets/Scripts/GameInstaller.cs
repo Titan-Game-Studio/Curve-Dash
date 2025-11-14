@@ -12,17 +12,17 @@ namespace STG.CurveDash
         public override void InstallBindings()
         {
             // ecs
-            
+
             Container.BindInstance(new EcsWorld());
             Container.BindInterfacesAndSelfTo<EcsSystems>().AsSingle();
             Container.BindInterfacesTo<EcsStartup>().AsSingle();
-            
+
             // settings
 
             Container.BindInstance(Prefabs);
 
             // systems
-            
+
             Container.BindInstance(Prefabs.AssetCatalog).AsSingle();
             Container.Bind<AddressablesController>().AsSingle().NonLazy();
             Container.Bind<AssetManager>().AsSingle();
@@ -40,15 +40,18 @@ namespace STG.CurveDash
             Container.Bind<PlayerStatService>().AsSingle();
             Container.BindInterfacesAndSelfTo<GameSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<CrystalSystem>().AsSingle();
-            
+            Container.BindInterfacesAndSelfTo<ObstacleSystem>().AsSingle();
+
             Container.BindInterfacesTo<DeleteEventsSystem<BallPassedComponent>>().AsSingle();
-            Container.BindInterfacesTo<DeleteEventsSystem<BallHitComponent>>().AsSingle();
+            Container.BindInterfacesTo<DeleteEventsSystem<BallHitCrystalEvent>>().AsSingle();
+            Container.BindInterfacesTo<DeleteEventsSystem<BallHitObstacleEvent>>().AsSingle();
             Container.BindInterfacesTo<DeleteEventsSystem<PlayerLevelUpComponent>>().AsSingle();
 
             // factories
 
             Container.BindFactory<BallView, BallViewFactory>().FromComponentInNewPrefab(Prefabs.BallPrefab);
-            Container.BindFactory<BlockPartView, BlockPartViewFactory>().FromComponentInNewPrefab(Prefabs.BlockPartPrefab);
+            Container.BindFactory<BlockPartView, BlockPartViewFactory>()
+                .FromComponentInNewPrefab(Prefabs.BlockPartPrefab);
 
             // pools
 
@@ -57,7 +60,7 @@ namespace STG.CurveDash
                 .UnderTransformGroup("ObjectsPool");
             Container.BindMemoryPool<CrystalView, CrystalViewPool>()
                 .WithInitialSize(5).FromComponentInNewPrefab(Prefabs.CrystalPrefab)
-                .UnderTransformGroup("ObjectsPool");            
+                .UnderTransformGroup("ObjectsPool");
             Container.BindMemoryPool<ObstacleView, ObstacleViewPool>()
                 .WithInitialSize(5).FromComponentInNewPrefab(Prefabs.ObstaclePrefab)
                 .UnderTransformGroup("ObjectsPool");

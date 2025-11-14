@@ -21,7 +21,7 @@ namespace STG.CurveDash
             viewLinkPool = world.GetPool<ViewLinkComponent>();
             
             crystalFilter = world.Filter<CrystalComponent>().End();
-            ballHitCrystalFilter = world.Filter<CrystalComponent>().Inc<BallHitComponent>().End();
+            ballHitCrystalFilter = world.Filter<CrystalComponent>().Inc<BallHitCrystalEvent>().End();
         }
 
         public void Tick()

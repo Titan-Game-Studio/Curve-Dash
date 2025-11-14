@@ -15,5 +15,10 @@ namespace STG.CurveDash
         {
             audioSource.PlayOneShot(clip, volume);
         }
+        
+        public void Stop()
+        {
+            audioSource.Stop();
+        }
     }
 }

@@ -6,6 +6,8 @@ namespace STG.CurveDash
 {
     public class BallSystem : ITickable
     {
+        const float BallOverlapRadius = 0.4f;
+
         private readonly EcsWorld world;
         private readonly AudioPlayer audioPlayer;
         private readonly AudioSettings audioSettings;
@@ -14,13 +16,16 @@ namespace STG.CurveDash
         private readonly EcsPool<BallComponent> ballPool;
         private readonly EcsPool<BlockComponent> blockPool;
         private readonly EcsPool<CrystalComponent> crystalPool;
+        private readonly EcsPool<ObstacleComponent> obstaclePool;
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
         private readonly EcsPool<FallingComponent> fallingPool;
         private readonly EcsPool<BallPassedComponent> ballPassedPool;
-        private readonly EcsPool<BallHitComponent> ballHitCrystalPool;
+        private readonly EcsPool<BallHitCrystalEvent> ballHitCrystalPool;
+        private readonly EcsPool<BallHitObstacleEvent> ballHitObstaclePool;
         private readonly EcsFilter ballFilter;
 
         private readonly Collider[] hitColliders = new Collider[1];
+        private readonly Collider[] hitColliders1 = new Collider[1];
 
         private float ballSize = 1f;
 
@@ -35,10 +40,12 @@ namespace STG.CurveDash
             ballPool = world.GetPool<BallComponent>();
             blockPool = world.GetPool<BlockComponent>();
             crystalPool = world.GetPool<CrystalComponent>();
+            obstaclePool = world.GetPool<ObstacleComponent>();
             viewLinkPool = world.GetPool<ViewLinkComponent>();
             fallingPool = world.GetPool<FallingComponent>();
             ballPassedPool = world.GetPool<BallPassedComponent>();
-            ballHitCrystalPool = world.GetPool<BallHitComponent>();
+            ballHitCrystalPool = world.GetPool<BallHitCrystalEvent>();
+            ballHitObstaclePool = world.GetPool<BallHitObstacleEvent>();
             ballFilter = world.Filter<BallComponent>().End();
         }
 
@@ -78,6 +85,9 @@ namespace STG.CurveDash
 
                 if (CheckCollisionWithCrystal(position, out int crystal) && crystalPool.Has(crystal))
                     ballHitCrystalPool.Add(crystal);
+                
+                if (CheckCollisionWithObstacle(position, out int obstacle) && obstaclePool.Has(obstacle))
+                    ballHitObstaclePool.Add(obstacle);
 
                 if (CheckEntityUnder(position, out var block) && blockPool.Has(block))
                 {
@@ -126,10 +136,22 @@ namespace STG.CurveDash
 
         private bool CheckCollisionWithCrystal(Vector3 position, out int hitEntity)
         {
-            const float BallOverlapRadius = 0.4f;
             if (Physics.OverlapSphereNonAlloc(position, BallOverlapRadius, hitColliders, gameSettings.CrystalMask) != 0)
             {
                 var linkView = hitColliders[0].transform.GetComponent<EntityLinkView>();
+                return linkView.Entity.Unpack(world, out hitEntity);
+            }
+
+            hitEntity = -1;
+            return false;
+        }
+
+        private bool CheckCollisionWithObstacle(Vector3 position, out int hitEntity)
+        {
+            if (Physics.OverlapSphereNonAlloc(position, BallOverlapRadius, hitColliders1, gameSettings.ObstacleMask) !=
+                0)
+            {
+                var linkView = hitColliders1[0].transform.GetComponent<EntityLinkView>();
                 return linkView.Entity.Unpack(world, out hitEntity);
             }
 

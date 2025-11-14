@@ -10,6 +10,10 @@ namespace STG.CurveDash
         private readonly AddressablesController _controller;
         private readonly AssetCatalog _catalog;
 
+        private readonly Dictionary<AssetReferenceGameObject, GameObject> _assetCache = new();
+
+        private readonly Dictionary<AssetReferenceGameObject, List<Action<GameObject>>> _pendingLoadCallbacks = new();
+
         public AssetManager(AssetCatalog catalog, AddressablesController controller)
         {
             _catalog = catalog;
@@ -57,7 +61,33 @@ namespace STG.CurveDash
             if (!IsValid(list, index)) return;
 
             var reference = list[index];
-            _controller.LoadAssetAsync<GameObject>(reference, onLoaded);
+
+            if (_assetCache.TryGetValue(reference, out var cached) && cached != null)
+            {
+                onLoaded?.Invoke(cached);
+                return;
+            }
+
+            if (_pendingLoadCallbacks.TryGetValue(reference, out var pending))
+            {
+                if (onLoaded != null) pending.Add(onLoaded);
+                return;
+            }
+
+            _pendingLoadCallbacks[reference] = new List<Action<GameObject>>();
+            if (onLoaded != null) _pendingLoadCallbacks[reference].Add(onLoaded);
+
+            _controller.LoadAssetAsync<GameObject>(reference, asset =>
+            {
+                _assetCache[reference] = asset;
+
+                if (_pendingLoadCallbacks.TryGetValue(reference, out var callbacks))
+                {
+                    foreach (var cb in callbacks)
+                        cb?.Invoke(asset);
+                    _pendingLoadCallbacks.Remove(reference);
+                }
+            });
         }
 
         private bool IsValid(List<AssetReferenceGameObject> list, int index)
@@ -71,8 +101,24 @@ namespace STG.CurveDash
             return true;
         }
 
+        // Release a loaded asset
+        public void UnloadAsset(List<AssetReferenceGameObject> list, int index)
+        {
+            if (!IsValid(list, index)) return;
+
+            var reference = list[index];
+
+            _assetCache.Remove(reference);
+            _pendingLoadCallbacks.Remove(reference);
+
+            _controller.UnloadAsset(reference);
+        }
+
         public void ReleaseAll()
         {
+            _assetCache.Clear();
+            _pendingLoadCallbacks.Clear();
+
             _controller.ReleaseAll();
         }
     }

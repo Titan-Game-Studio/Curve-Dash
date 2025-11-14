@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace STG.CurveDash
@@ -12,5 +13,6 @@ namespace STG.CurveDash
         public AudioClip BallFallSound;
         public AudioClip BallTurnSound;
         public AudioClip NextLevelSound;
+        public List<AudioClip> BackgroundSounds;
     }
 }

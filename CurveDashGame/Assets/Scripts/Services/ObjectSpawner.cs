@@ -131,27 +131,17 @@ namespace STG.CurveDash
             crystalView.GetComponent<Rigidbody>().isKinematic = true;
             crystalView.GetComponent<Rigidbody>().position = crystalView.transform.position;
 
-            float hue = Random.Range(0f, 1f);
-            Color color = Color.HSVToRGB(hue, 1f, 1f);
-
-            crystalView.GetComponent<Renderer>().material.color = color;
-
             return entity;
         }
 
         public int SpawnObstacle(Vector3 blockPosition)
         {
-            var crystalView = obstacleViewPool.Spawn();
-            var entity = CreateEntity<ObstacleComponent>(crystalView.gameObject);
+            var obstacleView = obstacleViewPool.Spawn();
+            var entity = CreateEntity<ObstacleComponent>(obstacleView.gameObject);
 
-            crystalView.transform.position = blockPosition + ObstacleOffset;
-            crystalView.GetComponent<Rigidbody>().isKinematic = true;
-            crystalView.GetComponent<Rigidbody>().position = crystalView.transform.position;
-
-            float hue = Random.Range(0f, 1f);
-            Color color = Color.HSVToRGB(hue, 1f, 1f);
-
-            crystalView.GetComponent<Renderer>().material.color = color;
+            obstacleView.transform.position = blockPosition + ObstacleOffset;
+            obstacleView.GetComponent<Rigidbody>().isKinematic = true;
+            obstacleView.GetComponent<Rigidbody>().position = obstacleView.transform.position;
 
             return entity;
         }
