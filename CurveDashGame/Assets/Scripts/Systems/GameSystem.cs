@@ -41,10 +41,15 @@ namespace STG.CurveDash
 
         private readonly EcsFilter gameStateFilter;
         private readonly EcsPool<GameStateComponent> gameStatePool;
+        private readonly EcsPool<ViewLinkComponent> viewLinkPool;
 
         [Inject] private IAdManager adManager;
+        [Inject] private AssetManager assetManager;
 
         private const float BallSpawnHeight = 0.65f;
+        private bool isAudioLoaded;
+        private AudioClip currentBgmClip;
+        private AudioKey currentBgmKey;
 
         public GameSystem(EcsWorld world, GameSettings gameSettings, AudioPlayer audioPlayer,
             AudioSettings audioSettings, BallSystem ballSystem, PlayerStatService playerStatService,
@@ -69,6 +74,7 @@ namespace STG.CurveDash
 
             gameStatePool = world.GetPool<GameStateComponent>();
             gameStateFilter = world.Filter<GameStateComponent>().End();
+            viewLinkPool = world.GetPool<ViewLinkComponent>();
 
             playerLevelUpFilter = world.Filter<PlayerLevelUpComponent>().End();
         }
@@ -81,65 +87,71 @@ namespace STG.CurveDash
 
         public void Initialize()
         {
+            assetManager.InitializeAddressables();
             ShowTitle(false);
         }
 
-        private int currentMusicIndex = 0;
-        private float musicTimer = 0f;
+        private void LoadCoreAudio()
+        {
+            assetManager.LoadAudioAsync(AudioKey.BallHitCrystal, clip => audioSettings.BallHitCrystalSound = clip);
+            assetManager.LoadAudioAsync(AudioKey.GameStart, clip => audioSettings.GameStartSound = clip);
+            assetManager.LoadAudioAsync(AudioKey.BallFall, clip => audioSettings.BallFallSound = clip);
+            assetManager.LoadAudioAsync(AudioKey.BallTurn, clip => audioSettings.BallTurnSound = clip);
+            assetManager.LoadAudioAsync(AudioKey.NextLevel, clip => audioSettings.NextLevelSound = clip);
+
+            LoadBgmForMode(gameSettings.GameMode);
+        }
+
+        private void LoadBgmForMode(GameMode mode)
+        {
+            AudioKey targetKey = GetBgmKeyForMode(mode);
+            if (currentBgmKey == targetKey && currentBgmClip != null) return;
+
+            currentBgmKey = targetKey;
+
+            assetManager.LoadAudioAsync(targetKey, clip =>
+            {
+                currentBgmClip = clip;
+
+                var gameState = gameStateFilter.GetRawEntities()[0];
+                ref var gameStateComponent = ref gameStatePool.Get(gameState);
+                if (gameStateComponent.State == GameState.Playing)
+                {
+                    PlayBackgroundMusic();
+                }
+            });
+        }
+
+        private AudioKey GetBgmKeyForMode(GameMode mode)
+        {
+            switch (mode)
+            {
+                case GameMode.Hard:
+                    return AudioKey.BGM_Soulforge;
+                case GameMode.Holes:
+                    return AudioKey.BGM_Wolfspire;
+                case GameMode.Easy:
+                    return AudioKey.BGM_Thundershade;
+                case GameMode.Normal:
+                    return AudioKey.BGM_Thundershade;
+                default:
+                    return AudioKey.BGM_Thundershade;
+            }
+        }
 
         private void PlayBackgroundMusic()
         {
-            if (audioSettings.BackgroundSounds == null || audioSettings.BackgroundSounds.Count == 0)
-            {
-                Debug.LogWarning("No background sounds available in audioSettings.");
-                return;
-            }
-
-            // Start playing the first clip
-            PlayNextMusic();
-        }
-
-        private void PlayNextMusic()
-        {
-            if (audioSettings.BackgroundSounds == null || audioSettings.BackgroundSounds.Count == 0) return;
-
-            // Play the current AudioClip
-            var clip = audioSettings.BackgroundSounds[currentMusicIndex];
-            
-            Debug.Log($"Playing music: {clip.name}");
-            audioPlayer.Play(clip);
-
-            // Set timer based on the length of the clip
-            musicTimer = clip.length;
-
-            // Move to the next clip, loop back to the start if necessary
-            currentMusicIndex = (currentMusicIndex + 1) % audioSettings.BackgroundSounds.Count;
+            if (currentBgmClip != null)
+                audioPlayer.Play(currentBgmClip);
         }
 
         private void StopBackgroundMusic()
         {
-            // Stop the currently playing clip
             audioPlayer.Stop();
-            
-            // Reset the timer and index for safety
-            musicTimer = 0f;
-            currentMusicIndex = 0;
         }
 
         public void Tick()
         {
-            // Reduce the timer by delta time
-            if (musicTimer > 0)
-            {
-                musicTimer -= Time.deltaTime;
-
-                // If timer hits zero, start the next music
-                if (musicTimer <= 0f)
-                {
-                    PlayNextMusic();
-                }
-            }
-
             var gameState = gameStateFilter.GetRawEntities()[0];
             ref var gameStateComponent = ref gameStatePool.Get(gameState);
 
@@ -154,6 +166,17 @@ namespace STG.CurveDash
 
                     break;
                 case GameState.Playing:
+                    ref var psc = ref playerStatService.GetPlayerStat();
+                    bool isInvincible = psc.InvincibleTimer > 0;
+                    if (isInvincible)
+                        psc.InvincibleTimer -= Time.deltaTime;
+
+                    var ballEntity = ballFilter.GetRawEntities()[0];
+                    ref var viewLink = ref viewLinkPool.Get(ballEntity);
+                    var ballView = viewLink.Transform.GetComponent<BallView>();
+                    if (ballView != null)
+                        ballView.SetInvincible(isInvincible);
+
                     if (Input.GetKeyDown(KeyCode.Escape))
                         ShowTitle();
 
@@ -190,15 +213,27 @@ namespace STG.CurveDash
             foreach (var _ in ballHitCrystalFilter)
             {
                 playerStatService.AddGold(PlayerStatService.ScoreForCrystal);
+                if (UnityEngine.Random.value < 0.1f)
+                {
+                    playerStatService.AddHeart(1);
+                }
                 audioPlayer.Play(audioSettings.BallHitCrystalSound, audioSettings.BallHitCrystalVolume);
             }
 
             foreach (var _ in ballHitObstacleFilter)
             {
+                ref var playerStatComponent = ref playerStatService.GetPlayerStat();
+                if (playerStatComponent.InvincibleTimer > 0) continue;
+
+#if UNITY_ANDROID || UNITY_IOS
+                Handheld.Vibrate();
+#endif
+                playerStatComponent.InvincibleTimer = 0.1f; // ~1-3 frames
+
                 playerStatService.TakeDamage(PlayerStatService.Damege, () =>
                 {
-                    Debug.Log("Ball hit obstacle");
-                    // GameOver();
+                    Debug.Log("Ball hit obstacle - Game Over!");
+                    GameOver();
                 });
             }
 
@@ -263,6 +298,7 @@ namespace STG.CurveDash
         {
             bool recreate = gameSettings.GameMode != gameMode;
             gameSettings.GameMode = gameMode;
+            LoadBgmForMode(gameMode);
             GameStart(recreate);
         }
 
@@ -279,7 +315,6 @@ namespace STG.CurveDash
             PlayBackgroundMusic();
         }
 
-        
 
         private void GameOver()
         {

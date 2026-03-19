@@ -1,4 +1,4 @@
-﻿namespace STG.CurveDash
+namespace STG.CurveDash
 {
     public struct PlayerStatComponent
     {
@@ -7,5 +7,6 @@
         public int Level;
         public int Gold;
         public int Heart;
+        public float InvincibleTimer;
     }
 }

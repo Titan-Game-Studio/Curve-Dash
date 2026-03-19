@@ -37,4 +37,16 @@ sysinfo.txt
 *.apk
 *.unitypackage
 
-\.idea/
+# IDE
+.idea/
+.vscode/
+
+# Unity Crash Recovery
+[Aa]ssets/_Recovery/
+[Aa]ssets/_Recovery.meta
+
+# Unity Cloud Content Delivery
+[Cc]CDBuildData/
+
+# Backups
+*.backup*

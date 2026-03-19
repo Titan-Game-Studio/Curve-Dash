@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace STG.CurveDash
 {
@@ -13,11 +14,23 @@ namespace STG.CurveDash
         private readonly Dictionary<AssetReferenceGameObject, GameObject> _assetCache = new();
 
         private readonly Dictionary<AssetReferenceGameObject, List<Action<GameObject>>> _pendingLoadCallbacks = new();
+        
+        private AsyncOperationHandle _initHandle;
 
         public AssetManager(AssetCatalog catalog, AddressablesController controller)
         {
             _catalog = catalog;
             _controller = controller;
+        }
+
+        public void InitializeAddressables()
+        {
+            _initHandle = Addressables.InitializeAsync();
+        }
+
+        public bool IsReady()
+        {
+            return _initHandle.IsValid() && _initHandle.IsDone;
         }
 
         #region LOAD_ASSET_ASYNC
@@ -40,6 +53,22 @@ namespace STG.CurveDash
         public void LoadObstacleAsync(int index, Action<GameObject> onLoaded)
         {
             LoadAsync(_catalog.Obstacles, index, onLoaded);
+        }
+        
+        public void LoadAudioAsync(AudioKey key, Action<AudioClip> onLoaded)
+        {
+            var mapping = _catalog.AudioAssets.Find(m => m.Key == key);
+    
+            if (mapping.Reference == null || !mapping.Reference.RuntimeKeyIsValid())
+            {
+                Debug.LogError($"[AssetManager] AudioKey {key} not found or invalid in Catalog");
+                return;
+            }
+
+            _controller.LoadAssetAsync<AudioClip>(mapping.Reference, clip =>
+            {
+                onLoaded?.Invoke(clip);
+            });
         }
 
         #endregion

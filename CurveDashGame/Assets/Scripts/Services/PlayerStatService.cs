@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Leopotam.EcsLite;
 using UnityEngine;
 
@@ -87,6 +87,7 @@ namespace STG.CurveDash
             playerStatComponent.Score = 0;
             playerStatComponent.Gold = 0;
             playerStatComponent.Heart = MaxHeart;
+            playerStatComponent.InvincibleTimer = 0f;
             RestoreResult(ref playerStatComponent);
         }
 

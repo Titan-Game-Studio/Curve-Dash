@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: deda10c31c0eac1489b67280a6b8cbb0
   m_SerializeEntries:
+  - m_GUID: 01173e6a0a8dfd94ca58cd38c265d681
+    m_Address: gamestart
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0133b83d2f970db42aeef66aa736ef47
     m_Address: Owl
     m_ReadOnly: 0
@@ -125,6 +130,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5b8f7e9f5b816564084f6ed9016bdf7e
+    m_Address: Soulforge
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5e966ec0c45a41f43ae1c3504164d54f
+    m_Address: nextlevel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 664c64bbb000f5e428ca3b8f7e0ea923
     m_Address: VFX_Trail_Void
     m_ReadOnly: 0
@@ -155,6 +170,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 73a6c62ddfe23b44bb0a7cc7bd564278
+    m_Address: turn
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 74e838f61acce1740b87c68f37ba21e4
     m_Address: Kid 4
     m_ReadOnly: 0
@@ -172,6 +192,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 852672785d05a474c8009254454cdcec
     m_Address: Cat
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8cfe3be4d2987ee46be2a7ce11949781
+    m_Address: fall
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 95da616b9ca5be942b52dd271af0db90
+    m_Address: Thundershade
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -197,6 +227,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b1b493e68187df9489ddabd238957ed8
     m_Address: Cloud 2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b6039e869b88dfe449ea7e1b11ca2a4c
+    m_Address: hitcrystal
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b63c09a3b82b0c9418e167b4d7f56b87
+    m_Address: Wolfspire
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
