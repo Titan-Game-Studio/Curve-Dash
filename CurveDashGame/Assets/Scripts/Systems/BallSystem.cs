@@ -1,4 +1,4 @@
-﻿using Leopotam.EcsLite;
+using Leopotam.EcsLite;
 using UnityEngine;
 using Zenject;
 
@@ -17,10 +17,12 @@ namespace STG.CurveDash
         private readonly EcsPool<BlockComponent> blockPool;
         private readonly EcsPool<CrystalComponent> crystalPool;
         private readonly EcsPool<ObstacleComponent> obstaclePool;
+        private readonly EcsPool<ShieldComponent> shieldPool;
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
         private readonly EcsPool<FallingComponent> fallingPool;
         private readonly EcsPool<BallPassedComponent> ballPassedPool;
         private readonly EcsPool<BallHitCrystalEvent> ballHitCrystalPool;
+        private readonly EcsPool<BallHitShieldEvent> ballHitShieldPool;
         private readonly EcsPool<BallHitObstacleEvent> ballHitObstaclePool;
         private readonly EcsFilter ballFilter;
 
@@ -41,10 +43,12 @@ namespace STG.CurveDash
             blockPool = world.GetPool<BlockComponent>();
             crystalPool = world.GetPool<CrystalComponent>();
             obstaclePool = world.GetPool<ObstacleComponent>();
+            shieldPool = world.GetPool<ShieldComponent>();
             viewLinkPool = world.GetPool<ViewLinkComponent>();
             fallingPool = world.GetPool<FallingComponent>();
             ballPassedPool = world.GetPool<BallPassedComponent>();
             ballHitCrystalPool = world.GetPool<BallHitCrystalEvent>();
+            ballHitShieldPool = world.GetPool<BallHitShieldEvent>();
             ballHitObstaclePool = world.GetPool<BallHitObstacleEvent>();
             ballFilter = world.Filter<BallComponent>().End();
         }
@@ -83,8 +87,13 @@ namespace STG.CurveDash
             {
                 var position = viewLinkComponent.Transform.position;
 
-                if (CheckCollisionWithCrystal(position, out int crystal) && crystalPool.Has(crystal))
-                    ballHitCrystalPool.Add(crystal);
+                if (CheckCollisionWithCrystal(position, out int pickupEntity))
+                {
+                    if (crystalPool.Has(pickupEntity))
+                        ballHitCrystalPool.Add(pickupEntity);
+                    else if (shieldPool.Has(pickupEntity))
+                        ballHitShieldPool.Add(pickupEntity);
+                }
                 
                 if (CheckCollisionWithObstacle(position, out int obstacle) && obstaclePool.Has(obstacle))
                     ballHitObstaclePool.Add(obstacle);

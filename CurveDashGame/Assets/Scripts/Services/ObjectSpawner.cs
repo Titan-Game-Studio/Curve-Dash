@@ -1,4 +1,4 @@
-﻿using Leopotam.EcsLite;
+using Leopotam.EcsLite;
 using STG.CurveDash.Views;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -11,6 +11,8 @@ namespace STG.CurveDash
         private readonly EcsWorld world;
         private readonly CrystalViewPool crystalViewPool;
         private readonly ObstacleViewPool obstacleViewPool;
+        private readonly ShieldViewPool shieldViewPool;
+        private readonly CloudViewPool cloudViewPool;
         private readonly BlockViewPool blockViewPool;
         private readonly BlockPartViewFactory blockPartViewFactory;
         private readonly BallViewFactory ballViewFactory;
@@ -21,24 +23,30 @@ namespace STG.CurveDash
         private readonly EcsPool<BallComponent> ballPool;
         private readonly EcsPool<CrystalComponent> crystalPool;
         private readonly EcsPool<ObstacleComponent> obstaclePool;
+        private readonly EcsPool<ShieldComponent> shieldPool;
+        private readonly EcsPool<CloudComponent> cloudPool;
         private readonly EcsPool<BlockComponent> blockPool;
 
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
         private readonly EcsFilter viewLinkFilter;
 
         public ObjectSpawner(EcsWorld world, BlockViewPool blockViewPool, BlockPartViewFactory blockPartViewFactory,
-            CrystalViewPool crystalViewPool, ObstacleViewPool obstacleViewPool, BallViewFactory ballViewFactory)
+            CrystalViewPool crystalViewPool, ObstacleViewPool obstacleViewPool, ShieldViewPool shieldViewPool, CloudViewPool cloudViewPool, BallViewFactory ballViewFactory)
         {
             this.world = world;
             this.blockViewPool = blockViewPool;
             this.blockPartViewFactory = blockPartViewFactory;
             this.crystalViewPool = crystalViewPool;
             this.obstacleViewPool = obstacleViewPool;
+            this.shieldViewPool = shieldViewPool;
+            this.cloudViewPool = cloudViewPool;
             this.ballViewFactory = ballViewFactory;
 
             ballPool = world.GetPool<BallComponent>();
             crystalPool = world.GetPool<CrystalComponent>();
             obstaclePool = world.GetPool<ObstacleComponent>();
+            shieldPool = world.GetPool<ShieldComponent>();
+            cloudPool = world.GetPool<CloudComponent>();
             blockPool = world.GetPool<BlockComponent>();
 
             viewLinkPool = world.GetPool<ViewLinkComponent>();
@@ -52,6 +60,8 @@ namespace STG.CurveDash
 
             crystalViewPool.Clear();
             obstacleViewPool.Clear();
+            shieldViewPool.Clear();
+            cloudViewPool.Clear();
             blockViewPool.Clear();
         }
 
@@ -146,6 +156,36 @@ namespace STG.CurveDash
             return entity;
         }
 
+        public int SpawnShield(Vector3 blockPosition)
+        {
+            var shieldView = shieldViewPool.Spawn();
+            var entity = CreateEntity<ShieldComponent>(shieldView.gameObject);
+
+            shieldView.transform.position = blockPosition + CrystalOffset; // Using same offset as Crystal
+            shieldView.GetComponent<Rigidbody>().isKinematic = true;
+            shieldView.GetComponent<Rigidbody>().position = shieldView.transform.position;
+
+            return entity;
+        }
+
+        public int SpawnCloud(Vector3 blockPosition)
+        {
+            var cloudView = cloudViewPool.Spawn();
+            var entity = CreateEntity<CloudComponent>(cloudView.gameObject);
+            
+            // Randomize cloud speed and offset
+            float heightOffset = Random.Range(1.5f, 3.5f);
+            float sideOffset = Random.Range(-2f, 2f);
+            
+            cloudView.transform.position = blockPosition + new Vector3(sideOffset, heightOffset, 0);
+            
+            ref var cloud = ref cloudPool.Get(entity);
+            cloud.Speed = Random.Range(1f, 3f);
+            cloud.Lifetime = 15f; // Clouds live for 15 seconds before despawning
+
+            return entity;
+        }
+
         private int CreateEntity<T>(GameObject gameObject) where T : struct
         {
             var entity = world.NewEntity();
@@ -171,6 +211,21 @@ namespace STG.CurveDash
             if (crystalPool.Has(entity))
             {
                 crystalViewPool.Despawn(viewLinkComponent.View.GetComponent<CrystalView>());
+            }
+
+            if (obstaclePool.Has(entity))
+            {
+                obstacleViewPool.Despawn(viewLinkComponent.View.GetComponent<ObstacleView>());
+            }
+
+            if (shieldPool.Has(entity))
+            {
+                shieldViewPool.Despawn(viewLinkComponent.View.GetComponent<ShieldView>());
+            }
+
+            if (cloudPool.Has(entity))
+            {
+                cloudViewPool.Despawn(viewLinkComponent.View.GetComponent<CloudView>());
             }
 
             if (blockPool.Has(entity))

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Leopotam.EcsLite;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -104,13 +104,23 @@ namespace STG.CurveDash
                     MakeHole(block);
             }
 
-            if (gameplayStrategies.GetCrystalSpawnStrategy().ShouldSpawn())
+            if (gameplayStrategies.GetShieldSpawnStrategy().ShouldSpawn())
+            {
+                SpawnShield(block);
+            }
+            else if (gameplayStrategies.GetCrystalSpawnStrategy().ShouldSpawn())
             {
                 SpawnCrystal(block);
             }
             else if (gameplayStrategies.GetObstacleSpawnStrategy().ShouldSpawn())
             {
                 SpawnObstacle(block);
+            }
+
+            // Clouds can spawn independently from other objects
+            if (gameplayStrategies.GetCloudSpawnStrategy().ShouldSpawn())
+            {
+                SpawnCloud(block);
             }
 
             return block;
@@ -135,6 +145,18 @@ namespace STG.CurveDash
                 blockComponent.Crystal = world.PackEntity(crystal);
             }
         }
+
+        private void SpawnShield(int block)
+        {
+            ref var viewLinkComponent = ref viewLinkPool.Get(block);
+            var child = viewLinkComponent.Transform.GetChild(Random.Range(0, BlockPartsCount - 1));
+            if (child.gameObject.activeSelf)
+            {
+                int shield = spawner.SpawnShield(child.position);
+                ref var blockComponent = ref blockPool.Get(block);
+                blockComponent.Crystal = world.PackEntity(shield);
+            }
+        }
         private void SpawnObstacle(int block)
         {
             ref var viewLinkComponent = ref viewLinkPool.Get(block);
@@ -144,6 +166,18 @@ namespace STG.CurveDash
                 int crystal = spawner.SpawnObstacle(child.position);
                 ref var blockComponent = ref blockPool.Get(block);
                 blockComponent.Crystal = world.PackEntity(crystal);
+            }
+        }
+
+        private void SpawnCloud(int block)
+        {
+            ref var viewLinkComponent = ref viewLinkPool.Get(block);
+            var child = viewLinkComponent.Transform.GetChild(Random.Range(0, BlockPartsCount - 1));
+            if (child.gameObject.activeSelf)
+            {
+                // Clouds do not attach uniquely to blockComponent.Crystal slot.
+                // They just spawn at the location and fly away.
+                spawner.SpawnCloud(child.position);
             }
         }
 

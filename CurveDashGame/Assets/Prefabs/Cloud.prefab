@@ -11,10 +11,10 @@ GameObject:
   - component: {fileID: 2830056364503120987}
   - component: {fileID: 2830056364503120990}
   - component: {fileID: -307365885568271129}
-  - component: {fileID: 7320142974096083703}
   - component: {fileID: -988062290415317578}
+  - component: {fileID: 4732137026703478303}
   m_Layer: 7
-  m_Name: Obstacle
+  m_Name: Cloud
   m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -83,18 +83,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &7320142974096083703
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2830056364503120991}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ffdaa45cf36df54383b412b46939fc1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ObstacleView
 --- !u!114 &-988062290415317578
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -107,3 +95,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91993f0b15344111af4e5a036f4b4a21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &4732137026703478303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2830056364503120991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 347d3790e3c71664f8214512ce2c51a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.Views.CloudView

@@ -1,4 +1,4 @@
-﻿namespace STG.CurveDash
+namespace STG.CurveDash
 {
     public class GameplayStrategiesProvider
     {
@@ -6,6 +6,8 @@
         private CrystalSpawnStrategy crystalSpawnStrategy;
         private ObstacleSpawnStrategy obstacleSpawnStrategy;
         private BlockHolesStrategy blockHolesStrategy;
+        private RandomShieldSpawnStrategy shieldSpawnStrategy;
+        private RandomCloudSpawnStrategy cloudSpawnStrategy;
 
         public GameplayStrategiesProvider(GameSettings gameSettings)
         {
@@ -35,10 +37,22 @@
             return obstacleSpawnStrategy ??= new RandomObstacleSpawnStrategy();
         }
 
+        public RandomShieldSpawnStrategy GetShieldSpawnStrategy()
+        {
+            return shieldSpawnStrategy ??= new RandomShieldSpawnStrategy();
+        }
+
+        public RandomCloudSpawnStrategy GetCloudSpawnStrategy()
+        {
+            return cloudSpawnStrategy ??= new RandomCloudSpawnStrategy();
+        }
+
         public void Reset()
         {
             crystalSpawnStrategy = null;
             blockHolesStrategy = null;
+            shieldSpawnStrategy = null;
+            cloudSpawnStrategy = null;
         }
     }
 }

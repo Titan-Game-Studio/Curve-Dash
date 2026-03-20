@@ -231,6 +231,7 @@ MonoBehaviour:
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
+  Clouds:
   - m_AssetGUID: 677b33b4a03ff8c4db79777386fcd1eb
     m_SubObjectName: 
     m_SubObjectType: 

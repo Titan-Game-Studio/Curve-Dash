@@ -41,10 +41,13 @@ namespace STG.CurveDash
             Container.BindInterfacesAndSelfTo<GameSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<CrystalSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<ObstacleSystem>().AsSingle();
+            Container.BindInterfacesAndSelfTo<CloudSystem>().AsSingle();
+            Container.BindInterfacesAndSelfTo<ShieldSystem>().AsSingle();
 
             Container.BindInterfacesTo<DeleteEventsSystem<BallPassedComponent>>().AsSingle();
             Container.BindInterfacesTo<DeleteEventsSystem<BallHitCrystalEvent>>().AsSingle();
             Container.BindInterfacesTo<DeleteEventsSystem<BallHitObstacleEvent>>().AsSingle();
+            Container.BindInterfacesTo<DeleteEventsSystem<BallHitShieldEvent>>().AsSingle();
             Container.BindInterfacesTo<DeleteEventsSystem<PlayerLevelUpComponent>>().AsSingle();
 
             // factories
@@ -63,6 +66,12 @@ namespace STG.CurveDash
                 .UnderTransformGroup("ObjectsPool");
             Container.BindMemoryPool<ObstacleView, ObstacleViewPool>()
                 .WithInitialSize(5).FromComponentInNewPrefab(Prefabs.ObstaclePrefab)
+                .UnderTransformGroup("ObjectsPool");
+            Container.BindMemoryPool<ShieldView, ShieldViewPool>()
+                .WithInitialSize(2).FromComponentInNewPrefab(Prefabs.ShieldPrefab)
+                .UnderTransformGroup("ObjectsPool");
+            Container.BindMemoryPool<CloudView, CloudViewPool>()
+                .WithInitialSize(5).FromComponentInNewPrefab(Prefabs.CloudPrefab)
                 .UnderTransformGroup("ObjectsPool");
         }
     }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using Zenject;
 using Random = UnityEngine.Random;
@@ -12,9 +12,13 @@ namespace STG.CurveDash.Views
 
         private void Start()
         {
-            // TODO: Refacter.
-            int index = Random.Range(0, 7);
-            _assetManager.LoadObstacleAsync(index, prefab => { Instantiate(prefab, transform); });
+            if (_assetManager.ObstacleCount > 0)
+            {
+                int index = Random.Range(0, _assetManager.ObstacleCount);
+                _assetManager.LoadObstacleAsync(index, prefab => { 
+                    if (this != null) Instantiate(prefab, transform); 
+                });
+            }
         }
     }
     

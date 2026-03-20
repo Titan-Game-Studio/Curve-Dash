@@ -1,4 +1,4 @@
-﻿using Leopotam.EcsLite;
+using Leopotam.EcsLite;
 using STG.CurveDash.AdsMob;
 using UnityEngine;
 using Zenject;
@@ -36,6 +36,7 @@ namespace STG.CurveDash
         private readonly EcsFilter ballPassedFilter;
         private readonly EcsFilter ballHitCrystalFilter;
         private readonly EcsFilter ballHitObstacleFilter;
+        private readonly EcsFilter ballHitShieldFilter;
         private readonly EcsFilter ballFallingFilter;
         private readonly EcsFilter playerLevelUpFilter;
 
@@ -70,6 +71,7 @@ namespace STG.CurveDash
             ballPassedFilter = world.Filter<BallPassedComponent>().End();
             ballHitCrystalFilter = world.Filter<BallHitCrystalEvent>().End();
             ballHitObstacleFilter = world.Filter<BallHitObstacleEvent>().End();
+            ballHitShieldFilter = world.Filter<BallHitShieldEvent>().End();
             ballFallingFilter = world.Filter<BallComponent>().Inc<FallingComponent>().End();
 
             gameStatePool = world.GetPool<GameStateComponent>();
@@ -213,10 +215,12 @@ namespace STG.CurveDash
             foreach (var _ in ballHitCrystalFilter)
             {
                 playerStatService.AddGold(PlayerStatService.ScoreForCrystal);
-                if (UnityEngine.Random.value < 0.1f)
-                {
-                    playerStatService.AddHeart(1);
-                }
+                audioPlayer.Play(audioSettings.BallHitCrystalSound, audioSettings.BallHitCrystalVolume);
+            }
+
+            foreach (var _ in ballHitShieldFilter)
+            {
+                playerStatService.AddHeart(1);
                 audioPlayer.Play(audioSettings.BallHitCrystalSound, audioSettings.BallHitCrystalVolume);
             }
 

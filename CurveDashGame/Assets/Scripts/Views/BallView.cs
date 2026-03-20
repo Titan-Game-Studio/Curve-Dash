@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using Zenject;
 using Random = UnityEngine.Random;
@@ -13,15 +15,23 @@ namespace STG.CurveDash
         [SerializeField] private Transform _vfxContainerTransform;
         [SerializeField] private Transform _characterContainerTransform;
         
-        private int _skinIndex = 0;
-        private int _vfxIndex = 0;
-        private int _characterIndex = 0;
+        private int _skinIndex = -1;
+        private int _vfxIndex = -1;
+        private int _characterIndex = -1;
+
+        private CancellationTokenSource _skinCts;
+        private CancellationTokenSource _vfxCts;
+        private CancellationTokenSource _characterCts;
+
+        private readonly Dictionary<int, GameObject> _cachedSkins = new Dictionary<int, GameObject>();
+        private readonly Dictionary<int, GameObject> _cachedVfx = new Dictionary<int, GameObject>();
+        private readonly Dictionary<int, GameObject> _cachedCharacters = new Dictionary<int, GameObject>();
 
         private bool _isInvincible;
         private float _blinkTimer;
         private bool _isWhite;
         private Material _whiteMaterial;
-        private System.Collections.Generic.Dictionary<Renderer, Material[]> _originalMaterials = new System.Collections.Generic.Dictionary<Renderer, Material[]>();
+        private Dictionary<Renderer, Material[]> _originalMaterials = new Dictionary<Renderer, Material[]>();
 
         private void Start()
         {
@@ -44,36 +54,84 @@ namespace STG.CurveDash
 
         private void Init()
         {
-            ResetAll();
-            _assetManager.LoadBallSkinAsync(_skinIndex, prefab => { Instantiate(prefab, _skinContainerTransform); });
-            _assetManager.LoadVFXAsync(_vfxIndex,vfx => { Instantiate(vfx,  _vfxContainerTransform); });
-            _assetManager.LoadCharacterAsync(_characterIndex,character => { Instantiate(character, _characterContainerTransform); });
+            UpdateSkin(0);
+            UpdateVFX(0);
+            UpdateCharacter(0);
         }
 
-        private void ResetAll()
+        private void OnDestroy()
         {
-            DestroyAllChildren(_skinContainerTransform);
-            DestroyAllChildren(_vfxContainerTransform);
-            DestroyAllChildren(_characterContainerTransform);
+            _skinCts?.Cancel(); 
+            _skinCts?.Dispose();
+            _vfxCts?.Cancel(); 
+            _vfxCts?.Dispose();
+            _characterCts?.Cancel(); 
+            _characterCts?.Dispose();
         }
 
-        private void UpdateSkin(int skinIndex = 0)
+        public void UpdateSkin(int skinIndex)
         {
-            if (skinIndex == _skinIndex)
-                return;
+            if (skinIndex == _skinIndex) return;
             _skinIndex = skinIndex;
-            DestroyAllChildren(_skinContainerTransform);
-            _assetManager.LoadBallSkinAsync(_skinIndex, prefab => { Instantiate(prefab, _skinContainerTransform); });
+            LoadOrEnableAsset(_skinIndex, _skinContainerTransform, _cachedSkins, _assetManager.LoadBallSkinAsync, ref _skinCts, OnVisualLoaded);
         }
 
-        private void DestroyAllChildren(Transform inTransform)
+        public void UpdateVFX(int vfxIndex)
         {
-            foreach (Transform child in inTransform)
+            if (vfxIndex == _vfxIndex) return;
+            _vfxIndex = vfxIndex;
+            LoadOrEnableAsset(_vfxIndex, _vfxContainerTransform, _cachedVfx, _assetManager.LoadVFXAsync, ref _vfxCts, null);
+        }
+
+        public void UpdateCharacter(int characterIndex)
+        {
+            if (characterIndex == _characterIndex) return;
+            _characterIndex = characterIndex;
+            LoadOrEnableAsset(_characterIndex, _characterContainerTransform, _cachedCharacters, _assetManager.LoadCharacterAsync, ref _characterCts, OnVisualLoaded);
+        }
+
+        private void LoadOrEnableAsset(
+            int index, 
+            Transform container, 
+            Dictionary<int, GameObject> cache, 
+            Action<int, Action<GameObject>> loadFunc,
+            ref CancellationTokenSource cts,
+            Action onLoadedCallback)
+        {
+            foreach (var kvp in cache)
             {
-                if (child !=  null)
-                {
-                    Destroy(child.gameObject);
-                }
+                if (kvp.Value != null) kvp.Value.SetActive(false);
+            }
+
+            if (cache.TryGetValue(index, out var existingObj) && existingObj != null)
+            {
+                existingObj.SetActive(true);
+                onLoadedCallback?.Invoke();
+                return;
+            }
+
+            cts?.Cancel();
+            cts?.Dispose();
+            cts = new CancellationTokenSource();
+            var token = cts.Token;
+
+            loadFunc(index, prefab => 
+            {
+                if (this == null || token.IsCancellationRequested) return;
+                
+                var obj = Instantiate(prefab, container);
+                cache[index] = obj;
+                onLoadedCallback?.Invoke();
+            });
+        }
+
+        private void OnVisualLoaded()
+        {
+            if (_isInvincible)
+            {
+                RestoreOriginalMaterials();
+                _isInvincible = false;
+                SetInvincible(true);
             }
         }
 
@@ -93,7 +151,7 @@ namespace STG.CurveDash
                 
                 _originalMaterials.Clear();
                 
-                var renderers = new System.Collections.Generic.List<Renderer>();
+                var renderers = new List<Renderer>();
                 if (_skinContainerTransform != null)
                     renderers.AddRange(_skinContainerTransform.GetComponentsInChildren<Renderer>());
                 if (_characterContainerTransform != null)

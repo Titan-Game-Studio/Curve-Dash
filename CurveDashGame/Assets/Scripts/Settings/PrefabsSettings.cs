@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 namespace STG.CurveDash
@@ -11,6 +11,8 @@ namespace STG.CurveDash
         public GameObject BlockPrefab;
         public GameObject CrystalPrefab;
         public GameObject ObstaclePrefab;
+        public GameObject CloudPrefab;
+        public GameObject ShieldPrefab;
         public AssetCatalog AssetCatalog;
     }
 }

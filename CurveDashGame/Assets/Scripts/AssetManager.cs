@@ -54,6 +54,14 @@ namespace STG.CurveDash
         {
             LoadAsync(_catalog.Obstacles, index, onLoaded);
         }
+
+        public void LoadCloudAsync(int index, Action<GameObject> onLoaded)
+        {
+            LoadAsync(_catalog.Clouds, index, onLoaded);
+        }
+        
+        public int ObstacleCount => _catalog.Obstacles?.Count ?? 0;
+        public int CloudCount => _catalog.Clouds?.Count ?? 0;
         
         public void LoadAudioAsync(AudioKey key, Action<AudioClip> onLoaded)
         {

@@ -31,6 +31,7 @@ namespace STG.CurveDash
         public List<AssetReferenceGameObject> VFXs;
         public List<AssetReferenceGameObject> Characters;
         public List<AssetReferenceGameObject> Obstacles;
+        public List<AssetReferenceGameObject> Clouds;
         public List<AudioMapping> AudioAssets;
     }
 }

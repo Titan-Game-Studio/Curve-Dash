@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2688408711388264356}
   - component: {fileID: 779893255176283668}
-  - component: {fileID: 5276500411347556991}
+  - component: {fileID: 1137773015044344309}
   m_Layer: 5
   m_Name: HeartIcon (3)
   m_TagString: Untagged
@@ -35,7 +35,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &779893255176283668
 CanvasRenderer:
@@ -45,7 +45,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 41930632295653265}
   m_CullTransparentMesh: 1
---- !u!114 &5276500411347556991
+--- !u!114 &1137773015044344309
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -54,27 +54,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 41930632295653265}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 534e3ec14cd78434b8676eec8a7fd9ba, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_Texture: {fileID: 8400000, guid: 19d44fcc5a20aa34daa69b50f812c951, type: 2}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
 --- !u!1 &987959602571820213
 GameObject:
   m_ObjectHideFlags: 0
@@ -85,7 +82,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5662157366063700871}
   - component: {fileID: 2342274312819450274}
-  - component: {fileID: 3489050838743610985}
+  - component: {fileID: 2521012033713524038}
   m_Layer: 5
   m_Name: HeartIcon (4)
   m_TagString: Untagged
@@ -110,7 +107,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2342274312819450274
 CanvasRenderer:
@@ -120,7 +117,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 987959602571820213}
   m_CullTransparentMesh: 1
---- !u!114 &3489050838743610985
+--- !u!114 &2521012033713524038
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -129,27 +126,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 987959602571820213}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 534e3ec14cd78434b8676eec8a7fd9ba, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_Texture: {fileID: 8400000, guid: 19d44fcc5a20aa34daa69b50f812c951, type: 2}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
 --- !u!1 &1016926900859373982
 GameObject:
   m_ObjectHideFlags: 0
@@ -160,7 +154,7 @@ GameObject:
   m_Component:
   - component: {fileID: 483993053454787160}
   - component: {fileID: 4671621755408941377}
-  - component: {fileID: 414846659545602324}
+  - component: {fileID: 3800230851766253719}
   m_Layer: 5
   m_Name: HeartIcon
   m_TagString: Untagged
@@ -185,7 +179,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4671621755408941377
 CanvasRenderer:
@@ -195,7 +189,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1016926900859373982}
   m_CullTransparentMesh: 1
---- !u!114 &414846659545602324
+--- !u!114 &3800230851766253719
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -204,27 +198,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 1016926900859373982}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 534e3ec14cd78434b8676eec8a7fd9ba, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_Texture: {fileID: 8400000, guid: 19d44fcc5a20aa34daa69b50f812c951, type: 2}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
 --- !u!1 &1377036233506190639
 GameObject:
   m_ObjectHideFlags: 0
@@ -533,7 +524,7 @@ GameObject:
   m_Component:
   - component: {fileID: 286243249222812645}
   - component: {fileID: 2507797319456521499}
-  - component: {fileID: 5681512724308767533}
+  - component: {fileID: 7712978285274636794}
   m_Layer: 5
   m_Name: HeartIcon (1)
   m_TagString: Untagged
@@ -558,7 +549,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2507797319456521499
 CanvasRenderer:
@@ -568,7 +559,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4214722814697900339}
   m_CullTransparentMesh: 1
---- !u!114 &5681512724308767533
+--- !u!114 &7712978285274636794
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -577,27 +568,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 4214722814697900339}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 534e3ec14cd78434b8676eec8a7fd9ba, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_Texture: {fileID: 8400000, guid: 19d44fcc5a20aa34daa69b50f812c951, type: 2}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
 --- !u!1 &7875723577106416497
 GameObject:
   m_ObjectHideFlags: 0
@@ -636,8 +624,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 366.98, y: 657}
-  m_SizeDelta: {x: 330, y: 100}
+  m_AnchoredPosition: {x: 250.78421, y: 657}
+  m_SizeDelta: {x: 562.3917, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2629521023207134258
 MonoBehaviour:
@@ -653,15 +641,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.HorizontalLayoutGroup
   m_Padding:
     m_Left: 0
-    m_Right: 20
+    m_Right: 10
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 5
-  m_Spacing: 10
+  m_Spacing: -10
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 1
-  m_ChildControlHeight: 1
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 1
@@ -675,7 +663,7 @@ GameObject:
   m_Component:
   - component: {fileID: 770252970121418262}
   - component: {fileID: 3506348888739410616}
-  - component: {fileID: 3079122623535560849}
+  - component: {fileID: 8932537277167183354}
   m_Layer: 5
   m_Name: HeartIcon (2)
   m_TagString: Untagged
@@ -700,7 +688,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3506348888739410616
 CanvasRenderer:
@@ -710,7 +698,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8719199845944561319}
   m_CullTransparentMesh: 1
---- !u!114 &3079122623535560849
+--- !u!114 &8932537277167183354
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -719,24 +707,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 8719199845944561319}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 534e3ec14cd78434b8676eec8a7fd9ba, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_Texture: {fileID: 8400000, guid: 19d44fcc5a20aa34daa69b50f812c951, type: 2}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
