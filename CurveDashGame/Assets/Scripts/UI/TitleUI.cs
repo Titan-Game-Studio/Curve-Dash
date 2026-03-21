@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Zenject;
 
 namespace STG.CurveDash
@@ -7,6 +7,14 @@ namespace STG.CurveDash
     {
         [Inject] 
         private GameSystem gameSystem;
+
+        public GameObject ShopUIPanel;
+
+        public void OnShopButtonClick()
+        {
+            if (ShopUIPanel != null)
+                ShopUIPanel.SetActive(true);
+        }
 
         public void OnEasyButtonClick()
         {

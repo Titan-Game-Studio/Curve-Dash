@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
@@ -8,7 +8,24 @@ namespace STG.CurveDash
     {
         [SerializeField] Text scoreText;
 
-        [Inject] private PlayerStatService playerStatService;
+        public GameObject ShopUIPanel;
+
+        [Inject] 
+        private GameSystem gameSystem;
+        
+        [Inject]
+        private PlayerStatService playerStatService;
+
+        public void OnShopButtonClick()
+        {
+            if (ShopUIPanel != null)
+                ShopUIPanel.SetActive(true);
+        }
+        
+        public void OnTapToStartButtonClick()
+        {
+            gameSystem.RestartGame();
+        }
         
         private void OnEnable()
         {

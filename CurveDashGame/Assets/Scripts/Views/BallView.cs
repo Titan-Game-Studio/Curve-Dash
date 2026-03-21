@@ -11,6 +11,9 @@ namespace STG.CurveDash
     public class BallView : MonoBehaviour
     {
         [Inject] private AssetManager _assetManager;
+        [Inject] private DataManager _dataManager;
+        [Inject] private ShopService _shopService;
+        
         [SerializeField] private Transform _skinContainerTransform;
         [SerializeField] private Transform _vfxContainerTransform;
         [SerializeField] private Transform _characterContainerTransform;
@@ -38,6 +41,26 @@ namespace STG.CurveDash
             Init();
         }
 
+        private void OnEnable()
+        {
+            if (_shopService != null)
+            {
+                _shopService.OnBallSkinEquipped += UpdateSkin;
+                _shopService.OnVFXEquipped += UpdateVFX;
+                _shopService.OnCharacterEquipped += UpdateCharacter;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (_shopService != null)
+            {
+                _shopService.OnBallSkinEquipped -= UpdateSkin;
+                _shopService.OnVFXEquipped -= UpdateVFX;
+                _shopService.OnCharacterEquipped -= UpdateCharacter;
+            }
+        }
+
         private void Update()
         {
             if (_isInvincible)
@@ -54,9 +77,9 @@ namespace STG.CurveDash
 
         private void Init()
         {
-            UpdateSkin(0);
-            UpdateVFX(0);
-            UpdateCharacter(0);
+            UpdateSkin(_dataManager.UserData.CurrentBallSkin);
+            UpdateVFX(_dataManager.UserData.CurrentVFX);
+            UpdateCharacter(_dataManager.UserData.CurrentCharacter);
         }
 
         private void OnDestroy()

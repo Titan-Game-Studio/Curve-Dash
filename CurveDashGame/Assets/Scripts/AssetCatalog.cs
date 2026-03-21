@@ -18,6 +18,15 @@ namespace STG.CurveDash
     }
     
     [Serializable]
+    public class ShopItemConfig
+    {
+        public string Name = "New Item";
+        public int Price = 100;
+        public AssetReferenceGameObject Prefab;
+        public AssetReferenceT<Sprite> Icon;
+    }
+
+    [Serializable]
     public struct AudioMapping
     {
         public AudioKey Key;
@@ -27,9 +36,11 @@ namespace STG.CurveDash
     [CreateAssetMenu(menuName = "CurveDash/Asset Catalog")]
     public class AssetCatalog : ScriptableObject
     {
-        public List<AssetReferenceGameObject> BallSkins;
-        public List<AssetReferenceGameObject> VFXs;
-        public List<AssetReferenceGameObject> Characters;
+        public List<ShopItemConfig> BallSkins;
+        public List<ShopItemConfig> BlockPartSkins;
+        public List<ShopItemConfig> VFXs;
+        public List<ShopItemConfig> Characters;
+
         public List<AssetReferenceGameObject> Obstacles;
         public List<AssetReferenceGameObject> Clouds;
         public List<AudioMapping> AudioAssets;

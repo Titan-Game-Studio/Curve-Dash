@@ -29,6 +29,7 @@ namespace STG.CurveDash
         private readonly ObjectSpawner spawner;
         private readonly BlockSystem blockSystem;
         private readonly AudioPlayer audioPlayer;
+        private readonly DataManager dataManager;
 
         private readonly EcsPool<BallComponent> ballPool;
         private readonly EcsFilter ballFilter;
@@ -54,7 +55,7 @@ namespace STG.CurveDash
 
         public GameSystem(EcsWorld world, GameSettings gameSettings, AudioPlayer audioPlayer,
             AudioSettings audioSettings, BallSystem ballSystem, PlayerStatService playerStatService,
-            ObjectSpawner spawner, BlockSystem blockSystem)
+            ObjectSpawner spawner, BlockSystem blockSystem, DataManager dataManager)
         {
             this.world = world;
             this.gameSettings = gameSettings;
@@ -64,6 +65,7 @@ namespace STG.CurveDash
             this.playerStatService = playerStatService;
             this.spawner = spawner;
             this.blockSystem = blockSystem;
+            this.dataManager = dataManager;
 
             ballPool = world.GetPool<BallComponent>();
             ballFilter = world.Filter<BallComponent>().End();
@@ -196,9 +198,6 @@ namespace STG.CurveDash
                     break;
                 case GameState.GameEnd:
                 {
-                    if (Input.GetMouseButtonDown(0))
-                        GameStart(true);
-
                     if (Input.GetKeyDown(KeyCode.Escape))
                         ShowTitle();
                 }
@@ -215,6 +214,7 @@ namespace STG.CurveDash
             foreach (var _ in ballHitCrystalFilter)
             {
                 playerStatService.AddGold(PlayerStatService.ScoreForCrystal);
+                dataManager.AddCoin(PlayerStatService.ScoreForCrystal);
                 audioPlayer.Play(audioSettings.BallHitCrystalSound, audioSettings.BallHitCrystalVolume);
             }
 
@@ -304,6 +304,11 @@ namespace STG.CurveDash
             gameSettings.GameMode = gameMode;
             LoadBgmForMode(gameMode);
             GameStart(recreate);
+        }
+        
+        public void RestartGame()
+        {
+            GameStart(true);
         }
 
         private void GameStart(bool recreateScene)

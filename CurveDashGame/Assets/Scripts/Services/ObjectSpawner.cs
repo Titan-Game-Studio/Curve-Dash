@@ -126,7 +126,7 @@ namespace STG.CurveDash
             var blockView = cachedBlockPartView != null ? cachedBlockPartView : blockPartViewFactory.Create();
 
             blockView.GetComponent<Rigidbody>().isKinematic = true;
-            blockView.GetComponent<Renderer>().material.color = color;
+            blockView.SetColor(color);
             blockView.transform.parent = viewLinkComponent.Transform;
             blockView.transform.SetPositionAndRotation(position, Quaternion.identity);
             blockView.gameObject.SetActive(true);

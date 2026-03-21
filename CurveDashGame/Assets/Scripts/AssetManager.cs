@@ -15,6 +15,9 @@ namespace STG.CurveDash
 
         private readonly Dictionary<AssetReferenceGameObject, List<Action<GameObject>>> _pendingLoadCallbacks = new();
         
+        private readonly Dictionary<object, object> _spriteCache = new();
+        private readonly Dictionary<object, List<Action<Sprite>>> _pendingSpriteLoadCallbacks = new();
+        
         private AsyncOperationHandle _initHandle;
 
         public AssetManager(AssetCatalog catalog, AddressablesController controller)
@@ -37,31 +40,50 @@ namespace STG.CurveDash
 
         public void LoadBallSkinAsync(int index, Action<GameObject> onLoaded)
         {
-            LoadAsync(_catalog.BallSkins, index, onLoaded);
+            if (index >= 0 && index < BallSkinCount) LoadGameObjectRefAsync(_catalog.BallSkins[index].Prefab, onLoaded);
+        }
+
+        public void LoadBlockPartSkinAsync(int index, Action<GameObject> onLoaded)
+        {
+            if (index >= 0 && index < BlockPartSkinCount) LoadGameObjectRefAsync(_catalog.BlockPartSkins[index].Prefab, onLoaded);
         }
 
         public void LoadVFXAsync(int index, Action<GameObject> onLoaded)
         {
-            LoadAsync(_catalog.VFXs, index, onLoaded);
+            if (index >= 0 && index < VFXCount) LoadGameObjectRefAsync(_catalog.VFXs[index].Prefab, onLoaded);
         }
 
         public void LoadCharacterAsync(int index, Action<GameObject> onLoaded)
         {
-            LoadAsync(_catalog.Characters, index, onLoaded);
+            if (index >= 0 && index < CharacterCount) LoadGameObjectRefAsync(_catalog.Characters[index].Prefab, onLoaded);
         }
 
         public void LoadObstacleAsync(int index, Action<GameObject> onLoaded)
         {
-            LoadAsync(_catalog.Obstacles, index, onLoaded);
+            LoadGameObjectAsync(_catalog.Obstacles, index, onLoaded);
         }
 
         public void LoadCloudAsync(int index, Action<GameObject> onLoaded)
         {
-            LoadAsync(_catalog.Clouds, index, onLoaded);
+            LoadGameObjectAsync(_catalog.Clouds, index, onLoaded);
         }
         
+        public void LoadBallSkinIconAsync(int index, Action<Sprite> onLoaded) => LoadSpriteRefAsync((index >= 0 && index < BallSkinCount) ? _catalog.BallSkins[index].Icon : null, onLoaded);
+        public void LoadBlockPartSkinIconAsync(int index, Action<Sprite> onLoaded) => LoadSpriteRefAsync((index >= 0 && index < BlockPartSkinCount) ? _catalog.BlockPartSkins[index].Icon : null, onLoaded);
+        public void LoadVFXIconAsync(int index, Action<Sprite> onLoaded) => LoadSpriteRefAsync((index >= 0 && index < VFXCount) ? _catalog.VFXs[index].Icon : null, onLoaded);
+        public void LoadCharacterIconAsync(int index, Action<Sprite> onLoaded) => LoadSpriteRefAsync((index >= 0 && index < CharacterCount) ? _catalog.Characters[index].Icon : null, onLoaded);
+        
+        public ShopItemConfig GetBallSkinConfig(int index) => (index >= 0 && index < BallSkinCount) ? _catalog.BallSkins[index] : null;
+        public ShopItemConfig GetBlockPartSkinConfig(int index) => (index >= 0 && index < BlockPartSkinCount) ? _catalog.BlockPartSkins[index] : null;
+        public ShopItemConfig GetVFXConfig(int index) => (index >= 0 && index < VFXCount) ? _catalog.VFXs[index] : null;
+        public ShopItemConfig GetCharacterConfig(int index) => (index >= 0 && index < CharacterCount) ? _catalog.Characters[index] : null;
+        
+        public int BallSkinCount => _catalog.BallSkins?.Count ?? 0;
+        public int VFXCount => _catalog.VFXs?.Count ?? 0;
+        public int CharacterCount => _catalog.Characters?.Count ?? 0;
         public int ObstacleCount => _catalog.Obstacles?.Count ?? 0;
         public int CloudCount => _catalog.Clouds?.Count ?? 0;
+        public int BlockPartSkinCount => _catalog.BlockPartSkins?.Count ?? 0;
         
         public void LoadAudioAsync(AudioKey key, Action<AudioClip> onLoaded)
         {
@@ -85,19 +107,23 @@ namespace STG.CurveDash
 
         public void InstantiateVFX(int index, Transform parent = null, Action<GameObject> onSpawned = null)
         {
-            if (!IsValid(_catalog.VFXs, index)) return;
+            if (index < 0 || index >= VFXCount) return;
 
-            var reference = _catalog.VFXs[index];
+            var reference = _catalog.VFXs[index].Prefab;
             _controller.InstantiateAsync(reference, parent, onSpawned);
         }
 
         #endregion
 
-        private void LoadAsync(List<AssetReferenceGameObject> list, int index, Action<GameObject> onLoaded)
+        private void LoadGameObjectAsync(List<AssetReferenceGameObject> list, int index, Action<GameObject> onLoaded)
         {
-            if (!IsValid(list, index)) return;
+            if (list == null || index < 0 || index >= list.Count) return;
+            LoadGameObjectRefAsync(list[index], onLoaded);
+        }
 
-            var reference = list[index];
+        private void LoadGameObjectRefAsync(AssetReferenceGameObject reference, Action<GameObject> onLoaded)
+        {
+            if (reference == null || !reference.RuntimeKeyIsValid()) return;
 
             if (_assetCache.TryGetValue(reference, out var cached) && cached != null)
             {
@@ -126,24 +152,42 @@ namespace STG.CurveDash
                 }
             });
         }
-
-        private bool IsValid(List<AssetReferenceGameObject> list, int index)
+        
+        private void LoadSpriteRefAsync(AssetReferenceT<Sprite> reference, Action<Sprite> onLoaded)
         {
-            if (index < 0 || index >= list.Count)
+            if (reference == null || !reference.RuntimeKeyIsValid()) return;
+
+            if (_spriteCache.TryGetValue(reference, out var cached) && cached != null)
             {
-                Debug.LogError($"[AssetManager] Invalid index {index}");
-                return false;
+                onLoaded?.Invoke((Sprite)cached);
+                return;
             }
 
-            return true;
+            if (_pendingSpriteLoadCallbacks.TryGetValue(reference, out var pending))
+            {
+                if (onLoaded != null) pending.Add(onLoaded);
+                return;
+            }
+
+            _pendingSpriteLoadCallbacks[reference] = new List<Action<Sprite>>();
+            if (onLoaded != null) _pendingSpriteLoadCallbacks[reference].Add(onLoaded);
+
+            _controller.LoadAssetAsync<Sprite>(reference, asset =>
+            {
+                _spriteCache[reference] = asset;
+
+                if (_pendingSpriteLoadCallbacks.TryGetValue(reference, out var callbacks))
+                {
+                    foreach (var cb in callbacks)
+                        cb?.Invoke(asset);
+                    _pendingSpriteLoadCallbacks.Remove(reference);
+                }
+            });
         }
 
-        // Release a loaded asset
-        public void UnloadAsset(List<AssetReferenceGameObject> list, int index)
+        public void UnloadAsset(AssetReferenceGameObject reference)
         {
-            if (!IsValid(list, index)) return;
-
-            var reference = list[index];
+            if (reference == null) return;
 
             _assetCache.Remove(reference);
             _pendingLoadCallbacks.Remove(reference);
@@ -155,6 +199,8 @@ namespace STG.CurveDash
         {
             _assetCache.Clear();
             _pendingLoadCallbacks.Clear();
+            _spriteCache.Clear();
+            _pendingSpriteLoadCallbacks.Clear();
 
             _controller.ReleaseAll();
         }
