@@ -18,6 +18,7 @@ namespace STG.CurveDash.UI
         [Inject] private ShopService _shopService;
         [Inject] private DataManager _dataManager;
         [Inject] private AssetManager _assetManager;
+        [Inject] private STG.CurveDash.AdsMob.IAdManager _adManager;
 
         [Header("Tabs")]
         public Button CharacterTabButton;
@@ -32,6 +33,7 @@ namespace STG.CurveDash.UI
         [Header("Info & Controls")]
         public Text TotalCoinsText;
         public Button CloseButton;
+        public Button WatchAdButton;
 
         private ShopTab _currentTab = ShopTab.Skin;
         private List<ShopItemElement> _spawnedItems = new List<ShopItemElement>();
@@ -46,6 +48,7 @@ namespace STG.CurveDash.UI
             if (TrailTabButton) TrailTabButton.onClick.AddListener(() => SwitchTab(ShopTab.Trail));
             if (TileTabButton) TileTabButton.onClick.AddListener(() => SwitchTab(ShopTab.Tile));
             if (CloseButton) CloseButton.onClick.AddListener(CloseShop);
+            if (WatchAdButton) WatchAdButton.onClick.AddListener(OnWatchAdClicked);
 
             SwitchTab(ShopTab.Skin); // Default tab
         }
@@ -53,6 +56,21 @@ namespace STG.CurveDash.UI
         public void CloseShop()
         {
             gameObject.SetActive(false);
+        }
+
+        private void OnWatchAdClicked()
+        {
+            if (WatchAdButton) WatchAdButton.interactable = false;
+            
+            _adManager.ShowRewardedAd(success =>
+            {
+                if (WatchAdButton) WatchAdButton.interactable = true;
+                if (success)
+                {
+                    _dataManager.AddCoin(100);
+                    RefreshUI();
+                }
+            });
         }
 
         private void OnEnable()

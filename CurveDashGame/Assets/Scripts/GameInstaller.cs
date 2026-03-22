@@ -27,6 +27,7 @@ namespace STG.CurveDash
             Container.Bind<AddressablesController>().AsSingle().NonLazy();
             Container.Bind<AssetManager>().AsSingle();
             Container.BindInterfacesAndSelfTo<DataManager>().AsSingle().NonLazy();
+            Container.BindInterfacesAndSelfTo<CloudSaveManager>().AsSingle().NonLazy();
             Container.Bind<ShopService>().AsSingle();
             Container.BindInterfacesTo<AndroidRefreshRateFix>().AsSingle();
             Container.BindInterfacesTo<CameraFollowSystem>().AsSingle();

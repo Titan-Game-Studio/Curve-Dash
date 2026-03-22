@@ -8,6 +8,8 @@ namespace STG.CurveDash
         private const string SaveKey = "CurveDash_UserData";
         
         public UserData UserData { get; private set; }
+        
+        public System.Action OnLocalDataSaved;
 
         public void Initialize()
         {
@@ -37,6 +39,17 @@ namespace STG.CurveDash
 
         public void SaveData()
         {
+            UserData.LastUpdated = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            string json = JsonUtility.ToJson(UserData);
+            PlayerPrefs.SetString(SaveKey, json);
+            PlayerPrefs.Save();
+            
+            OnLocalDataSaved?.Invoke();
+        }
+
+        public void UpdateDataFromCloud(UserData cloudData)
+        {
+            UserData = cloudData;
             string json = JsonUtility.ToJson(UserData);
             PlayerPrefs.SetString(SaveKey, json);
             PlayerPrefs.Save();

@@ -17,7 +17,8 @@ namespace STG.CurveDash.AdsMob
         // private const string INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3601008096580983/6101763781";
 
         // ReSharper disable once InconsistentNaming
-        private const string REWARDED_AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917";
+        private const string REWARDED_AD_UNIT_ID = "ca-app-pub-3601008096580983/7632039705";
+        // private const string REWARDED_AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917";
 #elif UNITY_IPHONE
         private const string BANNER_AD_UNIT_ID = "ca-app-pub-3940256099942544/2934735716";
         private const string INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/4411468910";
@@ -39,7 +40,7 @@ namespace STG.CurveDash.AdsMob
             MobileAds.Initialize(initStatus => { isInitialized = true; });
             RequestBanner();
             RequestInterstitial();
-            // RequestRewardedAd();
+            RequestRewardedAd();
         }
 
         public void ShowBanner()
@@ -69,9 +70,27 @@ namespace STG.CurveDash.AdsMob
             }
         }
 
-        public void ShowRewardedAd(Action onAdClosed = null)
+        public void ShowRewardedAd(Action<bool> onRewardEarned)
         {
-            throw new NotImplementedException();
+            if (isInitialized && rewardedAd != null && rewardedAd.CanShowAd())
+            {
+                bool rewardGranted = false;
+                
+                rewardedAd.OnAdFullScreenContentClosed += () =>
+                {
+                    onRewardEarned?.Invoke(rewardGranted);
+                    RequestRewardedAd(); // Load next ad
+                };
+
+                rewardedAd.Show((Reward reward) =>
+                {
+                    rewardGranted = true;
+                });
+            }
+            else
+            {
+                onRewardEarned?.Invoke(false);
+            }
         }
 
         private void RequestBanner()
@@ -110,7 +129,25 @@ namespace STG.CurveDash.AdsMob
 
         private void RequestRewardedAd()
         {
-            throw new System.NotImplementedException();
+            var adRequest = new AdRequest();
+
+            RewardedAd.Load(REWARDED_AD_UNIT_ID, adRequest, (RewardedAd ad, LoadAdError error) =>
+            {
+                if (error != null)
+                {
+                    Debug.LogError("Rewarded ad failed to load with error : " + error);
+                    return;
+                }
+
+                if (ad == null)
+                {
+                    Debug.LogError("Unexpected error: Rewarded load event fired with null ad and null error.");
+                    return;
+                }
+
+                Debug.Log("Rewarded ad loaded with response : " + ad.GetResponseInfo());
+                rewardedAd = ad;
+            });
         }
     }
 }

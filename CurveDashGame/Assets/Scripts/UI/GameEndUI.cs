@@ -16,6 +16,12 @@ namespace STG.CurveDash
         [Inject]
         private PlayerStatService playerStatService;
 
+        [Inject]
+        private DataManager dataManager;
+
+        [Inject]
+        private STG.CurveDash.AdsMob.IAdManager adManager;
+
         public void OnShopButtonClick()
         {
             if (ShopUIPanel != null)
@@ -25,6 +31,17 @@ namespace STG.CurveDash
         public void OnTapToStartButtonClick()
         {
             gameSystem.RestartGame();
+        }
+        
+        public void OnWatchAdButtonClick()
+        {
+            adManager.ShowRewardedAd(success =>
+            {
+                if (success)
+                {
+                    dataManager.AddCoin(100);
+                }
+            });
         }
         
         private void OnEnable()

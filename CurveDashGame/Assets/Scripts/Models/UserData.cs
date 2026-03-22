@@ -17,5 +17,7 @@ namespace STG.CurveDash
         public List<int> UnlockedBlockPartSkins = new List<int> { 0 };
         public List<int> UnlockedVFXs = new List<int> { 0 };
         public List<int> UnlockedCharacters = new List<int> { 0 };
+
+        public long LastUpdated;
     }
 }
