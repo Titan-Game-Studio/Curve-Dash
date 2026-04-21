@@ -1,0 +1,3 @@
+[submodule "CurveDashGame/Assets/TGS.Core"]
+	path = CurveDashGame/Assets/TGS.Core
+	url = git@github.com:Titan-Game-Studio/TGS.Core.git
