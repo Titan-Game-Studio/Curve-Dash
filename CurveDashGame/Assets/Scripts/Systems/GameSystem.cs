@@ -1,7 +1,7 @@
 using Leopotam.EcsLite;
-using STG.CurveDash.AdsMob;
 using UnityEngine;
 using Zenject;
+using TGS.Ads;
 
 namespace STG.CurveDash
 {
@@ -45,7 +45,7 @@ namespace STG.CurveDash
         private readonly EcsPool<GameStateComponent> gameStatePool;
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
 
-        [Inject] private IAdManager adManager;
+        [Inject] private IAdService adService;
         [Inject] private AssetManager assetManager;
 
         private const float BallSpawnHeight = 0.65f;
@@ -327,22 +327,21 @@ namespace STG.CurveDash
 
         private void GameOver()
         {
-            adManager.ShowInterstitial(() =>
-            {
-                playerStatService.GameEnd();
+            adService.ShowInterstitial();
 
-                audioPlayer.Play(audioSettings.BallFallSound);
+            playerStatService.GameEnd();
 
-                var gameState = gameStateFilter.GetRawEntities()[0];
-                ref var gameStateComponent = ref gameStatePool.Get(gameState);
-                gameStateComponent.GameOverTimer = 1.0f;
-                var ball = ballFilter.GetRawEntities()[0];
-                ref var ballComponent = ref ballPool.Get(ball);
-                ballComponent.Speed = 0;
+            audioPlayer.Play(audioSettings.BallFallSound);
 
-                ChangeState(GameState.GameOver);
-                StopBackgroundMusic();
-            });
+            var gameState = gameStateFilter.GetRawEntities()[0];
+            ref var gameStateComponent = ref gameStatePool.Get(gameState);
+            gameStateComponent.GameOverTimer = 1.0f;
+            var ball = ballFilter.GetRawEntities()[0];
+            ref var ballComponent = ref ballPool.Get(ball);
+            ballComponent.Speed = 0;
+
+            ChangeState(GameState.GameOver);
+            StopBackgroundMusic();
         }
 
         private int GetPartsCountInBlock()

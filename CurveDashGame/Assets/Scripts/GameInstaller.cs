@@ -1,7 +1,7 @@
 using Zenject;
 using Leopotam.EcsLite;
-using STG.CurveDash.AdsMob;
 using STG.CurveDash.Views;
+using TGS.Ads;
 
 namespace STG.CurveDash
 {
@@ -38,7 +38,8 @@ namespace STG.CurveDash
             Container.BindInterfacesAndSelfTo<BallSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<BlockSystem>().AsSingle();
             Container.BindInterfacesTo<FallingSystem>().AsSingle();
-            Container.Bind<IAdManager>().To<AdManager>().AsSingle();
+            Container.BindInterfacesAndSelfTo<TGS.Core.IAP.UnityIapService>().AsSingle();
+            Container.BindInterfacesAndSelfTo<LevelPlayAdService>().AsSingle();
             Container.Bind<AudioPlayer>().AsSingle();
             Container.Bind<PlayerStatService>().AsSingle();
             Container.BindInterfacesAndSelfTo<GameSystem>().AsSingle();

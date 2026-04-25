@@ -11,7 +11,6 @@ namespace STG.CurveDash
 {
     public class CloudSaveManager : IInitializable, IDisposable
     {
-        private const string CLOUD_SAVE_KEY = "UserDataFile";
         private readonly DataManager _dataManager;
 
         public CloudSaveManager(DataManager dataManager)
@@ -52,9 +51,9 @@ namespace STG.CurveDash
         {
             try
             {
-                var savedData = await CloudSaveService.Instance.Data.Player.LoadAsync(new HashSet<string> { CLOUD_SAVE_KEY });
+                var savedData = await CloudSaveService.Instance.Data.Player.LoadAsync(new HashSet<string> { TGS.Core.TGSIntegrations.CLOUD_SAVE_KEY });
                 
-                if (savedData.TryGetValue(CLOUD_SAVE_KEY, out var item))
+                if (savedData.TryGetValue(TGS.Core.TGSIntegrations.CLOUD_SAVE_KEY, out var item))
                 {
                     string json = item.Value.GetAs<string>();
                     UserData cloudData = JsonUtility.FromJson<UserData>(json);
@@ -91,8 +90,10 @@ namespace STG.CurveDash
             try
             {
                 string json = JsonUtility.ToJson(_dataManager.UserData);
-                var data = new Dictionary<string, object> { { CLOUD_SAVE_KEY, json } };
-                await CloudSaveService.Instance.Data.Player.SaveAsync(data);
+                var data = new Dictionary<string, object>
+            {
+                { TGS.Core.TGSIntegrations.CLOUD_SAVE_KEY, json }
+            };    await CloudSaveService.Instance.Data.Player.SaveAsync(data);
                 // Debug.Log("Data saved to cloud."); // Uncomment to spam logs
             }
             catch (Exception e)

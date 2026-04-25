@@ -20,7 +20,7 @@ namespace STG.CurveDash
         private DataManager dataManager;
 
         [Inject]
-        private STG.CurveDash.AdsMob.IAdManager adManager;
+        private TGS.Ads.IAdService adService;
 
         public void OnShopButtonClick()
         {
@@ -35,7 +35,7 @@ namespace STG.CurveDash
         
         public void OnWatchAdButtonClick()
         {
-            adManager.ShowRewardedAd(success =>
+            adService.ShowRewarded(success =>
             {
                 if (success)
                 {

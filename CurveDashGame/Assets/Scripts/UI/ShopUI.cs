@@ -18,7 +18,7 @@ namespace STG.CurveDash.UI
         [Inject] private ShopService _shopService;
         [Inject] private DataManager _dataManager;
         [Inject] private AssetManager _assetManager;
-        [Inject] private STG.CurveDash.AdsMob.IAdManager _adManager;
+        [Inject] private TGS.Ads.IAdService _adService;
 
         [Header("Tabs")]
         public Button CharacterTabButton;
@@ -62,7 +62,7 @@ namespace STG.CurveDash.UI
         {
             if (WatchAdButton) WatchAdButton.interactable = false;
             
-            _adManager.ShowRewardedAd(success =>
+            _adService.ShowRewarded(success =>
             {
                 if (WatchAdButton) WatchAdButton.interactable = true;
                 if (success)

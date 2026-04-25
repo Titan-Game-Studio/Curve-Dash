@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using STG.CurveDash.AdsMob;
+using System.Collections.Generic;
+using TGS.Ads;
 using UnityEngine;
 using Zenject;
 
@@ -16,7 +17,7 @@ namespace STG.CurveDash
         private GameSystem gameSystem;
         
         [Inject] 
-        private IAdManager adManager;
+        private IAdService adService;
 
         private GameState gameState;
         private Dictionary<GameState, GameObject> uiDictionary;
@@ -31,8 +32,8 @@ namespace STG.CurveDash
 
         private void Start()
         {
-            adManager.Initialize();
-            adManager.ShowBanner();
+            adService.Initialize();
+            adService.ShowBanner();
         }
 
         private void Update()
