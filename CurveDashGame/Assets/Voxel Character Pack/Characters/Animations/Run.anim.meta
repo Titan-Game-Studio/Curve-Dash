@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: bfd1977a25b72e649a7e74232dd3a20b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 261068
+  packageName: Voxel Character Pack
+  packageVersion: 1.0
+  assetPath: Assets/Voxel Character Pack/Characters/Animations/Run.anim
+  uploadId: 601735

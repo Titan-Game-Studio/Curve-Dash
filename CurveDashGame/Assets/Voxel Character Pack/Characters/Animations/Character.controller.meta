@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f8324a661c1eb7442bdbdf12b81f7a55
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 261068
+  packageName: Voxel Character Pack
+  packageVersion: 1.0
+  assetPath: Assets/Voxel Character Pack/Characters/Animations/Character.controller
+  uploadId: 601735

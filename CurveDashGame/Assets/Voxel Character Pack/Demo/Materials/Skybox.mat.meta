@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7c04fee1b522ff44eb59af6fd268c0b9
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 261068
+  packageName: Voxel Character Pack
+  packageVersion: 1.0
+  assetPath: Assets/Voxel Character Pack/Demo/Materials/Skybox.mat
+  uploadId: 601735

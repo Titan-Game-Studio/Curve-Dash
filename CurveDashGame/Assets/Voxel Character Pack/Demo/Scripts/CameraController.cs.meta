@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: e9a364f2eab4c9f499db8d1f8309cb3f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 261068
+  packageName: Voxel Character Pack
+  packageVersion: 1.0
+  assetPath: Assets/Voxel Character Pack/Demo/Scripts/CameraController.cs
+  uploadId: 601735

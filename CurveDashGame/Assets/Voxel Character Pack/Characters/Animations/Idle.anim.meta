@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 45fb76f7ab966934f870b907425847da
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 261068
+  packageName: Voxel Character Pack
+  packageVersion: 1.0
+  assetPath: Assets/Voxel Character Pack/Characters/Animations/Idle.anim
+  uploadId: 601735
