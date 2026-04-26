@@ -11,7 +11,7 @@ namespace STG.CurveDash
 
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
         private readonly EcsFilter shieldFilter;
-        private readonly EcsFilter ballHitShieldFilter;
+        private readonly EcsFilter playerHitShieldFilter;
 
         public ShieldSystem(EcsWorld world, ObjectSpawner spawner)
         {
@@ -19,7 +19,7 @@ namespace STG.CurveDash
 
             viewLinkPool = world.GetPool<ViewLinkComponent>();
             shieldFilter = world.Filter<ShieldComponent>().End();
-            ballHitShieldFilter = world.Filter<ShieldComponent>().Inc<BallHitShieldEvent>().End();
+            playerHitShieldFilter = world.Filter<ShieldComponent>().Inc<PlayerHitShieldEvent>().End();
         }
 
         public void Tick()
@@ -32,8 +32,9 @@ namespace STG.CurveDash
                 transform.Rotate(Vector3.up, delta, Space.World);
             }
 
-            foreach (var shield in ballHitShieldFilter)
+            foreach (var shield in playerHitShieldFilter)
                 spawner.DespawnObject(shield);
         }
     }
 }
+

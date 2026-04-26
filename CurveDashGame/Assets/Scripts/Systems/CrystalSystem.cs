@@ -1,4 +1,4 @@
-﻿using Leopotam.EcsLite;
+using Leopotam.EcsLite;
 using UnityEngine;
 using Zenject;
 
@@ -12,7 +12,7 @@ namespace STG.CurveDash
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
         
         private readonly EcsFilter crystalFilter;
-        private readonly EcsFilter ballHitCrystalFilter;
+        private readonly EcsFilter playerHitCrystalFilter;
 
         public CrystalSystem(EcsWorld world, ObjectSpawner spawner)
         {
@@ -21,7 +21,7 @@ namespace STG.CurveDash
             viewLinkPool = world.GetPool<ViewLinkComponent>();
             
             crystalFilter = world.Filter<CrystalComponent>().End();
-            ballHitCrystalFilter = world.Filter<CrystalComponent>().Inc<BallHitCrystalEvent>().End();
+            playerHitCrystalFilter = world.Filter<CrystalComponent>().Inc<PlayerHitCrystalEvent>().End();
         }
 
         public void Tick()
@@ -36,7 +36,7 @@ namespace STG.CurveDash
                 transform.Rotate(Vector3.up, delta, Space.World);
             }
 
-            foreach (var crystal in ballHitCrystalFilter)
+            foreach (var crystal in playerHitCrystalFilter)
                 spawner.DespawnObject(crystal);
         }
     }

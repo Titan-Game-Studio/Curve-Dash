@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a2fcddca5534ccf88d77db16476cd44, type: 3}
+  m_Name: GamePrefabs
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.PrefabsSettings
+  PlayerPrefab: {fileID: 2022366318159508469, guid: 10c87e6641247c14786bf65eb641d6e2,
+    type: 3}
+  BlockPartPrefab: {fileID: 6665807110726029970, guid: 1b08af6a4997f90438f83fdc39d4ef16,
+    type: 3}
+  BlockPrefab: {fileID: 4461514161787342673, guid: 3da635f4749fe3b438425f0062b87d2e,
+    type: 3}
+  CrystalPrefab: {fileID: 2830056364503120991, guid: 7f6b421886393c2468f4c55903be0c37,
+    type: 3}
+  ShieldPrefab: {fileID: 2830056364503120991, guid: 2c6ac8e62aa322c47a2afdac6fc454cd,
+    type: 3}
+  WeaponPickupPrefab: {fileID: 2830056364503120991, guid: 182672a8f1b817f4aac75863c739d9e9,
+    type: 3}
+  ObstaclePrefab: {fileID: 2830056364503120991, guid: d6ee31dd44995724f9e4d2f5ba478c4e,
+    type: 3}
+  CloudPrefab: {fileID: 2830056364503120991, guid: b0401df5ddf3ec44783114dc725cdc89,
+    type: 3}
+  GameAssetCatalog: {fileID: 11400000, guid: c7cc995cc6d07844cab5ec322981a74f, type: 2}

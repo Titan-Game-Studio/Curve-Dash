@@ -23,7 +23,7 @@ namespace STG.CurveDash
         private readonly EcsPool<FallingComponent> fallingPool;
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
 
-        private readonly EcsFilter ballPassedFilter;
+        private readonly EcsFilter playerPassedFilter;
 
         private int BlockPartsCount = 1;
 
@@ -39,7 +39,7 @@ namespace STG.CurveDash
             fallingPool = world.GetPool<FallingComponent>();
             viewLinkPool = world.GetPool<ViewLinkComponent>();
             
-            ballPassedFilter = world.Filter<BallPassedComponent>()
+            playerPassedFilter = world.Filter<PlayerPassedComponent>()
                 .Exc<FallingComponent>()
                 .End();
         }
@@ -65,7 +65,7 @@ namespace STG.CurveDash
         
         public void Tick()
         {
-            foreach (var block in ballPassedFilter)
+            foreach (var block in playerPassedFilter)
                 OnMovedToNextBlock(block);
         }
         
@@ -104,7 +104,20 @@ namespace STG.CurveDash
                     MakeHole(block);
             }
 
-            if (gameplayStrategies.GetShieldSpawnStrategy().ShouldSpawn())
+            float randomVal = Random.value;
+            if (randomVal < 0.03f) // 3% chance for Weapon
+            {
+                SpawnWeaponPickup(block);
+            }
+            else if (randomVal < 0.05f) // 2% chance for Mount
+            {
+                SpawnMountPickup(block);
+            }
+            else if (randomVal < 0.07f) // 2% chance for Aura
+            {
+                SpawnAuraPickup(block);
+            }
+            else if (gameplayStrategies.GetShieldSpawnStrategy().ShouldSpawn())
             {
                 SpawnShield(block);
             }
@@ -155,6 +168,42 @@ namespace STG.CurveDash
                 int shield = spawner.SpawnShield(child.position);
                 ref var blockComponent = ref blockPool.Get(block);
                 blockComponent.Crystal = world.PackEntity(shield);
+            }
+        }
+
+        private void SpawnWeaponPickup(int block)
+        {
+            ref var viewLinkComponent = ref viewLinkPool.Get(block);
+            var child = viewLinkComponent.Transform.GetChild(Random.Range(0, BlockPartsCount - 1));
+            if (child.gameObject.activeSelf)
+            {
+                int weapon = spawner.SpawnWeaponPickup(child.position);
+                ref var blockComponent = ref blockPool.Get(block);
+                blockComponent.Crystal = world.PackEntity(weapon);
+            }
+        }
+
+        private void SpawnMountPickup(int block)
+        {
+            ref var viewLinkComponent = ref viewLinkPool.Get(block);
+            var child = viewLinkComponent.Transform.GetChild(Random.Range(0, BlockPartsCount - 1));
+            if (child.gameObject.activeSelf)
+            {
+                int mount = spawner.SpawnMountPickup(child.position);
+                ref var blockComponent = ref blockPool.Get(block);
+                blockComponent.Crystal = world.PackEntity(mount);
+            }
+        }
+
+        private void SpawnAuraPickup(int block)
+        {
+            ref var viewLinkComponent = ref viewLinkPool.Get(block);
+            var child = viewLinkComponent.Transform.GetChild(Random.Range(0, BlockPartsCount - 1));
+            if (child.gameObject.activeSelf)
+            {
+                int aura = spawner.SpawnAuraPickup(child.position);
+                ref var blockComponent = ref blockPool.Get(block);
+                blockComponent.Crystal = world.PackEntity(aura);
             }
         }
         private void SpawnObstacle(int block)

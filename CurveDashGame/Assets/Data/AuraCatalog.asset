@@ -1,0 +1,165 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fedfeb61dd9c80d4fa2088abab570387, type: 3}
+  m_Name: AuraCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ShopItemCatalog
+  Items:
+  - Name: VFX_Trail_Cosmos
+    Price: 0
+    Prefab:
+      m_AssetGUID: f6bbcfa7e746d0340bd78dd22f35b3b3
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: VFX_Trail_Cosmos
+  - Name: VFX_Trail_Dark
+    Price: 0
+    Prefab:
+      m_AssetGUID: ae6bdf3417a5d6047a559654858dac31
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: VFX_Trail_Dark
+  - Name: VFX_Trail_Earth
+    Price: 0
+    Prefab:
+      m_AssetGUID: dc0d32e4741335241afdd5ebfb8bf32a
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: VFX_Trail_Earth
+  - Name: VFX_Trail_Electric
+    Price: 0
+    Prefab:
+      m_AssetGUID: 395d5ec7f996d364f94e11cfb40736d3
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: VFX_Trail_Electric
+  - Name: VFX_Trail_Fire
+    Price: 0
+    Prefab:
+      m_AssetGUID: 101a8868c1adc5b40bdaf7526f47b7b5
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: VFX_Trail_Fire
+  - Name: VFX_Trail_Ice
+    Price: 0
+    Prefab:
+      m_AssetGUID: a64a37f3dcfb87f44a8c6236b5d49b20
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: VFX_Trail_Ice
+  - Name: VFX_Trail_Nature
+    Price: 0
+    Prefab:
+      m_AssetGUID: 26169785b8e30c944a512729256a05cd
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: VFX_Trail_Nature
+  - Name: VFX_Trail_Void
+    Price: 0
+    Prefab:
+      m_AssetGUID: 664c64bbb000f5e428ca3b8f7e0ea923
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: VFX_Trail_Void
+  - Name: VFX_Trail_Sound
+    Price: 0
+    Prefab:
+      m_AssetGUID: a92ebdf897fa283428c50a41fe4411a5
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: VFX_Trail_Sound
+  - Name: VFX_Trail_Water
+    Price: 0
+    Prefab:
+      m_AssetGUID: 07a0367c119e4ca408ec23af0e377799
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: VFX_Trail_Water

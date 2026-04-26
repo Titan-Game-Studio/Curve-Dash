@@ -3,16 +3,28 @@ using UnityEngine;
 
 namespace STG.CurveDash
 {
-    [Serializable]
-    public class PrefabsSettings
+    [CreateAssetMenu(fileName = "GamePrefabs", menuName = "Curve Dash/Prefabs Settings")]
+    public class PrefabsSettings : ScriptableObject
     {
-        public GameObject BallPrefab;
+        [Header("Player & Environment")]
+        public GameObject PlayerPrefab;
         public GameObject BlockPartPrefab;
         public GameObject BlockPrefab;
+        
+        [Header("Pickups & Items")]
         public GameObject CrystalPrefab;
-        public GameObject ObstaclePrefab;
-        public GameObject CloudPrefab;
         public GameObject ShieldPrefab;
-        public AssetCatalog AssetCatalog;
+        public GameObject WeaponPickupPrefab;
+        public GameObject MountPickupPrefab;
+        public GameObject AuraPickupPrefab;
+
+        [Header("Enemies & Obstacles")]
+        public GameObject ObstaclePrefab;
+
+        [Header("Decorations")]
+        public GameObject CloudPrefab;
+
+        [Header("Data")]
+        public GameAssetCatalog GameAssetCatalog;
     }
 }

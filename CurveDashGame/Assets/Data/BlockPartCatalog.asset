@@ -1,0 +1,120 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fedfeb61dd9c80d4fa2088abab570387, type: 3}
+  m_Name: BlockPartCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ShopItemCatalog
+  Items:
+  - Name: Tile 1
+    Price: 0
+    Prefab:
+      m_AssetGUID: 46a039e7efe6cb94c9cbe88de9cbc13c
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Tile 1
+  - Name: Tile 2
+    Price: 0
+    Prefab:
+      m_AssetGUID: 4e7c93612d09afe4e80d3ec6dc099f01
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Tile 2
+  - Name: Tile 3
+    Price: 0
+    Prefab:
+      m_AssetGUID: 68ea075391a80074ea837c3dadd9a0b4
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Tile 3
+  - Name: Tile 4
+    Price: 0
+    Prefab:
+      m_AssetGUID: 78daa958001d3e7439365f42c0af0202
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Tile 4
+  - Name: Tile 5
+    Price: 0
+    Prefab:
+      m_AssetGUID: 90b868c14a83bb44c96db0978ba0e9d9
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Tile 5
+  - Name: Tile 6
+    Price: 0
+    Prefab:
+      m_AssetGUID: d13a52f99e250784d95a5794dba8372b
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Tile 6
+  - Name: Tile 7
+    Price: 0
+    Prefab:
+      m_AssetGUID: 49c8b6d1e7bbec14c9730cc1074e2fe9
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Tile 7

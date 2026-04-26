@@ -24,21 +24,21 @@ namespace STG.CurveDash
         private readonly EcsWorld world;
         private readonly GameSettings gameSettings;
         private readonly AudioSettings audioSettings;
-        private readonly BallSystem ballSystem;
+        private readonly PlayerMovementSystem ballSystem;
         private readonly PlayerStatService playerStatService;
         private readonly ObjectSpawner spawner;
         private readonly BlockSystem blockSystem;
         private readonly AudioPlayer audioPlayer;
         private readonly DataManager dataManager;
 
-        private readonly EcsPool<BallComponent> ballPool;
-        private readonly EcsFilter ballFilter;
+        private readonly EcsPool<PlayerComponent> playerPool;
+        private readonly EcsFilter playerFilter;
 
-        private readonly EcsFilter ballPassedFilter;
-        private readonly EcsFilter ballHitCrystalFilter;
-        private readonly EcsFilter ballHitObstacleFilter;
-        private readonly EcsFilter ballHitShieldFilter;
-        private readonly EcsFilter ballFallingFilter;
+        private readonly EcsFilter playerPassedFilter;
+        private readonly EcsFilter playerHitCrystalFilter;
+        private readonly EcsFilter playerHitObstacleFilter;
+        private readonly EcsFilter playerHitShieldFilter;
+        private readonly EcsFilter playerFallingFilter;
         private readonly EcsFilter playerLevelUpFilter;
 
         private readonly EcsFilter gameStateFilter;
@@ -54,7 +54,7 @@ namespace STG.CurveDash
         private AudioKey currentBgmKey;
 
         public GameSystem(EcsWorld world, GameSettings gameSettings, AudioPlayer audioPlayer,
-            AudioSettings audioSettings, BallSystem ballSystem, PlayerStatService playerStatService,
+            AudioSettings audioSettings, PlayerMovementSystem ballSystem, PlayerStatService playerStatService,
             ObjectSpawner spawner, BlockSystem blockSystem, DataManager dataManager)
         {
             this.world = world;
@@ -67,14 +67,14 @@ namespace STG.CurveDash
             this.blockSystem = blockSystem;
             this.dataManager = dataManager;
 
-            ballPool = world.GetPool<BallComponent>();
-            ballFilter = world.Filter<BallComponent>().End();
+            playerPool = world.GetPool<PlayerComponent>();
+            playerFilter = world.Filter<PlayerComponent>().End();
 
-            ballPassedFilter = world.Filter<BallPassedComponent>().End();
-            ballHitCrystalFilter = world.Filter<BallHitCrystalEvent>().End();
-            ballHitObstacleFilter = world.Filter<BallHitObstacleEvent>().End();
-            ballHitShieldFilter = world.Filter<BallHitShieldEvent>().End();
-            ballFallingFilter = world.Filter<BallComponent>().Inc<FallingComponent>().End();
+            playerPassedFilter = world.Filter<PlayerPassedComponent>().End();
+            playerHitCrystalFilter = world.Filter<PlayerHitCrystalEvent>().End();
+            playerHitObstacleFilter = world.Filter<PlayerHitObstacleEvent>().End();
+            playerHitShieldFilter = world.Filter<PlayerHitShieldEvent>().End();
+            playerFallingFilter = world.Filter<PlayerComponent>().Inc<FallingComponent>().End();
 
             gameStatePool = world.GetPool<GameStateComponent>();
             gameStateFilter = world.Filter<GameStateComponent>().End();
@@ -175,9 +175,9 @@ namespace STG.CurveDash
                     if (isInvincible)
                         psc.InvincibleTimer -= Time.deltaTime;
 
-                    var ballEntity = ballFilter.GetRawEntities()[0];
+                    var ballEntity = playerFilter.GetRawEntities()[0];
                     ref var viewLink = ref viewLinkPool.Get(ballEntity);
-                    var ballView = viewLink.Transform.GetComponent<BallView>();
+                    var ballView = viewLink.Transform.GetComponent<PlayerView>();
                     if (ballView != null)
                         ballView.SetInvincible(isInvincible);
 
@@ -185,9 +185,9 @@ namespace STG.CurveDash
                         ShowTitle();
 
                     if (Input.GetMouseButtonDown(0))
-                        ballSystem.ChangeDirection(ballFilter.GetRawEntities()[0]);
+                        ballSystem.ChangeDirection(playerFilter.GetRawEntities()[0]);
 
-                    foreach (var _ in ballFallingFilter)
+                    foreach (var _ in playerFallingFilter)
                         GameOver();
 
                     break;
@@ -206,25 +206,25 @@ namespace STG.CurveDash
                     break;
             }
 
-            foreach (var _ in ballPassedFilter)
+            foreach (var _ in playerPassedFilter)
             {
                 playerStatService.AddScore(PlayerStatService.ScoreForStep);
             }
 
-            foreach (var _ in ballHitCrystalFilter)
+            foreach (var _ in playerHitCrystalFilter)
             {
                 playerStatService.AddGold(PlayerStatService.ScoreForCrystal);
                 dataManager.AddCoin(PlayerStatService.ScoreForCrystal);
                 audioPlayer.Play(audioSettings.BallHitCrystalSound, audioSettings.BallHitCrystalVolume);
             }
 
-            foreach (var _ in ballHitShieldFilter)
+            foreach (var _ in playerHitShieldFilter)
             {
                 playerStatService.AddHeart(1);
                 audioPlayer.Play(audioSettings.BallHitCrystalSound, audioSettings.BallHitCrystalVolume);
             }
 
-            foreach (var _ in ballHitObstacleFilter)
+            foreach (var _ in playerHitObstacleFilter)
             {
                 ref var playerStatComponent = ref playerStatService.GetPlayerStat();
                 if (playerStatComponent.InvincibleTimer > 0) continue;
@@ -245,10 +245,10 @@ namespace STG.CurveDash
             {
                 audioPlayer.Play(audioSettings.NextLevelSound);
 
-                var ball = ballFilter.GetRawEntities()[0];
-                ref var ballComponent = ref ballPool.Get(ball);
-                ballComponent.Speed = GetBallSpeedForCurrentLevel();
-                ballComponent.Size = GetBallSizeForCurrentLevel();
+                var ball = playerFilter.GetRawEntities()[0];
+                ref var playerComponent = ref playerPool.Get(ball);
+                playerComponent.Speed = GetBallSpeedForCurrentLevel();
+                playerComponent.Size = GetBallSizeForCurrentLevel();
             }
         }
 
@@ -268,7 +268,7 @@ namespace STG.CurveDash
             playerStatService.GameStart(gameSettings.Level);
 
             blockSystem.CreateStartBlocks(GetPartsCountInBlock());
-            spawner.SpawnBall(new Vector3(0, BallSpawnHeight, 0), GetBallSpeedForCurrentLevel());
+            spawner.SpawnPlayer(new Vector3(0, BallSpawnHeight, 0), GetBallSpeedForCurrentLevel());
         }
 
         private void ChangeState(GameState state)
@@ -336,9 +336,9 @@ namespace STG.CurveDash
             var gameState = gameStateFilter.GetRawEntities()[0];
             ref var gameStateComponent = ref gameStatePool.Get(gameState);
             gameStateComponent.GameOverTimer = 1.0f;
-            var ball = ballFilter.GetRawEntities()[0];
-            ref var ballComponent = ref ballPool.Get(ball);
-            ballComponent.Speed = 0;
+            var ball = playerFilter.GetRawEntities()[0];
+            ref var playerComponent = ref playerPool.Get(ball);
+            playerComponent.Speed = 0;
 
             ChangeState(GameState.GameOver);
             StopBackgroundMusic();

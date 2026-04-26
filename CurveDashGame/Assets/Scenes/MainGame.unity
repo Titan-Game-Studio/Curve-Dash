@@ -1125,22 +1125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a672bd8ecadd674198954e9e65c42fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Prefabs:
-    BallPrefab: {fileID: 2022366318159508469, guid: 10c87e6641247c14786bf65eb641d6e2,
-      type: 3}
-    BlockPartPrefab: {fileID: 6665807110726029970, guid: 1b08af6a4997f90438f83fdc39d4ef16,
-      type: 3}
-    BlockPrefab: {fileID: 4461514161787342673, guid: 3da635f4749fe3b438425f0062b87d2e,
-      type: 3}
-    CrystalPrefab: {fileID: 2830056364503120991, guid: 7f6b421886393c2468f4c55903be0c37,
-      type: 3}
-    ObstaclePrefab: {fileID: 2830056364503120991, guid: d6ee31dd44995724f9e4d2f5ba478c4e,
-      type: 3}
-    CloudPrefab: {fileID: 2830056364503120991, guid: b0401df5ddf3ec44783114dc725cdc89,
-      type: 3}
-    ShieldPrefab: {fileID: 2830056364503120991, guid: 2c6ac8e62aa322c47a2afdac6fc454cd,
-      type: 3}
-    AssetCatalog: {fileID: 11400000, guid: f172bfc2ce1b03c4f9a54139df60267a, type: 2}
+  Prefabs: {fileID: 11400000, guid: 9c24cdc24a60c0f4a93fe48b108f89ad, type: 2}
 --- !u!114 &1795648098
 MonoBehaviour:
   m_ObjectHideFlags: 0

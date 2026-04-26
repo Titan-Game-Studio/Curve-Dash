@@ -140,16 +140,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 432e9094c1b923244a5e4d210f3fbf85
-    m_Address: Kid 3
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 448dd0e419be52b43b54347caf0c2c9b
-    m_Address: Kid 1
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 45f4c60b69bd0a64b855fb984ea6c987
     m_Address: Turtle
     m_ReadOnly: 0
@@ -212,6 +202,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5b8f7e9f5b816564084f6ed9016bdf7e
     m_Address: Soulforge
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5cc8839ef833cc7418b136fb1def55a6
+    m_Address: Comfy
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -292,11 +287,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 73a6c62ddfe23b44bb0a7cc7bd564278
     m_Address: turn
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 74e838f61acce1740b87c68f37ba21e4
-    m_Address: Kid 4
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -385,6 +375,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a16b6bf8a11319949a456f8c0ad47f3b
+    m_Address: Farmer
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a3c86a14c614b324f8ca0f7ae5d7e880
     m_Address: PenguinPreview
     m_ReadOnly: 0
@@ -442,6 +437,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bcb56616be1867d4089d33f8e37a7d25
     m_Address: Tree 4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: be5dbe90b2f57934590440741f5a424e
+    m_Address: Elegant
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -520,8 +520,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f2e8597508d7a354fbec8a3138997437
-    m_Address: Kid 2
+  - m_GUID: f3ca59b04000fb04eb5f479559d2d3f0
+    m_Address: Runner
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

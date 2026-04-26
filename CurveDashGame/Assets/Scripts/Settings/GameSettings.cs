@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 namespace STG.CurveDash
@@ -18,7 +18,7 @@ namespace STG.CurveDash
         
         public float CameraLerpRate = 5.0f;
         public float TerrainLerpRate = 0.1f;
-        public LayerMask CrystalMask; 
+        public LayerMask PickupMask; 
         public LayerMask ObstacleMask; 
     }
 }

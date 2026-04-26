@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94998a170c85b6a40b0a95857bbca134, type: 3}
+  m_Name: GameAssetCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.GameAssetCatalog
+  MountSkins: {fileID: 11400000, guid: 01daee5b7f1e94c4081074b7ebcb5fa7, type: 2}
+  BlockPartSkins: {fileID: 11400000, guid: 47a828d9cc205e445b8f8d80a3b57a32, type: 2}
+  VFXs: {fileID: 11400000, guid: c7dfe55902b41bc4fbd958d3a8da0dc2, type: 2}
+  Characters: {fileID: 11400000, guid: 113731e7a1649bf4faba71fb4d80b097, type: 2}
+  Weapons: {fileID: 11400000, guid: eb36be323548e8446913be57c982298c, type: 2}
+  Obstacles: {fileID: 11400000, guid: c428df1660258704bb4ea43035be13fb, type: 2}
+  Clouds: {fileID: 11400000, guid: b2fee90e98589924ab16bad92297fa22, type: 2}
+  AudioCatalog: {fileID: 11400000, guid: 0ef620cc309604b4782e5a8d790a42e1, type: 2}

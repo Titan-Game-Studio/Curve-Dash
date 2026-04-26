@@ -1,0 +1,255 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fedfeb61dd9c80d4fa2088abab570387, type: 3}
+  m_Name: MountSkinCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ShopItemCatalog
+  Items:
+  - Name: Bear
+    Price: 0
+    Prefab:
+      m_AssetGUID: 20448f50d45eeda408a97e8eb78a6d47
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Bear
+  - Name: Bison
+    Price: 0
+    Prefab:
+      m_AssetGUID: 059a0c0f88498ef4c94174211265bb24
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Bison
+  - Name: Cat
+    Price: 0
+    Prefab:
+      m_AssetGUID: 852672785d05a474c8009254454cdcec
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Cat
+  - Name: Cheetah
+    Price: 0
+    Prefab:
+      m_AssetGUID: 37b5142ee9796d44685156785e2292e9
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Cheetah
+  - Name: Deer
+    Price: 0
+    Prefab:
+      m_AssetGUID: 7e9232d1122d64b4e873b1598e17f5a6
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Deer
+  - Name: Dog
+    Price: 0
+    Prefab:
+      m_AssetGUID: 3ba3079b5d96981488fa97ec1f88c032
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Dog
+  - Name: Elephant
+    Price: 0
+    Prefab:
+      m_AssetGUID: 0ed47bebe78e39143b6fb2966a39e9a2
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Elephant
+  - Name: Fox
+    Price: 0
+    Prefab:
+      m_AssetGUID: ce8121766023134429b1dbdcd2cba052
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Fox
+  - Name: Giraffe
+    Price: 0
+    Prefab:
+      m_AssetGUID: 3e7637c99067f204f965c84e6ccb21c0
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Giraffe
+  - Name: Horse
+    Price: 0
+    Prefab:
+      m_AssetGUID: 6823284829080f342946ffbaa7ae8971
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Horse
+  - Name: Lion
+    Price: 0
+    Prefab:
+      m_AssetGUID: 6d2a0e9b8c44a8f4ba6b68ca9e8d3a89
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Lion
+  - Name: Bird
+    Price: 0
+    Prefab:
+      m_AssetGUID: e1eafbc36d09ba14199e23c85e3deb8c
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Bird
+  - Name: Duck
+    Price: 0
+    Prefab:
+      m_AssetGUID: 732460759345f5e4f825a4a71cf9bb16
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Duck
+  - Name: Owl
+    Price: 0
+    Prefab:
+      m_AssetGUID: 0133b83d2f970db42aeef66aa736ef47
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Owl
+  - Name: Penguin
+    Price: 0
+    Prefab:
+      m_AssetGUID: 27886274f6ee5ae478702af711008699
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Penguin
+  - Name: Toucan
+    Price: 0
+    Prefab:
+      m_AssetGUID: 59f78f10871a425429db017ddfc9d0ed
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    Icon:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    _lastPrefabName: Toucan

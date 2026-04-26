@@ -7,7 +7,7 @@ namespace STG.CurveDash
     {
         private readonly DataManager _dataManager;
 
-        public event System.Action<int> OnBallSkinEquipped;
+        public event System.Action<int> OnMountSkinEquipped;
         public event System.Action<int> OnVFXEquipped;
         public event System.Action<int> OnCharacterEquipped;
         public event System.Action<int> OnBlockPartSkinEquipped;
@@ -19,32 +19,32 @@ namespace STG.CurveDash
 
         #region BALL SKINS
 
-        public bool TryUnlockBallSkin(int index, int cost)
+        public bool TryUnlockMountSkin(int index, int cost)
         {
-            if (IsBallSkinUnlocked(index)) return false;
+            if (IsMountSkinUnlocked(index)) return false;
 
             if (_dataManager.UserData.TotalCoins >= cost)
             {
                 _dataManager.UserData.TotalCoins -= cost;
-                _dataManager.UserData.UnlockedBallSkins.Add(index);
+                _dataManager.UserData.UnlockedMountSkins.Add(index);
                 _dataManager.SaveData();
                 return true;
             }
             return false;
         }
 
-        public bool IsBallSkinUnlocked(int index)
+        public bool IsMountSkinUnlocked(int index)
         {
-            return _dataManager.UserData.UnlockedBallSkins.Contains(index);
+            return _dataManager.UserData.UnlockedMountSkins.Contains(index);
         }
 
-        public void EquipBallSkin(int index)
+        public void EquipMountSkin(int index)
         {
-            if (IsBallSkinUnlocked(index))
+            if (IsMountSkinUnlocked(index))
             {
-                _dataManager.UserData.CurrentBallSkin = index;
+                _dataManager.UserData.CurrentMountSkin = index;
                 _dataManager.SaveData();
-                OnBallSkinEquipped?.Invoke(index);
+                OnMountSkinEquipped?.Invoke(index);
             }
         }
 
@@ -150,3 +150,4 @@ namespace STG.CurveDash
         #endregion
     }
 }
+

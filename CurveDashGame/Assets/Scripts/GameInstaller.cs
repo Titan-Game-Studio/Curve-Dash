@@ -11,6 +11,8 @@ namespace STG.CurveDash
 
         public override void InstallBindings()
         {
+            UnityEngine.Assertions.Assert.IsNotNull(Prefabs, "[LỖI SETUP] Bạn chưa kéo file GamePrefabs (ScriptableObject) vào ô 'Prefabs' của GameInstaller trong Unity Inspector!");
+
             // ecs
 
             Container.BindInstance(new EcsWorld());
@@ -23,7 +25,7 @@ namespace STG.CurveDash
 
             // systems
 
-            Container.BindInstance(Prefabs.AssetCatalog).AsSingle();
+            Container.BindInstance(Prefabs.GameAssetCatalog).AsSingle();
             Container.Bind<AddressablesController>().AsSingle().NonLazy();
             Container.Bind<AssetManager>().AsSingle();
             Container.BindInterfacesAndSelfTo<DataManager>().AsSingle().NonLazy();
@@ -35,9 +37,12 @@ namespace STG.CurveDash
             Container.BindInterfacesTo<BackgroundColorSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<ObjectSpawner>().AsSingle();
             Container.Bind<GameplayStrategiesProvider>().AsSingle();
-            Container.BindInterfacesAndSelfTo<BallSystem>().AsSingle();
+            Container.BindInterfacesAndSelfTo<PlayerMovementSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<BlockSystem>().AsSingle();
             Container.BindInterfacesTo<FallingSystem>().AsSingle();
+            Container.BindInterfacesAndSelfTo<CombatSystem>().AsSingle();
+            Container.BindInterfacesAndSelfTo<WeaponPickupSystem>().AsSingle();
+            Container.BindInterfacesAndSelfTo<PowerUpPickupSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<TGS.Core.IAP.UnityIapService>().AsSingle();
             Container.BindInterfacesAndSelfTo<LevelPlayAdService>().AsSingle();
             Container.Bind<AudioPlayer>().AsSingle();
@@ -48,15 +53,18 @@ namespace STG.CurveDash
             Container.BindInterfacesAndSelfTo<CloudSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<ShieldSystem>().AsSingle();
 
-            Container.BindInterfacesTo<DeleteEventsSystem<BallPassedComponent>>().AsSingle();
-            Container.BindInterfacesTo<DeleteEventsSystem<BallHitCrystalEvent>>().AsSingle();
-            Container.BindInterfacesTo<DeleteEventsSystem<BallHitObstacleEvent>>().AsSingle();
-            Container.BindInterfacesTo<DeleteEventsSystem<BallHitShieldEvent>>().AsSingle();
+            Container.BindInterfacesTo<DeleteEventsSystem<PlayerPassedComponent>>().AsSingle();
+            Container.BindInterfacesTo<DeleteEventsSystem<PlayerHitCrystalEvent>>().AsSingle();
+            Container.BindInterfacesTo<DeleteEventsSystem<PlayerHitObstacleEvent>>().AsSingle();
+            Container.BindInterfacesTo<DeleteEventsSystem<PlayerHitShieldEvent>>().AsSingle();
             Container.BindInterfacesTo<DeleteEventsSystem<PlayerLevelUpComponent>>().AsSingle();
+            Container.BindInterfacesTo<DeleteEventsSystem<PlayerHitWeaponEvent>>().AsSingle();
+            Container.BindInterfacesTo<DeleteEventsSystem<PlayerHitMountEvent>>().AsSingle();
+            Container.BindInterfacesTo<DeleteEventsSystem<PlayerHitAuraEvent>>().AsSingle();
 
             // factories
 
-            Container.BindFactory<BallView, BallViewFactory>().FromComponentInNewPrefab(Prefabs.BallPrefab);
+            Container.BindFactory<PlayerView, PlayerViewFactory>().FromComponentInNewPrefab(Prefabs.PlayerPrefab);
             Container.BindFactory<BlockPartView, BlockPartViewFactory>()
                 .FromComponentInNewPrefab(Prefabs.BlockPartPrefab);
 
@@ -76,6 +84,15 @@ namespace STG.CurveDash
                 .UnderTransformGroup("ObjectsPool");
             Container.BindMemoryPool<CloudView, CloudViewPool>()
                 .WithInitialSize(5).FromComponentInNewPrefab(Prefabs.CloudPrefab)
+                .UnderTransformGroup("ObjectsPool");
+            Container.BindMemoryPool<WeaponPickupView, WeaponPickupViewPool>()
+                .WithInitialSize(2).FromComponentInNewPrefab(Prefabs.WeaponPickupPrefab)
+                .UnderTransformGroup("ObjectsPool");
+            Container.BindMemoryPool<MountPickupView, MountPickupViewPool>()
+                .WithInitialSize(2).FromComponentInNewPrefab(Prefabs.MountPickupPrefab)
+                .UnderTransformGroup("ObjectsPool");
+            Container.BindMemoryPool<AuraPickupView, AuraPickupViewPool>()
+                .WithInitialSize(2).FromComponentInNewPrefab(Prefabs.AuraPickupPrefab)
                 .UnderTransformGroup("ObjectsPool");
         }
     }

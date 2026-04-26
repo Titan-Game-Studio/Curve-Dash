@@ -131,8 +131,8 @@ namespace STG.CurveDash.UI
             switch (_currentTab)
             {
                 case ShopTab.Character: _assetManager.LoadCharacterIconAsync(index, onLoaded); break;
-                case ShopTab.Skin: _assetManager.LoadBallSkinIconAsync(index, onLoaded); break;
-                case ShopTab.Trail: _assetManager.LoadVFXIconAsync(index, onLoaded); break;
+                case ShopTab.Skin: _assetManager.LoadMountSkinIconAsync(index, onLoaded); break;
+                case ShopTab.Trail: _assetManager.LoadAuraIconAsync(index, onLoaded); break;
                 case ShopTab.Tile: _assetManager.LoadBlockPartSkinIconAsync(index, onLoaded); break;
             }
         }
@@ -173,8 +173,8 @@ namespace STG.CurveDash.UI
             return _currentTab switch
             {
                 ShopTab.Character => _assetManager.CharacterCount,
-                ShopTab.Skin => _assetManager.BallSkinCount,
-                ShopTab.Trail => _assetManager.VFXCount,
+                ShopTab.Skin => _assetManager.MountSkinCount,
+                ShopTab.Trail => _assetManager.AuraCount,
                 ShopTab.Tile => _assetManager.BlockPartSkinCount,
                 _ => 0
             };
@@ -185,8 +185,8 @@ namespace STG.CurveDash.UI
             return _currentTab switch
             {
                 ShopTab.Character => _assetManager.GetCharacterConfig(index),
-                ShopTab.Skin => _assetManager.GetBallSkinConfig(index),
-                ShopTab.Trail => _assetManager.GetVFXConfig(index),
+                ShopTab.Skin => _assetManager.GetMountSkinConfig(index),
+                ShopTab.Trail => _assetManager.GetAuraConfig(index),
                 ShopTab.Tile => _assetManager.GetBlockPartSkinConfig(index),
                 _ => null
             };
@@ -197,7 +197,7 @@ namespace STG.CurveDash.UI
             return _currentTab switch
             {
                 ShopTab.Character => _shopService.IsCharacterUnlocked(index),
-                ShopTab.Skin => _shopService.IsBallSkinUnlocked(index),
+                ShopTab.Skin => _shopService.IsMountSkinUnlocked(index),
                 ShopTab.Trail => _shopService.IsVFXUnlocked(index),
                 ShopTab.Tile => _shopService.IsBlockPartSkinUnlocked(index),
                 _ => false
@@ -209,7 +209,7 @@ namespace STG.CurveDash.UI
             return _currentTab switch
             {
                 ShopTab.Character => _dataManager.UserData.CurrentCharacter == index,
-                ShopTab.Skin => _dataManager.UserData.CurrentBallSkin == index,
+                ShopTab.Skin => _dataManager.UserData.CurrentMountSkin == index,
                 ShopTab.Trail => _dataManager.UserData.CurrentVFX == index,
                 ShopTab.Tile => _dataManager.UserData.CurrentBlockPartSkin == index,
                 _ => false
@@ -221,7 +221,7 @@ namespace STG.CurveDash.UI
             return _currentTab switch
             {
                 ShopTab.Character => _shopService.TryUnlockCharacter(index, cost),
-                ShopTab.Skin => _shopService.TryUnlockBallSkin(index, cost),
+                ShopTab.Skin => _shopService.TryUnlockMountSkin(index, cost),
                 ShopTab.Trail => _shopService.TryUnlockVFX(index, cost),
                 ShopTab.Tile => _shopService.TryUnlockBlockPartSkin(index, cost),
                 _ => false
@@ -233,7 +233,7 @@ namespace STG.CurveDash.UI
             switch (_currentTab)
             {
                 case ShopTab.Character: _shopService.EquipCharacter(index); break;
-                case ShopTab.Skin: _shopService.EquipBallSkin(index); break;
+                case ShopTab.Skin: _shopService.EquipMountSkin(index); break;
                 case ShopTab.Trail: _shopService.EquipVFX(index); break;
                 case ShopTab.Tile: _shopService.EquipBlockPartSkin(index); break;
             }
@@ -242,3 +242,4 @@ namespace STG.CurveDash.UI
         #endregion
     }
 }
+

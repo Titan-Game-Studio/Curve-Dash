@@ -1,4 +1,4 @@
-﻿using Leopotam.EcsLite;
+using Leopotam.EcsLite;
 using UnityEngine;
 using Zenject;
 
@@ -12,7 +12,8 @@ namespace STG.CurveDash
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
 
         private readonly EcsFilter obstacleFilter;
-        private readonly EcsFilter ballHitObstacleFilter;
+        private readonly EcsFilter playerHitObstacleFilter;
+        private readonly EcsFilter deadEnemyFilter;
 
         public ObstacleSystem(EcsWorld world, ObjectSpawner spawner)
         {
@@ -21,12 +22,16 @@ namespace STG.CurveDash
             viewLinkPool = world.GetPool<ViewLinkComponent>();
 
             obstacleFilter = world.Filter<ObstacleComponent>().End();
-            ballHitObstacleFilter = world.Filter<ObstacleComponent>().Inc<BallHitObstacleEvent>().End();
+            playerHitObstacleFilter = world.Filter<ObstacleComponent>().Inc<PlayerHitObstacleEvent>().End();
+            deadEnemyFilter = world.Filter<ObstacleComponent>().Inc<EnemyDeadEvent>().End();
         }
 
         public void Tick()
         {
-            foreach (var obstacle in ballHitObstacleFilter)
+            foreach (var obstacle in playerHitObstacleFilter)
+                spawner.DespawnObject(obstacle);
+
+            foreach (var obstacle in deadEnemyFilter)
                 spawner.DespawnObject(obstacle);
         }
     }

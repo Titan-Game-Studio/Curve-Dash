@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5aea40a7ca57d424c99117487f5534e8, type: 3}
+  m_Name: AudioCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.AudioMappingCatalog
+  AudioAssets:
+  - Key: 0
+    Reference:
+      m_AssetGUID: b6039e869b88dfe449ea7e1b11ca2a4c
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+  - Key: 1
+    Reference:
+      m_AssetGUID: 01173e6a0a8dfd94ca58cd38c265d681
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+  - Key: 2
+    Reference:
+      m_AssetGUID: 8cfe3be4d2987ee46be2a7ce11949781
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+  - Key: 3
+    Reference:
+      m_AssetGUID: 73a6c62ddfe23b44bb0a7cc7bd564278
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+  - Key: 4
+    Reference:
+      m_AssetGUID: 5e966ec0c45a41f43ae1c3504164d54f
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 1
+  - Key: 5
+    Reference:
+      m_AssetGUID: 95da616b9ca5be942b52dd271af0db90
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 1
+  - Key: 6
+    Reference:
+      m_AssetGUID: 5b8f7e9f5b816564084f6ed9016bdf7e
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 1
+  - Key: 7
+    Reference:
+      m_AssetGUID: b63c09a3b82b0c9418e167b4d7f56b87
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 1

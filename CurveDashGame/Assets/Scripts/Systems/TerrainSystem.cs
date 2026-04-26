@@ -1,4 +1,4 @@
-﻿using Leopotam.EcsLite;
+using Leopotam.EcsLite;
 using UnityEngine;
 using Zenject;
 
@@ -13,7 +13,7 @@ namespace STG.CurveDash
 
         private readonly Vector3 initialPosition = new Vector3(0, -5, 0);
 
-        private readonly EcsFilter followingBallFilter;
+        private readonly EcsFilter followingPlayerFilter;
         
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
         
@@ -28,14 +28,14 @@ namespace STG.CurveDash
 
             viewLinkPool = world.GetPool<ViewLinkComponent>();
 
-            followingBallFilter = world.Filter<BallComponent>().Exc<FallingComponent>().End();
+            followingPlayerFilter = world.Filter<PlayerComponent>().Exc<FallingComponent>().End();
             
             terrainView.transform.position = initialPosition;
         }
         
         public void Tick()
         {
-            foreach (var followingBall in followingBallFilter)
+            foreach (var followingBall in followingPlayerFilter)
             {
                 ref var viewLinkComponent = ref viewLinkPool.Get(followingBall);
             

@@ -9,7 +9,7 @@ namespace STG.CurveDash
     public class AssetManager
     {
         private readonly AddressablesController _controller;
-        private readonly AssetCatalog _catalog;
+        private readonly GameAssetCatalog _catalog;
 
         private readonly Dictionary<AssetReferenceGameObject, GameObject> _assetCache = new();
 
@@ -20,7 +20,7 @@ namespace STG.CurveDash
         
         private AsyncOperationHandle _initHandle;
 
-        public AssetManager(AssetCatalog catalog, AddressablesController controller)
+        public AssetManager(GameAssetCatalog catalog, AddressablesController controller)
         {
             _catalog = catalog;
             _controller = controller;
@@ -38,56 +38,56 @@ namespace STG.CurveDash
 
         #region LOAD_ASSET_ASYNC
 
-        public void LoadBallSkinAsync(int index, Action<GameObject> onLoaded)
+        public void LoadMountSkinAsync(int index, Action<GameObject> onLoaded)
         {
-            if (index >= 0 && index < BallSkinCount) LoadGameObjectRefAsync(_catalog.BallSkins[index].Prefab, onLoaded);
+            if (index >= 0 && index < MountSkinCount) LoadGameObjectRefAsync(_catalog.MountSkins.Items[index].Prefab, onLoaded);
         }
 
         public void LoadBlockPartSkinAsync(int index, Action<GameObject> onLoaded)
         {
-            if (index >= 0 && index < BlockPartSkinCount) LoadGameObjectRefAsync(_catalog.BlockPartSkins[index].Prefab, onLoaded);
+            if (index >= 0 && index < BlockPartSkinCount) LoadGameObjectRefAsync(_catalog.BlockPartSkins.Items[index].Prefab, onLoaded);
         }
 
-        public void LoadVFXAsync(int index, Action<GameObject> onLoaded)
+        public void LoadAuraAsync(int index, Action<GameObject> onLoaded)
         {
-            if (index >= 0 && index < VFXCount) LoadGameObjectRefAsync(_catalog.VFXs[index].Prefab, onLoaded);
+            if (index >= 0 && index < AuraCount) LoadGameObjectRefAsync(_catalog.Auras.Items[index].Prefab, onLoaded);
         }
 
         public void LoadCharacterAsync(int index, Action<GameObject> onLoaded)
         {
-            if (index >= 0 && index < CharacterCount) LoadGameObjectRefAsync(_catalog.Characters[index].Prefab, onLoaded);
+            if (index >= 0 && index < CharacterCount) LoadGameObjectRefAsync(_catalog.Characters.Items[index].Prefab, onLoaded);
         }
 
         public void LoadObstacleAsync(int index, Action<GameObject> onLoaded)
         {
-            LoadGameObjectAsync(_catalog.Obstacles, index, onLoaded);
+            LoadGameObjectAsync(_catalog.Obstacles.References, index, onLoaded);
         }
 
         public void LoadCloudAsync(int index, Action<GameObject> onLoaded)
         {
-            LoadGameObjectAsync(_catalog.Clouds, index, onLoaded);
+            LoadGameObjectAsync(_catalog.Clouds.References, index, onLoaded);
         }
         
-        public void LoadBallSkinIconAsync(int index, Action<Sprite> onLoaded) => LoadSpriteRefAsync((index >= 0 && index < BallSkinCount) ? _catalog.BallSkins[index].Icon : null, onLoaded);
-        public void LoadBlockPartSkinIconAsync(int index, Action<Sprite> onLoaded) => LoadSpriteRefAsync((index >= 0 && index < BlockPartSkinCount) ? _catalog.BlockPartSkins[index].Icon : null, onLoaded);
-        public void LoadVFXIconAsync(int index, Action<Sprite> onLoaded) => LoadSpriteRefAsync((index >= 0 && index < VFXCount) ? _catalog.VFXs[index].Icon : null, onLoaded);
-        public void LoadCharacterIconAsync(int index, Action<Sprite> onLoaded) => LoadSpriteRefAsync((index >= 0 && index < CharacterCount) ? _catalog.Characters[index].Icon : null, onLoaded);
+        public void LoadMountSkinIconAsync(int index, Action<Sprite> onLoaded) => LoadSpriteRefAsync((index >= 0 && index < MountSkinCount) ? _catalog.MountSkins.Items[index].Icon : null, onLoaded);
+        public void LoadBlockPartSkinIconAsync(int index, Action<Sprite> onLoaded) => LoadSpriteRefAsync((index >= 0 && index < BlockPartSkinCount) ? _catalog.BlockPartSkins.Items[index].Icon : null, onLoaded);
+        public void LoadAuraIconAsync(int index, Action<Sprite> onLoaded) => LoadSpriteRefAsync((index >= 0 && index < AuraCount) ? _catalog.Auras.Items[index].Icon : null, onLoaded);
+        public void LoadCharacterIconAsync(int index, Action<Sprite> onLoaded) => LoadSpriteRefAsync((index >= 0 && index < CharacterCount) ? _catalog.Characters.Items[index].Icon : null, onLoaded);
         
-        public ShopItemConfig GetBallSkinConfig(int index) => (index >= 0 && index < BallSkinCount) ? _catalog.BallSkins[index] : null;
-        public ShopItemConfig GetBlockPartSkinConfig(int index) => (index >= 0 && index < BlockPartSkinCount) ? _catalog.BlockPartSkins[index] : null;
-        public ShopItemConfig GetVFXConfig(int index) => (index >= 0 && index < VFXCount) ? _catalog.VFXs[index] : null;
-        public ShopItemConfig GetCharacterConfig(int index) => (index >= 0 && index < CharacterCount) ? _catalog.Characters[index] : null;
+        public ShopItemConfig GetMountSkinConfig(int index) => (index >= 0 && index < MountSkinCount) ? _catalog.MountSkins.Items[index] : null;
+        public ShopItemConfig GetBlockPartSkinConfig(int index) => (index >= 0 && index < BlockPartSkinCount) ? _catalog.BlockPartSkins.Items[index] : null;
+        public ShopItemConfig GetAuraConfig(int index) => (index >= 0 && index < AuraCount) ? _catalog.Auras.Items[index] : null;
+        public ShopItemConfig GetCharacterConfig(int index) => (index >= 0 && index < CharacterCount) ? _catalog.Characters.Items[index] : null;
         
-        public int BallSkinCount => _catalog.BallSkins?.Count ?? 0;
-        public int VFXCount => _catalog.VFXs?.Count ?? 0;
-        public int CharacterCount => _catalog.Characters?.Count ?? 0;
-        public int ObstacleCount => _catalog.Obstacles?.Count ?? 0;
-        public int CloudCount => _catalog.Clouds?.Count ?? 0;
-        public int BlockPartSkinCount => _catalog.BlockPartSkins?.Count ?? 0;
+        public int MountSkinCount => _catalog.MountSkins?.Items?.Count ?? 0;
+        public int AuraCount => _catalog.Auras?.Items?.Count ?? 0;
+        public int CharacterCount => _catalog.Characters?.Items?.Count ?? 0;
+        public int ObstacleCount => _catalog.Obstacles?.References?.Count ?? 0;
+        public int CloudCount => _catalog.Clouds?.References?.Count ?? 0;
+        public int BlockPartSkinCount => _catalog.BlockPartSkins?.Items?.Count ?? 0;
         
         public void LoadAudioAsync(AudioKey key, Action<AudioClip> onLoaded)
         {
-            var mapping = _catalog.AudioAssets.Find(m => m.Key == key);
+            var mapping = _catalog.AudioCatalog.AudioAssets.Find(m => m.Key == key);
     
             if (mapping.Reference == null || !mapping.Reference.RuntimeKeyIsValid())
             {
@@ -105,11 +105,19 @@ namespace STG.CurveDash
 
         #region INSTANTIATE_ASYNC
 
-        public void InstantiateVFX(int index, Transform parent = null, Action<GameObject> onSpawned = null)
+        public void InstantiateAura(int index, Transform parent = null, Action<GameObject> onSpawned = null)
         {
-            if (index < 0 || index >= VFXCount) return;
+            if (index < 0 || index >= AuraCount) return;
 
-            var reference = _catalog.VFXs[index].Prefab;
+            var reference = _catalog.Auras.Items[index].Prefab;
+            _controller.InstantiateAsync(reference, parent, onSpawned);
+        }
+
+        public void InstantiateMountSkin(int index, Transform parent = null, Action<GameObject> onSpawned = null)
+        {
+            if (index < 0 || index >= MountSkinCount) return;
+
+            var reference = _catalog.MountSkins.Items[index].Prefab;
             _controller.InstantiateAsync(reference, parent, onSpawned);
         }
 
@@ -206,3 +214,4 @@ namespace STG.CurveDash
         }
     }
 }
+

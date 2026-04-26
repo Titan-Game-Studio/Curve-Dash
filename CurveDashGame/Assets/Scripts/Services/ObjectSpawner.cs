@@ -15,39 +15,63 @@ namespace STG.CurveDash
         private readonly CloudViewPool cloudViewPool;
         private readonly BlockViewPool blockViewPool;
         private readonly BlockPartViewFactory blockPartViewFactory;
-        private readonly BallViewFactory ballViewFactory;
+        private readonly PlayerViewFactory playerViewFactory;
+        private readonly WeaponPickupViewPool weaponPickupViewPool;
+        private readonly MountPickupViewPool mountPickupViewPool;
+        private readonly AuraPickupViewPool auraPickupViewPool;
+        private readonly GameAssetCatalog assetCatalog;
+        private readonly AssetManager assetManager;
 
         private readonly Vector3 CrystalOffset = new Vector3(0, 0.8f, 0);
         private readonly Vector3 ObstacleOffset = new Vector3(0, 0.5f, 0);
 
-        private readonly EcsPool<BallComponent> ballPool;
+        private readonly EcsPool<PlayerComponent> playerPool;
         private readonly EcsPool<CrystalComponent> crystalPool;
         private readonly EcsPool<ObstacleComponent> obstaclePool;
         private readonly EcsPool<ShieldComponent> shieldPool;
         private readonly EcsPool<CloudComponent> cloudPool;
         private readonly EcsPool<BlockComponent> blockPool;
+        
+        private readonly EcsPool<EnemyHealthComponent> enemyHealthPool;
+        private readonly EcsPool<PlayerCombatComponent> combatPool;
+        private readonly EcsPool<WeaponPickupComponent> weaponPickupPool;
+        private readonly EcsPool<MountPickupComponent> mountPickupPool;
+        private readonly EcsPool<AuraPickupComponent> auraPickupPool;
 
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
         private readonly EcsFilter viewLinkFilter;
 
         public ObjectSpawner(EcsWorld world, BlockViewPool blockViewPool, BlockPartViewFactory blockPartViewFactory,
-            CrystalViewPool crystalViewPool, ObstacleViewPool obstacleViewPool, ShieldViewPool shieldViewPool, CloudViewPool cloudViewPool, BallViewFactory ballViewFactory)
+            CrystalViewPool crystalViewPool, ObstacleViewPool obstacleViewPool, ShieldViewPool shieldViewPool, CloudViewPool cloudViewPool, PlayerViewFactory playerViewFactory, 
+            WeaponPickupViewPool weaponPickupViewPool, MountPickupViewPool mountPickupViewPool, AuraPickupViewPool auraPickupViewPool, 
+            GameAssetCatalog assetCatalog, AssetManager assetManager)
         {
             this.world = world;
+            this.assetCatalog = assetCatalog;
+            this.assetManager = assetManager;
             this.blockViewPool = blockViewPool;
             this.blockPartViewFactory = blockPartViewFactory;
             this.crystalViewPool = crystalViewPool;
             this.obstacleViewPool = obstacleViewPool;
             this.shieldViewPool = shieldViewPool;
             this.cloudViewPool = cloudViewPool;
-            this.ballViewFactory = ballViewFactory;
+            this.playerViewFactory = playerViewFactory;
+            this.weaponPickupViewPool = weaponPickupViewPool;
+            this.mountPickupViewPool = mountPickupViewPool;
+            this.auraPickupViewPool = auraPickupViewPool;
 
-            ballPool = world.GetPool<BallComponent>();
+            playerPool = world.GetPool<PlayerComponent>();
             crystalPool = world.GetPool<CrystalComponent>();
             obstaclePool = world.GetPool<ObstacleComponent>();
             shieldPool = world.GetPool<ShieldComponent>();
             cloudPool = world.GetPool<CloudComponent>();
             blockPool = world.GetPool<BlockComponent>();
+            
+            enemyHealthPool = world.GetPool<EnemyHealthComponent>();
+            combatPool = world.GetPool<PlayerCombatComponent>();
+            weaponPickupPool = world.GetPool<WeaponPickupComponent>();
+            mountPickupPool = world.GetPool<MountPickupComponent>();
+            auraPickupPool = world.GetPool<AuraPickupComponent>();
 
             viewLinkPool = world.GetPool<ViewLinkComponent>();
             viewLinkFilter = world.Filter<ViewLinkComponent>().End();
@@ -63,15 +87,23 @@ namespace STG.CurveDash
             shieldViewPool.Clear();
             cloudViewPool.Clear();
             blockViewPool.Clear();
+            weaponPickupViewPool.Clear();
+            mountPickupViewPool.Clear();
+            auraPickupViewPool.Clear();
         }
 
-        public int SpawnBall(Vector3 pos, float speed)
+        public int SpawnPlayer(Vector3 pos, float speed)
         {
-            var gameObject = ballViewFactory.Create().gameObject;
-            var entity = CreateEntity<BallComponent>(gameObject);
+            var gameObject = playerViewFactory.Create().gameObject;
+            var entity = CreateEntity<PlayerComponent>(gameObject);
 
-            ref var ballComponent = ref world.GetPool<BallComponent>().Get(entity);
-            ballComponent.Speed = speed;
+            ref var playerComponent = ref world.GetPool<PlayerComponent>().Get(entity);
+            playerComponent.Speed = speed;
+            
+            ref var combat = ref combatPool.Add(entity);
+            combat.CurrentWeapon = null;
+            combat.CooldownTimer = 0f;
+
             gameObject.transform.position = pos;
             return entity;
         }
@@ -149,6 +181,10 @@ namespace STG.CurveDash
             var obstacleView = obstacleViewPool.Spawn();
             var entity = CreateEntity<ObstacleComponent>(obstacleView.gameObject);
 
+            ref var health = ref enemyHealthPool.Add(entity);
+            health.MaxHealth = 3;
+            health.CurrentHealth = 3;
+
             obstacleView.transform.position = blockPosition + ObstacleOffset;
             obstacleView.GetComponent<Rigidbody>().isKinematic = true;
             obstacleView.GetComponent<Rigidbody>().position = obstacleView.transform.position;
@@ -186,6 +222,62 @@ namespace STG.CurveDash
             return entity;
         }
 
+        public int SpawnWeaponPickup(Vector3 blockPosition)
+        {
+            var weaponView = weaponPickupViewPool.Spawn();
+            var entity = CreateEntity<WeaponPickupComponent>(weaponView.gameObject);
+
+            // Select random weapon
+            if (assetCatalog != null && assetCatalog.Weapons != null && assetCatalog.Weapons.Weapons != null && assetCatalog.Weapons.Weapons.Count > 0)
+            {
+                var weaponList = assetCatalog.Weapons.Weapons;
+                var randomWeapon = weaponList[Random.Range(0, weaponList.Count)];
+                weaponView.Setup(randomWeapon);
+            }
+
+            weaponView.transform.position = blockPosition + CrystalOffset;
+            weaponView.GetComponent<Rigidbody>().isKinematic = true;
+            weaponView.GetComponent<Rigidbody>().position = weaponView.transform.position;
+
+            return entity;
+        }
+
+        public int SpawnMountPickup(Vector3 blockPosition)
+        {
+            var mountView = mountPickupViewPool.Spawn();
+            var entity = CreateEntity<MountPickupComponent>(mountView.gameObject);
+
+            if (assetCatalog != null && assetCatalog.MountSkins != null && assetCatalog.MountSkins.Items != null && assetCatalog.MountSkins.Items.Count > 0)
+            {
+                var randomMountIndex = Random.Range(0, assetCatalog.MountSkins.Items.Count);
+                mountView.Setup(randomMountIndex, assetManager);
+            }
+
+            mountView.transform.position = blockPosition + CrystalOffset;
+            mountView.GetComponent<Rigidbody>().isKinematic = true;
+            mountView.GetComponent<Rigidbody>().position = mountView.transform.position;
+
+            return entity;
+        }
+
+        public int SpawnAuraPickup(Vector3 blockPosition)
+        {
+            var auraView = auraPickupViewPool.Spawn();
+            var entity = CreateEntity<AuraPickupComponent>(auraView.gameObject);
+
+            if (assetCatalog != null && assetCatalog.Auras != null && assetCatalog.Auras.Items != null && assetCatalog.Auras.Items.Count > 0)
+            {
+                var randomAuraIndex = Random.Range(0, assetCatalog.Auras.Items.Count);
+                auraView.Setup(randomAuraIndex, assetManager);
+            }
+
+            auraView.transform.position = blockPosition + CrystalOffset;
+            auraView.GetComponent<Rigidbody>().isKinematic = true;
+            auraView.GetComponent<Rigidbody>().position = auraView.transform.position;
+
+            return entity;
+        }
+
         private int CreateEntity<T>(GameObject gameObject) where T : struct
         {
             var entity = world.NewEntity();
@@ -203,7 +295,7 @@ namespace STG.CurveDash
         {
             ref var viewLinkComponent = ref viewLinkPool.Get(entity);
 
-            if (ballPool.Has(entity))
+            if (playerPool.Has(entity))
             {
                 Object.Destroy(viewLinkComponent.View);
             }
@@ -234,6 +326,21 @@ namespace STG.CurveDash
                     Object.Destroy(viewLinkComponent.View);
                 else
                     blockViewPool.Despawn(viewLinkComponent.View.GetComponent<BlockView>());
+            }
+
+            if (weaponPickupPool.Has(entity))
+            {
+                weaponPickupViewPool.Despawn(viewLinkComponent.View.GetComponent<WeaponPickupView>());
+            }
+
+            if (mountPickupPool.Has(entity))
+            {
+                mountPickupViewPool.Despawn(viewLinkComponent.View.GetComponent<MountPickupView>());
+            }
+
+            if (auraPickupPool.Has(entity))
+            {
+                auraPickupViewPool.Despawn(viewLinkComponent.View.GetComponent<AuraPickupView>());
             }
 
             world.DelEntity(entity);
