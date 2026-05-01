@@ -24,6 +24,10 @@ MonoBehaviour:
     type: 3}
   WeaponPickupPrefab: {fileID: 2830056364503120991, guid: 182672a8f1b817f4aac75863c739d9e9,
     type: 3}
+  MountPickupPrefab: {fileID: 2830056364503120991, guid: 1da3ba5aa20ed094f820c248e764e6e8,
+    type: 3}
+  AuraPickupPrefab: {fileID: 2830056364503120991, guid: 07d0ab8c09641b345b5f7300842c4ed2,
+    type: 3}
   ObstaclePrefab: {fileID: 2830056364503120991, guid: d6ee31dd44995724f9e4d2f5ba478c4e,
     type: 3}
   CloudPrefab: {fileID: 2830056364503120991, guid: b0401df5ddf3ec44783114dc725cdc89,

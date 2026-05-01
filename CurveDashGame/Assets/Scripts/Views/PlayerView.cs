@@ -39,6 +39,10 @@ namespace STG.CurveDash
         private Material _whiteMaterial;
         private Dictionary<Renderer, Material[]> _originalMaterials = new Dictionary<Renderer, Material[]>();
 
+        private Animator _characterAnimator;
+        private Animator _mountAnimator;
+        private bool _isRunning;
+
         private void Start()
         {
             Init();
@@ -188,7 +192,7 @@ namespace STG.CurveDash
 
         private void OnVisualLoaded()
         {
-            // Extract Bones from the currently active character
+            // Extract Bones and Animator from the currently active character
             if (_cachedCharacters.TryGetValue(_characterIndex, out var characterObj) && characterObj != null)
             {
                 var bones = characterObj.GetComponent<CharacterBones>();
@@ -198,12 +202,27 @@ namespace STG.CurveDash
                     _leftHandSlot = bones.LeftHandSlot;
                 }
                 
+                _characterAnimator = characterObj.GetComponentInChildren<Animator>();
+                
                 // Re-equip the weapon on the new character's hands
                 if (_currentWeaponData != null)
                 {
                     EquipWeapon(_currentWeaponData);
                 }
             }
+
+            // Extract Animator from Mount
+            if (_cachedSkins.TryGetValue(_skinIndex, out var mountObj) && mountObj != null)
+            {
+                _mountAnimator = mountObj.GetComponentInChildren<Animator>();
+            }
+            else
+            {
+                _mountAnimator = null;
+            }
+
+            // Sync animation state
+            SetRunning(_isRunning);
 
             if (_isInvincible)
             {
@@ -280,6 +299,35 @@ namespace STG.CurveDash
                 }
             }
             _originalMaterials.Clear();
+        }
+
+        public void SetRunning(bool isRunning)
+        {
+            _isRunning = isRunning;
+            
+            if (_mountAnimator != null)
+            {
+                _mountAnimator.SetBool("IsRunning", isRunning);
+                if (_characterAnimator != null)
+                {
+                    _characterAnimator.SetBool("IsRunning", false); // Tạm thời ngồi yên trên thú
+                }
+            }
+            else
+            {
+                if (_characterAnimator != null)
+                {
+                    _characterAnimator.SetBool("IsRunning", isRunning);
+                }
+            }
+        }
+
+        public void PlayAttack()
+        {
+            if (_characterAnimator != null)
+            {
+                _characterAnimator.SetTrigger("Attack");
+            }
         }
     }
 

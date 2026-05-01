@@ -269,6 +269,11 @@ namespace STG.CurveDash
 
             blockSystem.CreateStartBlocks(GetPartsCountInBlock());
             spawner.SpawnPlayer(new Vector3(0, BallSpawnHeight, 0), GetBallSpeedForCurrentLevel());
+            
+            var ballEntity = playerFilter.GetRawEntities()[0];
+            ref var viewLink = ref viewLinkPool.Get(ballEntity);
+            var ballView = viewLink.Transform.GetComponent<PlayerView>();
+            if (ballView != null) ballView.SetRunning(false);
         }
 
         private void ChangeState(GameState state)
@@ -322,6 +327,11 @@ namespace STG.CurveDash
             audioPlayer.Play(audioSettings.GameStartSound);
             ChangeState(GameState.Playing);
             PlayBackgroundMusic();
+            
+            var ballEntity = playerFilter.GetRawEntities()[0];
+            ref var viewLink = ref viewLinkPool.Get(ballEntity);
+            var ballView = viewLink.Transform.GetComponent<PlayerView>();
+            if (ballView != null) ballView.SetRunning(true);
         }
 
 
@@ -339,6 +349,10 @@ namespace STG.CurveDash
             var ball = playerFilter.GetRawEntities()[0];
             ref var playerComponent = ref playerPool.Get(ball);
             playerComponent.Speed = 0;
+            
+            ref var viewLink = ref viewLinkPool.Get(ball);
+            var ballView = viewLink.Transform.GetComponent<PlayerView>();
+            if (ballView != null) ballView.SetRunning(false);
 
             ChangeState(GameState.GameOver);
             StopBackgroundMusic();

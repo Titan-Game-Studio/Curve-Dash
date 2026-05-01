@@ -74,6 +74,12 @@ namespace STG.CurveDash
                     }
 
                     combat.CooldownTimer = combat.CurrentWeapon.AttackCooldown;
+                    
+                    var playerViewComponent = playerView.Transform.GetComponent<PlayerView>();
+                    if (playerViewComponent != null)
+                    {
+                        playerViewComponent.PlayAttack();
+                    }
                 }
             }
         }
