@@ -47,7 +47,8 @@ namespace STG.CurveDash
                             playerView.EquipWeapon(weaponView.WeaponToGive);
                         }
 
-                        Debug.Log($"[WeaponPickup] Player equipped {weaponView.WeaponToGive.WeaponName}");
+                        Debug.Log($"[WeaponPickup] Player equipped {weaponView.WeaponToGive.ItemName}");
+
                     }
                 }
                 

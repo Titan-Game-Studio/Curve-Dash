@@ -38,25 +38,62 @@ namespace STG.CurveDash
 
         #region LOAD_ASSET_ASYNC
 
-        public void LoadMountSkinAsync(int index, Action<GameObject> onLoaded)
+        public void LoadMountSkin(int index, Action<GameObject> onLoaded)
         {
             if (index >= 0 && index < MountSkinCount) LoadGameObjectRefAsync(_catalog.MountSkins.Items[index].Prefab, onLoaded);
         }
 
-        public void LoadBlockPartSkinAsync(int index, Action<GameObject> onLoaded)
+        public void LoadMountSkinAsync(int index, Action<GameObject> onLoaded) => LoadMountSkin(index, onLoaded);
+
+        public void LoadBlockPartSkin(int index, Action<GameObject> onLoaded)
         {
             if (index >= 0 && index < BlockPartSkinCount) LoadGameObjectRefAsync(_catalog.BlockPartSkins.Items[index].Prefab, onLoaded);
         }
 
-        public void LoadAuraAsync(int index, Action<GameObject> onLoaded)
+        public void LoadBlockPartSkinAsync(int index, Action<GameObject> onLoaded) => LoadBlockPartSkin(index, onLoaded);
+
+        public void LoadVFX(int index, Action<GameObject> onLoaded)
         {
             if (index >= 0 && index < AuraCount) LoadGameObjectRefAsync(_catalog.Auras.Items[index].Prefab, onLoaded);
         }
 
-        public void LoadCharacterAsync(int index, Action<GameObject> onLoaded)
+        public void LoadAuraAsync(int index, Action<GameObject> onLoaded) => LoadVFX(index, onLoaded);
+
+        public void LoadCharacter(string id, Action<GameObject> onLoaded)
         {
-            if (index >= 0 && index < CharacterCount) LoadGameObjectRefAsync(_catalog.Characters.Items[index].Prefab, onLoaded);
+            // 1. Tìm trong Shop Characters Catalog trước (Dựa theo Name)
+            if (_catalog.Characters != null && _catalog.Characters.Items != null)
+            {
+                var shopItem = _catalog.Characters.Items.Find(x => x.Name == id);
+                if (shopItem != null && shopItem.Prefab != null)
+                {
+                    LoadGameObjectRefAsync(shopItem.Prefab, onLoaded);
+                    return;
+                }
+            }
+
+            // 2. Tìm trong Master Item Catalog (Dựa theo ID)
+            var item = _catalog.MasterItemCatalog?.GetItem(id);
+            if (item != null && item.Prefab != null)
+            {
+                LoadGameObjectRefAsync(item.Prefab, onLoaded);
+                return;
+            }
+
+            // 3. Fallback: Nếu không tìm thấy gì, load nhân vật đầu tiên để game không bị treo
+            if (_catalog.Characters != null && _catalog.Characters.Items.Count > 0)
+            {
+                Debug.LogWarning($"[AssetManager] Character ID '{id}' not found. Falling back to first available character.");
+                LoadGameObjectRefAsync(_catalog.Characters.Items[0].Prefab, onLoaded);
+            }
+            else
+            {
+                Debug.LogError($"[AssetManager] Could not load character '{id}' and no fallback available!");
+            }
         }
+
+
+
 
         public void LoadObstacleAsync(int index, Action<GameObject> onLoaded)
         {
@@ -81,11 +118,16 @@ namespace STG.CurveDash
         public int MountSkinCount => _catalog.MountSkins?.Items?.Count ?? 0;
         public int AuraCount => _catalog.Auras?.Items?.Count ?? 0;
         public int CharacterCount => _catalog.Characters?.Items?.Count ?? 0;
+        public string GetCharacterId(int index) => (index >= 0 && index < CharacterCount) ? _catalog.Characters.Items[index].Name : "";
+
         public int ObstacleCount => _catalog.Obstacles?.References?.Count ?? 0;
         public int CloudCount => _catalog.Clouds?.References?.Count ?? 0;
         public int BlockPartSkinCount => _catalog.BlockPartSkins?.Items?.Count ?? 0;
         
+        public ItemData GetItem(string id) => _catalog.MasterItemCatalog?.GetItem(id);
+        
         public void LoadAudioAsync(AudioKey key, Action<AudioClip> onLoaded)
+
         {
             var mapping = _catalog.AudioCatalog.AudioAssets.Find(m => m.Key == key);
     

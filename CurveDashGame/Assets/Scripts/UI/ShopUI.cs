@@ -196,7 +196,8 @@ namespace STG.CurveDash.UI
         {
             return _currentTab switch
             {
-                ShopTab.Character => _shopService.IsCharacterUnlocked(index),
+                ShopTab.Character => _shopService.IsCharacterUnlocked(_assetManager.GetCharacterId(index)),
+
                 ShopTab.Skin => _shopService.IsMountSkinUnlocked(index),
                 ShopTab.Trail => _shopService.IsVFXUnlocked(index),
                 ShopTab.Tile => _shopService.IsBlockPartSkinUnlocked(index),
@@ -208,11 +209,13 @@ namespace STG.CurveDash.UI
         {
             return _currentTab switch
             {
-                ShopTab.Character => _dataManager.UserData.CurrentCharacter == index,
+                ShopTab.Character => _dataManager.UserData.CurrentCharacterId == _assetManager.GetCharacterId(index),
                 ShopTab.Skin => _dataManager.UserData.CurrentMountSkin == index,
+
                 ShopTab.Trail => _dataManager.UserData.CurrentVFX == index,
                 ShopTab.Tile => _dataManager.UserData.CurrentBlockPartSkin == index,
                 _ => false
+
             };
         }
 
@@ -220,7 +223,8 @@ namespace STG.CurveDash.UI
         {
             return _currentTab switch
             {
-                ShopTab.Character => _shopService.TryUnlockCharacter(index, cost),
+                ShopTab.Character => _shopService.TryUnlockCharacter(_assetManager.GetCharacterId(index), cost),
+
                 ShopTab.Skin => _shopService.TryUnlockMountSkin(index, cost),
                 ShopTab.Trail => _shopService.TryUnlockVFX(index, cost),
                 ShopTab.Tile => _shopService.TryUnlockBlockPartSkin(index, cost),
@@ -232,7 +236,8 @@ namespace STG.CurveDash.UI
         {
             switch (_currentTab)
             {
-                case ShopTab.Character: _shopService.EquipCharacter(index); break;
+                case ShopTab.Character: _shopService.EquipCharacter(_assetManager.GetCharacterId(index)); break;
+
                 case ShopTab.Skin: _shopService.EquipMountSkin(index); break;
                 case ShopTab.Trail: _shopService.EquipVFX(index); break;
                 case ShopTab.Tile: _shopService.EquipBlockPartSkin(index); break;

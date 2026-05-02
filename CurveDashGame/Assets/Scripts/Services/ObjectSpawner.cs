@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Leopotam.EcsLite;
 using STG.CurveDash.Views;
 using UnityEngine;
@@ -227,13 +229,17 @@ namespace STG.CurveDash
             var weaponView = weaponPickupViewPool.Spawn();
             var entity = CreateEntity<WeaponPickupComponent>(weaponView.gameObject);
 
-            // Select random weapon
-            if (assetCatalog != null && assetCatalog.Weapons != null && assetCatalog.Weapons.Weapons != null && assetCatalog.Weapons.Weapons.Count > 0)
+            // Select random weapon from MasterItemCatalog
+            if (assetCatalog != null && assetCatalog.MasterItemCatalog != null)
             {
-                var weaponList = assetCatalog.Weapons.Weapons;
-                var randomWeapon = weaponList[Random.Range(0, weaponList.Count)];
-                weaponView.Setup(randomWeapon);
+                var weapons = assetCatalog.MasterItemCatalog.Items.OfType<WeaponData>().ToList();
+                if (weapons.Count > 0)
+                {
+                    var randomWeapon = weapons[Random.Range(0, weapons.Count)];
+                    weaponView.Setup(randomWeapon);
+                }
             }
+
 
             weaponView.transform.position = blockPosition + CrystalOffset;
             weaponView.GetComponent<Rigidbody>().isKinematic = true;

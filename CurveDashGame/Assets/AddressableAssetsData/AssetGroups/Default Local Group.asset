@@ -35,6 +35,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 094cd1418e634464ebab9c4a1fdcbde4
+    m_Address: Assets/URP GanzSe Free Modular Character Pack/Prefabs/Modular Character/GanzSe
+      Free Modular Character Update 1_1.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0ed47bebe78e39143b6fb2966a39e9a2
     m_Address: Elephant
     m_ReadOnly: 0
@@ -205,11 +211,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5cc8839ef833cc7418b136fb1def55a6
-    m_Address: Comfy
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5e966ec0c45a41f43ae1c3504164d54f
     m_Address: nextlevel
     m_ReadOnly: 0
@@ -375,11 +376,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a16b6bf8a11319949a456f8c0ad47f3b
-    m_Address: Farmer
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a3c86a14c614b324f8ca0f7ae5d7e880
     m_Address: PenguinPreview
     m_ReadOnly: 0
@@ -437,11 +433,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bcb56616be1867d4089d33f8e37a7d25
     m_Address: Tree 4
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: be5dbe90b2f57934590440741f5a424e
-    m_Address: Elegant
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -517,11 +508,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ea6eb7da7b3bae54a99f405920d8aa3b
     m_Address: Tile5Preview
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f3ca59b04000fb04eb5f479559d2d3f0
-    m_Address: Runner
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

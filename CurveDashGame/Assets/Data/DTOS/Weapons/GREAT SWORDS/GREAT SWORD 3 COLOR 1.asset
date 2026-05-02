@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 296738ff66190554bb756951a1bdf8eb, type: 3}
+  m_Name: GREAT SWORD 3 COLOR 1
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.WeaponData
+  ItemName: GREAT SWORD 3 COLOR 1
+  Icon: {fileID: 0}
+  Rarity: 2
+  Type: 0
+  Prefab:
+    m_AssetGUID: 
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
+  Description: 
+  WeaponType: 0
+  Damage: 2
+  AttackRange: 2
+  AttackCooldown: 0.5
+  CritChance: 0.1
+  CritMultiplier: 2
+  MaxTargets: 1
+  RightHandModel: {fileID: 0}
+  LeftHandModel: {fileID: 2782776685421351648, guid: c2e10f9e728b8704784b1b020c37ad5f,
+    type: 3}
+  RightHandPositionOffset: {x: 0, y: 0, z: 0}
+  RightHandRotationOffset: {x: 0, y: 0, z: 0}
+  LeftHandPositionOffset: {x: -0.047, y: 0.048, z: 0.219}
+  LeftHandRotationOffset: {x: 1.5022569, y: 356.4527, z: 22.922838}
+  AnimatorController: {fileID: 9100000, guid: 03bb232c5988d2049ac34b4563d5b6ad, type: 2}
+  SpecialAbility: {fileID: 0}

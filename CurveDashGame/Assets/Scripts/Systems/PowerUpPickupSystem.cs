@@ -37,8 +37,9 @@ namespace STG.CurveDash
                         var playerView = playerViewLink.View.GetComponent<PlayerView>();
                         if (playerView != null)
                         {
-                            playerView.UpdateSkin(mountView.MountIndex);
+                            // playerView.UpdateSkin(mountView.MountIndex);
                         }
+
                     }
                 }
                 

@@ -233,12 +233,13 @@ namespace STG.CurveDash
                 Handheld.Vibrate();
 #endif
                 playerStatComponent.InvincibleTimer = 0.1f; // ~1-3 frames
-
+/*
                 playerStatService.TakeDamage(PlayerStatService.Damege, () =>
                 {
                     Debug.Log("Ball hit obstacle - Game Over!");
                     GameOver();
                 });
+*/
             }
 
             foreach (var _ in playerLevelUpFilter)

@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 296738ff66190554bb756951a1bdf8eb, type: 3}
+  m_Name: HAMMER 3 COLOR 2
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.WeaponData
+  ItemName: HAMMER 3 COLOR 2
+  Icon: {fileID: 0}
+  Rarity: 2
+  Type: 0
+  Prefab:
+    m_AssetGUID: 
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
+  Description: 
+  WeaponType: 2
+  Damage: 3
+  AttackRange: 2
+  AttackCooldown: 0.5
+  CritChance: 0.1
+  CritMultiplier: 2
+  MaxTargets: 1
+  RightHandModel: {fileID: 0}
+  LeftHandModel: {fileID: 5282661190385707016, guid: d7a55af0b7b4e1e4e8f173e55378e40d,
+    type: 3}
+  RightHandPositionOffset: {x: 0, y: 0, z: 0}
+  RightHandRotationOffset: {x: 0, y: 0, z: 0}
+  LeftHandPositionOffset: {x: -0.031999882, y: 0.018999977, z: 0.5320003}
+  LeftHandRotationOffset: {x: 3.3501818, y: 0.000029459985, z: 0.000028941316}
+  AnimatorController: {fileID: 9100000, guid: c15afe06600cf2940a2d0bdf6ce630d5, type: 2}
+  SpecialAbility: {fileID: 0}

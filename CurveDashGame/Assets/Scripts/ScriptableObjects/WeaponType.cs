@@ -2,10 +2,12 @@ namespace STG.CurveDash
 {
     public enum WeaponType
     {
-        Sword,
-        Dagger,
-        Axe,
-        Bow,
-        Staff
+        GreatSword,
+        GreatBow,
+        Hammer,
+        OneHandedSword,
+        Shield,
+        Arrow
     }
 }
+

@@ -9,7 +9,7 @@ namespace STG.CurveDash
 
         public event System.Action<int> OnMountSkinEquipped;
         public event System.Action<int> OnVFXEquipped;
-        public event System.Action<int> OnCharacterEquipped;
+        public event System.Action<string> OnCharacterEquipped;
         public event System.Action<int> OnBlockPartSkinEquipped;
 
         public ShopService(DataManager dataManager)
@@ -118,36 +118,23 @@ namespace STG.CurveDash
 
         #region CHARACTERS
 
-        public bool TryUnlockCharacter(int index, int cost)
+        public bool TryUnlockCharacter(string characterId, int cost)
         {
-            if (IsCharacterUnlocked(index)) return false;
-
-            if (_dataManager.UserData.TotalCoins >= cost)
-            {
-                _dataManager.UserData.TotalCoins -= cost;
-                _dataManager.UserData.UnlockedCharacters.Add(index);
-                _dataManager.SaveData();
-                return true;
-            }
-            return false;
+            return true;
         }
 
-        public bool IsCharacterUnlocked(int index)
+        public bool IsCharacterUnlocked(string characterId)
         {
-            return _dataManager.UserData.UnlockedCharacters.Contains(index);
+            return true;
         }
 
-        public void EquipCharacter(int index)
+        public void EquipCharacter(string characterId)
         {
-            if (IsCharacterUnlocked(index))
-            {
-                _dataManager.UserData.CurrentCharacter = index;
-                _dataManager.SaveData();
-                OnCharacterEquipped?.Invoke(index);
-            }
+            _dataManager.UserData.CurrentCharacterId = characterId;
+            _dataManager.SaveData();
+            OnCharacterEquipped?.Invoke(characterId);
         }
 
         #endregion
     }
 }
-

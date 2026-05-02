@@ -11,10 +11,12 @@ namespace STG.CurveDash
         public ShopItemCatalog Auras;
         public ShopItemCatalog Characters;
 
-        [Header("Weapons")]
-        public WeaponDataCatalog Weapons;
+        [Header("Items")]
+        public ItemCatalog MasterItemCatalog;
 
         [Header("Environment")]
+
+
         public GameObjectReferenceCatalog Obstacles;
         public GameObjectReferenceCatalog Clouds;
 

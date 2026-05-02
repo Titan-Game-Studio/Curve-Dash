@@ -64,13 +64,21 @@ namespace STG.CurveDash
                 if (targetEnemy != -1)
                 {
                     ref var targetHealth = ref healthPool.Get(targetEnemy);
-                    targetHealth.CurrentHealth -= combat.CurrentWeapon.Damage;
+                    // targetHealth.CurrentHealth -= combat.CurrentWeapon.Damage;
+
                     
                     Debug.Log($"[Combat] Player attacked an enemy for {combat.CurrentWeapon.Damage} damage! Enemy HP left: {targetHealth.CurrentHealth}");
 
                     if (targetHealth.CurrentHealth <= 0)
                     {
                         deadPool.Add(targetEnemy);
+                    }
+
+                    // Kích hoạt chiêu thức đặc biệt (Special Ability) nếu có
+                    if (combat.CurrentWeapon.SpecialAbility != null)
+                    {
+                        ref var enemyView = ref viewLinkPool.Get(targetEnemy);
+                        combat.CurrentWeapon.SpecialAbility.Execute(playerView.Transform.gameObject, enemyView.Transform.position);
                     }
 
                     combat.CooldownTimer = combat.CurrentWeapon.AttackCooldown;
