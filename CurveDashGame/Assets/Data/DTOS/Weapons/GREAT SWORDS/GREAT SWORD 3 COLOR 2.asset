@@ -9,12 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 296738ff66190554bb756951a1bdf8eb, type: 3}
+  m_Script: {fileID: 11500000, guid: 98ccac0390397c2449643b443a0f88d4, type: 3}
   m_Name: GREAT SWORD 3 COLOR 2
-  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.WeaponData
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.TwoHandedWeaponData
   ItemName: GREAT SWORD 3 COLOR 2
   Icon: {fileID: 0}
-  Rarity: 2
+  Rarity: 1
   Type: 0
   Prefab:
     m_AssetGUID: 
@@ -23,19 +23,13 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: 
-  WeaponType: 0
-  Damage: 2
-  AttackRange: 2
-  AttackCooldown: 0.5
-  CritChance: 0.1
-  CritMultiplier: 2
-  MaxTargets: 1
-  RightHandModel: {fileID: 0}
-  LeftHandModel: {fileID: 6999725053200202163, guid: 3f85231310b14de468a0bfbe9c64b4c6,
+  VisualModel: {fileID: 6999725053200202163, guid: 3f85231310b14de468a0bfbe9c64b4c6,
     type: 3}
-  RightHandPositionOffset: {x: 0, y: 0, z: 0}
-  RightHandRotationOffset: {x: 0, y: 0, z: 0}
-  LeftHandPositionOffset: {x: -0.047, y: 0.048, z: 0.219}
-  LeftHandRotationOffset: {x: 1.5022569, y: 356.4527, z: 22.922838}
-  AnimatorController: {fileID: 9100000, guid: 03bb232c5988d2049ac34b4563d5b6ad, type: 2}
-  SpecialAbility: {fileID: 0}
+  PositionOffset: {x: -0.047, y: 0.048, z: 0.219}
+  RotationOffset: {x: 1.5022569, y: 356.4527, z: 22.922838}
+  MainAnimator: {fileID: 9100000, guid: 03bb232c5988d2049ac34b4563d5b6ad, type: 2}
+  BaseMinDamage: 10
+  BaseMaxDamage: 15
+  BaseAttackSpeed: 1
+  BaseAttackRange: 2
+  Abilities: []

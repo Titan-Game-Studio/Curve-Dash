@@ -9,12 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 296738ff66190554bb756951a1bdf8eb, type: 3}
+  m_Script: {fileID: 11500000, guid: 91841b94ce3b8574999cf69c5262e69c, type: 3}
   m_Name: SHIELD 2 COLOR 2
-  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.WeaponData
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.OffHandData
   ItemName: SHIELD 2 COLOR 2
   Icon: {fileID: 0}
-  Rarity: 0
+  Rarity: 1
   Type: 0
   Prefab:
     m_AssetGUID: 
@@ -23,19 +23,12 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: 
-  WeaponType: 4
-  Damage: 1
-  AttackRange: 5
-  AttackCooldown: 0.5
-  CritChance: 0.1
-  CritMultiplier: 2
-  MaxTargets: 1
-  RightHandModel: {fileID: 0}
-  LeftHandModel: {fileID: 682866122035965355, guid: 2efe504fa39206949862a2ee9a2d5ec5,
+  VisualModel: {fileID: 682866122035965355, guid: 2efe504fa39206949862a2ee9a2d5ec5,
     type: 3}
-  RightHandPositionOffset: {x: 0, y: 0, z: 0}
-  RightHandRotationOffset: {x: 0, y: 0, z: 0}
-  LeftHandPositionOffset: {x: -0.016, y: 0.041, z: 0.023}
-  LeftHandRotationOffset: {x: 28.759998, y: -0.0000019478257, z: 256.06}
-  AnimatorController: {fileID: 9100000, guid: d3be57cfdb173234492a913b82cd4059, type: 2}
-  SpecialAbility: {fileID: 0}
+  PositionOffset: {x: -0.016, y: 0.041, z: 0.023}
+  RotationOffset: {x: 28.759998, y: -0.0000019478257, z: 256.06}
+  MainAnimator: {fileID: 0}
+  SubType: 0
+  BlockChance: 20
+  BonusDamage: 0
+  Abilities: []

@@ -43,7 +43,11 @@ namespace STG.CurveDash
         private Animator _mountAnimator;
         private bool _isRunning;
         private RuntimeAnimatorController _originalCharacterController;
-        private WeaponData _currentWeaponData;
+        
+        private EquippableData _leftHandItem;   // Tay Trái: GreatSword, Hammer, Bow, Shield
+        private EquippableData _rightHandItem;  // Tay Phải: Sword, Arrow
+        private GameObject _rightWeaponObj;
+        private GameObject _leftWeaponObj;
         private ModularCharacterView _modularView;
 
         private void Start()
@@ -87,7 +91,6 @@ namespace STG.CurveDash
 
         private void Init()
         {
-            // Load character bằng ID thay vì Index
             UpdateCharacter(_dataManager.UserData.CurrentCharacterId);
         }
 
@@ -105,7 +108,6 @@ namespace STG.CurveDash
         {
             if (_skinIndex == index) return;
             _skinIndex = index;
-            
             LoadOrEnableAsset(index, _skinContainerTransform, _cachedSkins, _assetManager.LoadMountSkin, ref _skinCts, OnVisualLoaded);
         }
 
@@ -113,7 +115,6 @@ namespace STG.CurveDash
         {
             if (_auraIndex == index) return;
             _auraIndex = index;
-            
             LoadOrEnableAsset(index, _auraContainerTransform, _cachedAuras, _assetManager.LoadVFX, ref _auraCts, OnVisualLoaded);
         }
 
@@ -122,7 +123,6 @@ namespace STG.CurveDash
             if (string.IsNullOrEmpty(characterId) || _characterId == characterId) return;
             _characterId = characterId;
 
-            // Ẩn tất cả nhân vật cũ
             foreach (var kvp in _cachedCharacters)
             {
                 if (kvp.Value != null) kvp.Value.SetActive(false);
@@ -143,67 +143,166 @@ namespace STG.CurveDash
             _assetManager.LoadCharacter(characterId, prefab => 
             {
                 if (this == null || token.IsCancellationRequested) return;
-                
                 var obj = Instantiate(prefab, _characterContainerTransform);
                 _cachedCharacters[characterId] = obj;
                 OnVisualLoaded();
             });
         }
 
-        public void EquipWeapon(WeaponData data)
+        #region SMART EQUIPMENT SYSTEM (Rule Based)
+
+        public void Equip(EquippableData item)
         {
-            _currentWeaponData = data;
-            
+            if (item == null) return;
+
+            // QUY TẮC 1: VŨ KHÍ 2 TAY (GreatSword, Hammer)
+            if (item is TwoHandedWeaponData twoHanded)
+            {
+                _leftHandItem = twoHanded;
+                _rightHandItem = null; // Khóa/Xóa tay phải
+            }
+            // QUY TẮC 2: CUNG (Great Bow)
+            else if (item is BowData bow)
+            {
+                _leftHandItem = bow;
+                _rightHandItem = bow.DefaultArrow; // Tự động đeo tên
+            }
+            // QUY TẮC 3: KIẾM 1 TAY (Sword)
+            else if (item is OneHandedWeaponData sword)
+            {
+                // Nếu tay phải đang cầm Cung hoặc 2 tay, thì xóa đi để cầm kiếm
+                if (_leftHandItem is TwoHandedWeaponData || _leftHandItem is BowData)
+                {
+                    _leftHandItem = null;
+                }
+
+                // Nếu tay phải chưa có kiếm, hoặc đang cầm thứ khác (như Arrow lẻ)
+                if (!(_rightHandItem is OneHandedWeaponData))
+                {
+                    _rightHandItem = sword;
+                }
+                else
+                {
+                    // Nếu tay phải đã có kiếm, thì lắp vào tay trái (Song kiếm)
+                    _leftHandItem = sword;
+                }
+            }
+            // QUY TẮC 4: ĐỒ PHỤ (Shield, Arrow)
+            else if (item is OffHandData offHand)
+            {
+                if (offHand.SubType == OffHandType.Shield)
+                {
+                    // Khiên luôn vào tay trái
+                    _leftHandItem = offHand;
+                    // Nếu đang cầm vũ khí 2 tay thì phải bỏ đi
+                    if (_leftHandItem is TwoHandedWeaponData || _leftHandItem is BowData) _rightHandItem = null;
+                }
+                else if (offHand.SubType == OffHandType.Arrow)
+                {
+                    // Tên luôn vào tay phải
+                    _rightHandItem = offHand;
+                }
+            }
+
+            RefreshWeaponVisuals();
+            RefreshAnimator();
+        }
+
+        private void RefreshWeaponVisuals()
+        {
             if (_rightWeaponObj != null) Destroy(_rightWeaponObj);
             if (_leftWeaponObj != null) Destroy(_leftWeaponObj);
 
-            if (data != null)
+            var rSlot = _rightHandSlot != null ? _rightHandSlot : transform;
+            var lSlot = _leftHandSlot != null ? _leftHandSlot : transform;
+
+            // Instantiate tay trái (User's priority: GreatSword, Hammer, Bow, Shield)
+            if (_leftHandItem != null && _leftHandItem.VisualModel != null)
             {
-                // Swap animator controller based on weapon
-                if (_characterAnimator != null && data.AnimatorController != null)
-                {
-                    _characterAnimator.runtimeAnimatorController = data.AnimatorController;
-                    _characterAnimator.SetBool("IsRunning", _isRunning);
-                }
-                else if (_characterAnimator != null)
-                {
-                    _characterAnimator.runtimeAnimatorController = _originalCharacterController;
-                    _characterAnimator.SetBool("IsRunning", _isRunning);
-                }
+                _leftWeaponObj = Instantiate(_leftHandItem.VisualModel, lSlot);
 
-                var rContainer = _rightHandSlot != null ? _rightHandSlot : transform;
-                var lContainer = _leftHandSlot != null ? _leftHandSlot : transform;
-
-                // Trang bị tay phải nếu có
-                if (data.RightHandModel != null)
-                {
-                    _rightWeaponObj = Instantiate(data.RightHandModel, rContainer);
-                    _rightWeaponObj.transform.localPosition = data.RightHandPositionOffset;
-                    _rightWeaponObj.transform.localRotation = Quaternion.Euler(data.RightHandRotationOffset);
-                    _rightWeaponObj.transform.localScale = Vector3.one;
-                }
-                
-                // Trang bị tay trái nếu có 
-                if (data.LeftHandModel != null)
-                {
-                    _leftWeaponObj = Instantiate(data.LeftHandModel, lContainer);
-                    _leftWeaponObj.transform.localPosition = data.LeftHandPositionOffset;
-                    _leftWeaponObj.transform.localRotation = Quaternion.Euler(data.LeftHandRotationOffset);
-                    _leftWeaponObj.transform.localScale = Vector3.one;
-                }
+                _leftWeaponObj.transform.localPosition = _leftHandItem.PositionOffset;
+                _leftWeaponObj.transform.localRotation = Quaternion.Euler(_leftHandItem.RotationOffset);
+                _leftWeaponObj.transform.localScale = Vector3.one;
             }
-            else
+
+            // Instantiate tay phải (One-Handed Sword, Arrows)
+            if (_rightHandItem != null && _rightHandItem.VisualModel != null)
             {
-                if (_characterAnimator != null)
-                {
-                    _characterAnimator.runtimeAnimatorController = _originalCharacterController;
-                    _characterAnimator.SetBool("IsRunning", _isRunning);
-                }
+                _rightWeaponObj = Instantiate(_rightHandItem.VisualModel, rSlot);
+
+                _rightWeaponObj.transform.localPosition = _rightHandItem.PositionOffset;
+                _rightWeaponObj.transform.localRotation = Quaternion.Euler(_rightHandItem.RotationOffset);
+                _rightWeaponObj.transform.localScale = Vector3.one;
             }
         }
 
-        private GameObject _rightWeaponObj;
-        private GameObject _leftWeaponObj;
+        private void RefreshAnimator()
+        {
+            if (_characterAnimator == null) return;
+
+            RuntimeAnimatorController targetController = _originalCharacterController;
+
+            // Logic chọn Hoạt ảnh dựa trên Rule
+            
+            // 1. ƯU TIÊN VŨ KHÍ 2 TAY HOẶC CUNG (Luôn ở tay trái theo Rule)
+            if (_leftHandItem is TwoHandedWeaponData || _leftHandItem is BowData)
+            {
+                if (_leftHandItem.MainAnimator != null) targetController = _leftHandItem.MainAnimator;
+            }
+            // 2. ƯU TIÊN KIẾM 1 TAY (Vũ khí chính ở tay phải)
+            else if (_rightHandItem is OneHandedWeaponData sword)
+            {
+                if (_leftHandItem == null)
+                {
+                    targetController = sword.MainAnimator;
+                }
+                else if (_leftHandItem is OneHandedWeaponData)
+                {
+                    // Song kiếm
+                    if (sword.DualWieldController != null) targetController = sword.DualWieldController;
+                }
+                else if (_leftHandItem is OffHandData offHand && offHand.SubType == OffHandType.Shield)
+                {
+                    // Kiếm + Khiên
+                    if (sword.SwordShieldController != null) targetController = sword.SwordShieldController;
+                }
+                else
+                {
+                    // Trường hợp khác (ví dụ cầm kiếm + item lạ)
+                    targetController = sword.MainAnimator;
+                }
+            }
+            // 3. TRƯỜNG HỢP CHỈ CẦM KHIÊN
+            else if (_leftHandItem is OffHandData oh && oh.SubType == OffHandType.Shield)
+            {
+                if (oh.MainAnimator != null) targetController = oh.MainAnimator;
+            }
+
+
+            if (_characterAnimator.runtimeAnimatorController != targetController)
+            {
+                _characterAnimator.runtimeAnimatorController = targetController;
+                
+                // Ép Animator khởi tạo lại toàn bộ liên kết (Rebind) để sẵn sàng ngay lập tức
+                _characterAnimator.Rebind();
+                
+                // Sau khi Rebind, các tham số bị xóa nên phải gán lại
+                _characterAnimator.SetBool("IsRunning", _isRunning);
+
+                // Ép nhảy vào State phù hợp
+                string stateName = _isRunning ? "Run" : "Idle";
+                _characterAnimator.Play(stateName, 0, 0f);
+                
+                // Cập nhật ngay lập tức
+                _characterAnimator.Update(0f);
+            }
+
+
+
+        }
+
+        #endregion
 
         private void LoadOrEnableAsset(
             int index, 
@@ -233,7 +332,6 @@ namespace STG.CurveDash
             loadFunc(index, prefab => 
             {
                 if (this == null || token.IsCancellationRequested) return;
-                
                 var obj = Instantiate(prefab, container);
                 cache[index] = obj;
                 onLoadedCallback?.Invoke();
@@ -245,9 +343,12 @@ namespace STG.CurveDash
             if (_cachedCharacters.TryGetValue(_characterId, out var characterObj) && characterObj != null)
             {
                 _modularView = characterObj.GetComponent<ModularCharacterView>();
-                _characterAnimator = characterObj.GetComponentInChildren<Animator>();
+                // Tìm Animator trên chính object nhân vật trước, tránh tìm nhầm vào vũ khí con
+                _characterAnimator = characterObj.GetComponent<Animator>();
+                if (_characterAnimator == null) 
+                    _characterAnimator = characterObj.GetComponentInChildren<Animator>();
+
                 
-                // Lưu lại Controller mặc định nếu chưa có
                 if (_originalCharacterController == null && _characterAnimator != null)
                 {
                     _originalCharacterController = _characterAnimator.runtimeAnimatorController;
@@ -259,10 +360,8 @@ namespace STG.CurveDash
                     _leftHandSlot = _modularView.LeftHandSlot;
                 }
                 
-                if (_currentWeaponData != null)
-                {
-                    EquipWeapon(_currentWeaponData);
-                }
+                RefreshWeaponVisuals();
+                RefreshAnimator();
             }
 
             if (_cachedSkins.TryGetValue(_skinIndex, out var mountObj) && mountObj != null)
@@ -352,7 +451,6 @@ namespace STG.CurveDash
         {
             if (_characterAnimator == null) return;
 
-            // Kiểm tra Tag "Attack" trên tất cả các Layer để tránh spam
             for (int i = 0; i < _characterAnimator.layerCount; i++)
             {
                 var stateInfo = _characterAnimator.GetCurrentAnimatorStateInfo(i);
@@ -365,6 +463,3 @@ namespace STG.CurveDash
 
     public class PlayerViewFactory : PlaceholderFactory<PlayerView> { }
 }
-
-
-

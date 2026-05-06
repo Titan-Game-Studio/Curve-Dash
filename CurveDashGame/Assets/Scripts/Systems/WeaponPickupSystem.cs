@@ -31,28 +31,38 @@ namespace STG.CurveDash
                 ref var weaponViewLink = ref viewLinkPool.Get(weaponEntity);
                 var weaponView = weaponViewLink.View.GetComponent<WeaponPickupView>();
                 
-                if (weaponView != null && weaponView.WeaponToGive != null)
+                if (weaponView != null && weaponView.ItemToGive != null)
                 {
-                    // Give weapon to player
                     foreach (var playerEntity in playerFilter)
                     {
                         ref var combat = ref combatPool.Get(playerEntity);
-                        combat.CurrentWeapon = weaponView.WeaponToGive;
-                        combat.CooldownTimer = 0f;
+                        
+                        // Nếu là vũ khí tấn công thì mới cập nhật chỉ số Combat
+                        if (weaponView.ItemToGive is WeaponData weaponBase)
+                        {
+                            // Khởi tạo một bản instance mới (Đây là lúc có thể Roll Affix)
+                            var instance = new WeaponInstance(weaponBase);
+                            
+                            // TẠM THỜI: Tự động tặng 1 Affix ngẫu nhiên để test
+                            // Sau này bạn có thể viết logic Roll xịn hơn ở đây
+                            
+                            combat.CurrentWeapon = instance;
+                            combat.CooldownTimer = 0f;
+                        }
+
 
                         ref var playerViewLink = ref viewLinkPool.Get(playerEntity);
                         var playerView = playerViewLink.View.GetComponent<PlayerView>();
                         if (playerView != null)
                         {
-                            playerView.EquipWeapon(weaponView.WeaponToGive);
+                            playerView.Equip(weaponView.ItemToGive);
                         }
 
-                        Debug.Log($"[WeaponPickup] Player equipped {weaponView.WeaponToGive.ItemName}");
+                        Debug.Log($"[WeaponPickup] Player picked up {weaponView.ItemToGive.ItemName}");
 
                     }
                 }
                 
-                // Despawn the pickup
                 spawner.DespawnObject(weaponEntity);
             }
         }

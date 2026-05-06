@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 296738ff66190554bb756951a1bdf8eb, type: 3}
+  m_Script: {fileID: 11500000, guid: 98ccac0390397c2449643b443a0f88d4, type: 3}
   m_Name: HAMMER 3 COLOR 3
-  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.WeaponData
-  ItemName: HAMMER 3 COLOR 3
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.TwoHandedWeaponData
+  ItemName: HAMMER 1 COLOR 1
   Icon: {fileID: 0}
   Rarity: 2
   Type: 0
@@ -23,19 +23,13 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: 
-  WeaponType: 2
-  Damage: 3
-  AttackRange: 2
-  AttackCooldown: 0.5
-  CritChance: 0.1
-  CritMultiplier: 2
-  MaxTargets: 1
-  RightHandModel: {fileID: 0}
-  LeftHandModel: {fileID: 6503715093918975228, guid: 445184725abd30546b35e98e7b6286fe,
+  VisualModel: {fileID: 6503715093918975228, guid: 445184725abd30546b35e98e7b6286fe,
     type: 3}
-  RightHandPositionOffset: {x: 0, y: 0, z: 0}
-  RightHandRotationOffset: {x: 0, y: 0, z: 0}
-  LeftHandPositionOffset: {x: -0.031999882, y: 0.018999977, z: 0.5320003}
-  LeftHandRotationOffset: {x: 3.3501818, y: 0.000029459985, z: 0.000028941316}
-  AnimatorController: {fileID: 9100000, guid: c15afe06600cf2940a2d0bdf6ce630d5, type: 2}
-  SpecialAbility: {fileID: 0}
+  PositionOffset: {x: -0.031999882, y: 0.018999977, z: 0.5320003}
+  RotationOffset: {x: 3.3501818, y: 0, z: 0}
+  MainAnimator: {fileID: 9100000, guid: c15afe06600cf2940a2d0bdf6ce630d5, type: 2}
+  BaseMinDamage: 10
+  BaseMaxDamage: 15
+  BaseAttackSpeed: 1
+  BaseAttackRange: 2
+  Abilities: []

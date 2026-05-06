@@ -9,12 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 296738ff66190554bb756951a1bdf8eb, type: 3}
+  m_Script: {fileID: 11500000, guid: 63214adb424b4a242b7d2ff17ff29bf0, type: 3}
   m_Name: GREAT BOW 3 COLOR 2
-  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.WeaponData
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.BowData
   ItemName: GREAT BOW 3 COLOR 2
   Icon: {fileID: 0}
-  Rarity: 2
+  Rarity: 1
   Type: 0
   Prefab:
     m_AssetGUID: 
@@ -23,19 +23,14 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: 
-  WeaponType: 1
-  Damage: 1
-  AttackRange: 5
-  AttackCooldown: 0.5
-  CritChance: 0.1
-  CritMultiplier: 2
-  MaxTargets: 1
-  RightHandModel: {fileID: 0}
-  LeftHandModel: {fileID: 2773260159954929202, guid: 0b843529f2663db4aa40ec3d45b2519f,
+  VisualModel: {fileID: 2773260159954929202, guid: 0b843529f2663db4aa40ec3d45b2519f,
     type: 3}
-  RightHandPositionOffset: {x: 0, y: 0, z: 0}
-  RightHandRotationOffset: {x: 0, y: 0, z: 0}
-  LeftHandPositionOffset: {x: -0.033, y: 0.061, z: 0.014}
-  LeftHandRotationOffset: {x: 15.308332, y: 355.27133, z: 116.77159}
-  AnimatorController: {fileID: 9100000, guid: 0a18ab27e14fa1a40b9106b93b50207e, type: 2}
-  SpecialAbility: {fileID: 11400000, guid: c4a4f61bae9fb434daa6fdc0dbe52b87, type: 2}
+  PositionOffset: {x: -0.033, y: 0.061, z: 0.014}
+  RotationOffset: {x: 15.308332, y: 355.27133, z: 116.77159}
+  MainAnimator: {fileID: 9100000, guid: 0a18ab27e14fa1a40b9106b93b50207e, type: 2}
+  BaseMinDamage: 10
+  BaseMaxDamage: 15
+  BaseAttackSpeed: 1
+  BaseAttackRange: 2
+  Abilities: []
+  DefaultArrow: {fileID: 11400000, guid: 1897a1a5efce80c4ebf11e187bae126d, type: 2}

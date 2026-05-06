@@ -1,46 +1,28 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace STG.CurveDash
 {
-    [CreateAssetMenu(fileName = "New Weapon", menuName = "Curve Dash/Items/Weapon Data")]
-    public class WeaponData : ItemData
+    public abstract class WeaponData : EquippableData
     {
-        public WeaponType WeaponType;
-        
-        [Header("Stats")]
-        public int Damage = 1;
-        public float AttackRange = 5f;
-        public float AttackCooldown = 0.5f;
-        
-        [Header("Special Traits")]
-        [Range(0f, 1f)]
-        public float CritChance = 0.1f;
-        public float CritMultiplier = 2.0f;
-        public int MaxTargets = 1;
-        
-        [Header("Visuals")]
-        public GameObject RightHandModel; 
-        public GameObject LeftHandModel;  
-        
-        [Header("Grip Offsets - Right Hand")]
-        public Vector3 RightHandPositionOffset;
-        public Vector3 RightHandRotationOffset;
+        [Header("Base Stats (White Item)")]
+        public float BaseMinDamage = 10f;
+        public float BaseMaxDamage = 15f;
+        public float BaseAttackSpeed = 1.0f; // Số đòn đánh mỗi giây
+        public float BaseAttackRange = 2f;
 
-        [Header("Grip Offsets - Left Hand")]
-        public Vector3 LeftHandPositionOffset;
-        public Vector3 LeftHandRotationOffset;
+        [Header("Sockets")]
+        public List<AbilityData> Abilities = new List<AbilityData>();
+        public virtual int MaxSockets => 3;
 
-        
-        [Header("Animation")]
-        public RuntimeAnimatorController AnimatorController;
-        
-        [Header("Ability")]
-        public AbilityData SpecialAbility;
-
-        public WeaponData()
+#if UNITY_EDITOR
+        protected virtual void OnValidate()
         {
-            Type = ItemType.Weapon;
+            if (Abilities != null && Abilities.Count > MaxSockets)
+            {
+                Abilities.RemoveRange(MaxSockets, Abilities.Count - MaxSockets);
+            }
         }
+#endif
     }
 }
-

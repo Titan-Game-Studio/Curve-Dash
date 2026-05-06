@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 296738ff66190554bb756951a1bdf8eb, type: 3}
+  m_Script: {fileID: 11500000, guid: 91841b94ce3b8574999cf69c5262e69c, type: 3}
   m_Name: SHIELD 3 COLOR 3
-  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.WeaponData
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.OffHandData
   ItemName: SHIELD 3 COLOR 3
   Icon: {fileID: 0}
   Rarity: 2
@@ -23,19 +23,12 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: 
-  WeaponType: 4
-  Damage: 1
-  AttackRange: 5
-  AttackCooldown: 0.5
-  CritChance: 0.1
-  CritMultiplier: 2
-  MaxTargets: 1
-  RightHandModel: {fileID: 0}
-  LeftHandModel: {fileID: 6524304573867782126, guid: ae0da4fd26885a44c8ea54ba6480df5d,
+  VisualModel: {fileID: 6524304573867782126, guid: ae0da4fd26885a44c8ea54ba6480df5d,
     type: 3}
-  RightHandPositionOffset: {x: 0, y: 0, z: 0}
-  RightHandRotationOffset: {x: 0, y: 0, z: 0}
-  LeftHandPositionOffset: {x: -0.016, y: 0.041, z: 0.023}
-  LeftHandRotationOffset: {x: 28.759998, y: -0.0000019478257, z: 256.06}
-  AnimatorController: {fileID: 9100000, guid: d3be57cfdb173234492a913b82cd4059, type: 2}
-  SpecialAbility: {fileID: 0}
+  PositionOffset: {x: -0.016, y: 0.041, z: 0.023}
+  RotationOffset: {x: 28.759998, y: -0.0000019478257, z: 256.06}
+  MainAnimator: {fileID: 0}
+  SubType: 0
+  BlockChance: 20
+  BonusDamage: 0
+  Abilities: []

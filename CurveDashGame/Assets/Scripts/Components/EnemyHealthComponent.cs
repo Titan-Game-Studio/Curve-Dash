@@ -2,7 +2,7 @@ namespace STG.CurveDash
 {
     public struct EnemyHealthComponent
     {
-        public int MaxHealth;
-        public int CurrentHealth;
+        public float MaxHealth;
+        public float CurrentHealth;
     }
 }

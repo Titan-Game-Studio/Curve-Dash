@@ -6,25 +6,24 @@ namespace STG.CurveDash
     public class WeaponPickupView : MonoBehaviour
     {
         [HideInInspector]
-        public WeaponData WeaponToGive;
+        public EquippableData ItemToGive;
         
         private GameObject spawnedVisual;
 
-        public void Setup(WeaponData data)
+        public void Setup(EquippableData data)
         {
-            WeaponToGive = data;
+            ItemToGive = data;
 
-            // Clear old visual if pooling
             if (spawnedVisual != null)
             {
                 Destroy(spawnedVisual);
             }
 
-            if (data != null && data.RightHandModel != null)
+            if (data != null && data.VisualModel != null)
             {
-                spawnedVisual = Instantiate(data.RightHandModel, transform);
+                spawnedVisual = Instantiate(data.VisualModel, transform);
+
                 
-                // Tự động tìm tâm của Mesh và dời về 0,0
                 var renderers = spawnedVisual.GetComponentsInChildren<Renderer>();
                 if (renderers.Length > 0)
                 {
@@ -33,7 +32,6 @@ namespace STG.CurveDash
                     {
                         bounds.Encapsulate(renderers[i].bounds);
                     }
-                    // Dời model sao cho tâm bounds trùng với vị trí gốc của cha
                     Vector3 localCenter = spawnedVisual.transform.InverseTransformPoint(bounds.center);
                     spawnedVisual.transform.localPosition = -localCenter;
                 }
@@ -48,7 +46,6 @@ namespace STG.CurveDash
         {
             if (spawnedVisual != null)
             {
-                // Xoay quanh tâm của cha (vị trí đã được căn giữa mesh)
                 spawnedVisual.transform.RotateAround(transform.position, Vector3.up, 100f * Time.deltaTime);
             }
         }

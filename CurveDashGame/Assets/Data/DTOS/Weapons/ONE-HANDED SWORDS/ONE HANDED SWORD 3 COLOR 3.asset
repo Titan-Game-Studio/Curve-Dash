@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 296738ff66190554bb756951a1bdf8eb, type: 3}
+  m_Script: {fileID: 11500000, guid: 2510c0c046da14c4594363ecb37bef83, type: 3}
   m_Name: ONE HANDED SWORD 3 COLOR 3
-  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.WeaponData
-  ItemName: ONE HANDED SWORD 3 COLOR 3
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.OneHandedWeaponData
+  ItemName: ONE HANDED SWORD 1 COLOR 3
   Icon: {fileID: 0}
   Rarity: 2
   Type: 0
@@ -23,19 +23,15 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: 
-  WeaponType: 3
-  Damage: 1
-  AttackRange: 5
-  AttackCooldown: 0.5
-  CritChance: 0.1
-  CritMultiplier: 2
-  MaxTargets: 1
-  RightHandModel: {fileID: 1531577783389713604, guid: 5ba921c5d3a579f4b8406b968f8ca5e8,
+  VisualModel: {fileID: 1531577783389713604, guid: 5ba921c5d3a579f4b8406b968f8ca5e8,
     type: 3}
-  LeftHandModel: {fileID: 0}
-  RightHandPositionOffset: {x: 0, y: 0, z: 0.021}
-  RightHandRotationOffset: {x: 0, y: 0, z: 87.24}
-  LeftHandPositionOffset: {x: 0, y: 0, z: 0}
-  LeftHandRotationOffset: {x: 0, y: 0, z: 0}
-  AnimatorController: {fileID: 9100000, guid: d3be57cfdb173234492a913b82cd4059, type: 2}
-  SpecialAbility: {fileID: 0}
+  PositionOffset: {x: 0, y: 0, z: 0.021}
+  RotationOffset: {x: 0, y: 0, z: 87.24}
+  MainAnimator: {fileID: 9100000, guid: d3be57cfdb173234492a913b82cd4059, type: 2}
+  BaseMinDamage: 10
+  BaseMaxDamage: 15
+  BaseAttackSpeed: 1
+  BaseAttackRange: 2
+  Abilities: []
+  DualWieldController: {fileID: 0}
+  SwordShieldController: {fileID: 0}

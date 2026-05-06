@@ -47,7 +47,8 @@ namespace STG.CurveDash
 
                 // Find closest enemy
                 int targetEnemy = -1;
-                float closestDistSq = combat.CurrentWeapon.AttackRange * combat.CurrentWeapon.AttackRange;
+                float attackRange = combat.CurrentWeapon.BaseData.BaseAttackRange;
+                float closestDistSq = attackRange * attackRange;
 
                 foreach (var enemyEntity in enemyFilter)
                 {
@@ -64,24 +65,31 @@ namespace STG.CurveDash
                 if (targetEnemy != -1)
                 {
                     ref var targetHealth = ref healthPool.Get(targetEnemy);
-                    // targetHealth.CurrentHealth -= combat.CurrentWeapon.Damage;
+                    float damage = combat.CurrentWeapon.GetRandomDamage();
+                    targetHealth.CurrentHealth -= damage;
 
+                    Debug.Log($"[Combat] Player attacked an enemy for {damage:F1} damage! Enemy HP left: {targetHealth.CurrentHealth:F1}");
                     
-                    Debug.Log($"[Combat] Player attacked an enemy for {combat.CurrentWeapon.Damage} damage! Enemy HP left: {targetHealth.CurrentHealth}");
-
                     if (targetHealth.CurrentHealth <= 0)
                     {
                         deadPool.Add(targetEnemy);
                     }
 
-                    // Kích hoạt chiêu thức đặc biệt (Special Ability) nếu có
-                    if (combat.CurrentWeapon.SpecialAbility != null)
+                    // Kích hoạt toàn bộ chiêu thức trong Socket
+                    if (combat.CurrentWeapon.BaseData.Abilities != null)
                     {
                         ref var enemyView = ref viewLinkPool.Get(targetEnemy);
-                        combat.CurrentWeapon.SpecialAbility.Execute(playerView.Transform.gameObject, enemyView.Transform.position);
+                        foreach (var ability in combat.CurrentWeapon.BaseData.Abilities)
+                        {
+                            if (ability != null)
+                            {
+                                ability.Execute(playerView.Transform.gameObject, enemyView.Transform.position);
+                            }
+                        }
                     }
 
-                    combat.CooldownTimer = combat.CurrentWeapon.AttackCooldown;
+                    // Tốc độ đánh: Cooldown = 1 / AttackSpeed
+                    combat.CooldownTimer = 1f / combat.CurrentWeapon.FinalAttackSpeed;
                     
                     var playerViewComponent = playerView.Transform.GetComponent<PlayerView>();
                     if (playerViewComponent != null)
