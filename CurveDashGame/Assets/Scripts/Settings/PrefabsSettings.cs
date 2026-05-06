@@ -20,11 +20,16 @@ namespace STG.CurveDash
 
         [Header("Enemies & Obstacles")]
         public GameObject ObstaclePrefab;
+        public GameObject MonsterBasePrefab;
+        
+
 
         [Header("Decorations")]
         public GameObject CloudPrefab;
 
         [Header("Data")]
         public GameAssetCatalog GameAssetCatalog;
+        public MonsterCatalog MonsterCatalog;
+
     }
 }

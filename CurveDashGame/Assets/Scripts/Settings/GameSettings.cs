@@ -20,5 +20,6 @@ namespace STG.CurveDash
         public float TerrainLerpRate = 0.1f;
         public LayerMask PickupMask; 
         public LayerMask ObstacleMask; 
+        public LayerMask EnemyMask; 
     }
 }

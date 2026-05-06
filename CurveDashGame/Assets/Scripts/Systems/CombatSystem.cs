@@ -21,7 +21,8 @@ namespace STG.CurveDash
             this.world = world;
             
             playerFilter = world.Filter<PlayerComponent>().Inc<PlayerCombatComponent>().Inc<ViewLinkComponent>().End();
-            enemyFilter = world.Filter<EnemyHealthComponent>().Inc<ViewLinkComponent>().Exc<EnemyDeadEvent>().End();
+            enemyFilter = world.Filter<EnemyHealthComponent>().Inc<EnemyComponent>().Inc<ViewLinkComponent>().Exc<EnemyDeadEvent>().End();
+
             
             combatPool = world.GetPool<PlayerCombatComponent>();
             viewLinkPool = world.GetPool<ViewLinkComponent>();
@@ -31,9 +32,37 @@ namespace STG.CurveDash
 
         public void Tick()
         {
+            // Smoothly rotate nearby enemies to face the player
+            foreach (var playerEntity in playerFilter)
+            {
+                ref var playerView = ref viewLinkPool.Get(playerEntity);
+                if (playerView.Transform == null) continue;
+                Vector3 playerPos = playerView.Transform.position;
+
+                foreach (var enemyEntity in enemyFilter)
+                {
+                    ref var enemyView = ref viewLinkPool.Get(enemyEntity);
+                    if (enemyView.Transform == null) continue;
+
+                    Vector3 direction = playerPos - enemyView.Transform.position;
+                    direction.y = 0; // Lock Y axis to prevent vertical tilting
+
+                    float distance = direction.magnitude;
+                    if (distance <= 10f) // Within 10 units, rotate to face player
+                    {
+                        if (direction != Vector3.zero)
+                        {
+                            Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
+                            enemyView.Transform.rotation = Quaternion.Slerp(enemyView.Transform.rotation, targetRotation, Time.deltaTime * 6f);
+                        }
+                    }
+                }
+            }
+
             foreach (var playerEntity in playerFilter)
             {
                 ref var combat = ref combatPool.Get(playerEntity);
+
                 if (combat.CurrentWeapon == null) continue;
 
                 if (combat.CooldownTimer > 0)
@@ -43,6 +72,7 @@ namespace STG.CurveDash
                 }
 
                 ref var playerView = ref viewLinkPool.Get(playerEntity);
+                if (playerView.Transform == null) continue;
                 Vector3 playerPos = playerView.Transform.position;
 
                 // Find closest enemy
@@ -53,7 +83,10 @@ namespace STG.CurveDash
                 foreach (var enemyEntity in enemyFilter)
                 {
                     ref var enemyView = ref viewLinkPool.Get(enemyEntity);
+                    if (enemyView.Transform == null) continue;
+                    
                     float distSq = (enemyView.Transform.position - playerPos).sqrMagnitude;
+
 
                     if (distSq <= closestDistSq)
                     {
@@ -74,6 +107,18 @@ namespace STG.CurveDash
                     {
                         deadPool.Add(targetEnemy);
                     }
+
+                    // Kích hoạt hiệu ứng chớp trắng cho enemy khi nhận sát thương
+                    ref var targetEnemyView = ref viewLinkPool.Get(targetEnemy);
+                    if (targetEnemyView.Transform != null)
+                    {
+                        var monsterView = targetEnemyView.Transform.GetComponent<STG.CurveDash.Views.MonsterView>();
+                        if (monsterView != null)
+                        {
+                            monsterView.FlashWhite(0.25f);
+                        }
+                    }
+
 
                     // Kích hoạt toàn bộ chiêu thức trong Socket
                     if (combat.CurrentWeapon.BaseData.Abilities != null)

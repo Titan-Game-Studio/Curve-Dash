@@ -38,6 +38,9 @@ namespace STG.CurveDash
         private bool _isWhite;
         private Material _whiteMaterial;
         private Dictionary<Renderer, Material[]> _originalMaterials = new Dictionary<Renderer, Material[]>();
+        
+        private float _damageFlashTimer;
+
 
         private Animator _characterAnimator;
         private Animator _mountAnimator;
@@ -49,11 +52,21 @@ namespace STG.CurveDash
         private GameObject _rightWeaponObj;
         private GameObject _leftWeaponObj;
         private ModularCharacterView _modularView;
+        private RangeCircleVisualizer _rangeVisualizer;
 
         private void Start()
         {
             Init();
+            
+            // Create simulator/game-view range visualizer for player
+            var rangeObj = new GameObject("PlayerRangeVisualizer");
+            rangeObj.transform.SetParent(transform, false);
+            rangeObj.transform.localPosition = new Vector3(0, 0.05f, 0); // slightly above ground
+            _rangeVisualizer = rangeObj.AddComponent<RangeCircleVisualizer>();
+            _rangeVisualizer.SetColor(Color.cyan);
+            UpdateRangeVisualizer();
         }
+
 
         private void OnEnable()
         {
@@ -77,17 +90,38 @@ namespace STG.CurveDash
 
         private void Update()
         {
-            if (_isInvincible)
+            if (_damageFlashTimer > 0)
             {
+                _damageFlashTimer -= Time.deltaTime;
                 _blinkTimer += Time.deltaTime;
-                if (_blinkTimer > 0.025f)
+                if (_blinkTimer > 0.05f)
                 {
                     _blinkTimer = 0f;
                     _isWhite = !_isWhite;
                     ToggleWhiteMaterials(_isWhite);
                 }
+
+                if (_damageFlashTimer <= 0)
+                {
+                    RestoreOriginalMaterials();
+                    _isWhite = false;
+                }
+            }
+            // Logic bất tử cũ (nếu muốn mờ đi thay vì chớp trắng)
+            else if (_isInvincible)
+            {
+                // Có thể thêm hiệu ứng mờ alpha ở đây nếu muốn
+            }
+
+            // Toggle range debug visualization on simulator (runs in built games too)
+            if (Input.GetKeyDown(KeyCode.F3))
+            {
+                RangeCircleVisualizer.IsDebugEnabled = !RangeCircleVisualizer.IsDebugEnabled;
+                Debug.Log($"[Debug] Range circle debug visualization toggled: {RangeCircleVisualizer.IsDebugEnabled}");
             }
         }
+
+
 
         private void Init()
         {
@@ -206,7 +240,18 @@ namespace STG.CurveDash
 
             RefreshWeaponVisuals();
             RefreshAnimator();
+            UpdateRangeVisualizer();
         }
+
+        private void UpdateRangeVisualizer()
+        {
+            if (_rangeVisualizer == null) return;
+            float range = 2f; // Default
+            if (_rightHandItem is WeaponData weapon) range = weapon.BaseAttackRange;
+            else if (_leftHandItem is WeaponData weapon2) range = weapon2.BaseAttackRange;
+            _rangeVisualizer.SetRadius(range);
+        }
+
 
         private void RefreshWeaponVisuals()
         {
@@ -284,15 +329,15 @@ namespace STG.CurveDash
             {
                 _characterAnimator.runtimeAnimatorController = targetController;
                 
-                // Ép Animator khởi tạo lại toàn bộ liên kết (Rebind) để sẵn sàng ngay lập tức
-                _characterAnimator.Rebind();
-                
-                // Sau khi Rebind, các tham số bị xóa nên phải gán lại
+                // Sau khi đổi Controller, gán lại các biến
                 _characterAnimator.SetBool("IsRunning", _isRunning);
 
-                // Ép nhảy vào State phù hợp
+                // Ép nhảy vào State phù hợp nếu nó tồn tại trong Controller mới
                 string stateName = _isRunning ? "Run" : "Idle";
-                _characterAnimator.Play(stateName, 0, 0f);
+                if (_characterAnimator.HasState(0, Animator.StringToHash(stateName)))
+                {
+                    _characterAnimator.Play(stateName, 0, 0f);
+                }
                 
                 // Cập nhật ngay lập tức
                 _characterAnimator.Update(0f);
@@ -383,38 +428,47 @@ namespace STG.CurveDash
             }
         }
 
+        public void FlashWhite(float duration)
+        {
+            if (_damageFlashTimer > 0) return; // Đang chớp rồi thì thôi
+            
+            _damageFlashTimer = duration;
+            _blinkTimer = 0;
+            _isWhite = true;
+            
+            PrepareOriginalMaterials();
+            ToggleWhiteMaterials(true);
+        }
+
+        private void PrepareOriginalMaterials()
+        {
+            _originalMaterials.Clear();
+            var renderers = new List<Renderer>();
+            if (_skinContainerTransform != null) renderers.AddRange(_skinContainerTransform.GetComponentsInChildren<Renderer>());
+            if (_characterContainerTransform != null) renderers.AddRange(_characterContainerTransform.GetComponentsInChildren<Renderer>());
+
+            foreach (var r in renderers)
+            {
+                if (r is ParticleSystemRenderer) continue;
+                _originalMaterials[r] = r.sharedMaterials;
+            }
+
+            if (_whiteMaterial == null)
+            {
+                _whiteMaterial = new Material(Shader.Find("Unlit/Color"));
+                _whiteMaterial.color = Color.white;
+            }
+        }
+
         public void SetInvincible(bool isInvincible)
         {
-            if (_isInvincible == isInvincible) return;
             _isInvincible = isInvincible;
-            
-            if (isInvincible)
-            {
-                if (_whiteMaterial == null)
-                {
-                    _whiteMaterial = new Material(Shader.Find("Unlit/Color"));
-                    _whiteMaterial.color = Color.white;
-                }
-                
-                _originalMaterials.Clear();
-                var renderers = new List<Renderer>();
-                if (_skinContainerTransform != null) renderers.AddRange(_skinContainerTransform.GetComponentsInChildren<Renderer>());
-                if (_characterContainerTransform != null) renderers.AddRange(_characterContainerTransform.GetComponentsInChildren<Renderer>());
-
-                foreach (var r in renderers)
-                {
-                    if (r is ParticleSystemRenderer) continue;
-                    _originalMaterials[r] = r.sharedMaterials;
-                }
-                _blinkTimer = 0;
-                _isWhite = true;
-                ToggleWhiteMaterials(true);
-            }
-            else
+            if (!isInvincible && _damageFlashTimer <= 0)
             {
                 RestoreOriginalMaterials();
             }
         }
+
 
         private void ToggleWhiteMaterials(bool useWhite)
         {
@@ -459,7 +513,39 @@ namespace STG.CurveDash
 
             _characterAnimator.SetTrigger("Attack");
         }
+
+        #region DEBUG GIZMOS
+
+        private void OnDrawGizmos()
+        {
+            float range = 2f; // Default
+            if (_rightHandItem is WeaponData weapon) range = weapon.BaseAttackRange;
+            else if (_leftHandItem is WeaponData weapon2) range = weapon2.BaseAttackRange;
+
+
+            // 1. Vẽ tầm đánh
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, range);
+
+            // 2. Tìm và vẽ quái vật gần đó (Tối ưu: Chỉ tìm trong bán kính rộng hơn tầm đánh chút)
+            Gizmos.color = Color.yellow;
+            var colliders = Physics.OverlapSphere(transform.position, range * 2f);
+            int count = 0;
+            foreach (var col in colliders)
+            {
+                if (count > 5) break; // Giới hạn số lượng line để không bị loạn
+                if (col.CompareTag("Enemy") || col.gameObject.name.Contains("Monster"))
+                {
+                    Gizmos.DrawLine(transform.position, col.transform.position);
+                    count++;
+                }
+            }
+
+        }
+
+        #endregion
     }
 
     public class PlayerViewFactory : PlaceholderFactory<PlayerView> { }
 }
+

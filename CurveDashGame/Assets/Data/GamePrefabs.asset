@@ -30,6 +30,9 @@ MonoBehaviour:
     type: 3}
   ObstaclePrefab: {fileID: 2830056364503120991, guid: d6ee31dd44995724f9e4d2f5ba478c4e,
     type: 3}
+  MonsterBasePrefab: {fileID: 2830056364503120991, guid: 7293c624b257d094ab705593dba9d430,
+    type: 3}
   CloudPrefab: {fileID: 2830056364503120991, guid: b0401df5ddf3ec44783114dc725cdc89,
     type: 3}
   GameAssetCatalog: {fileID: 11400000, guid: c7cc995cc6d07844cab5ec322981a74f, type: 2}
+  MonsterCatalog: {fileID: 11400000, guid: ca95dde1a0b83f14b964502e7ab78449, type: 2}

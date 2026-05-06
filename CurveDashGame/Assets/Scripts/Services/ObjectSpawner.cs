@@ -12,6 +12,7 @@ namespace STG.CurveDash
     {
         private readonly EcsWorld world;
         private readonly CrystalViewPool crystalViewPool;
+        private readonly MonsterViewPool monsterViewPool;
         private readonly ObstacleViewPool obstacleViewPool;
         private readonly ShieldViewPool shieldViewPool;
         private readonly CloudViewPool cloudViewPool;
@@ -40,11 +41,13 @@ namespace STG.CurveDash
         private readonly EcsPool<MountPickupComponent> mountPickupPool;
         private readonly EcsPool<AuraPickupComponent> auraPickupPool;
 
+        private readonly EcsPool<EnemyComponent> enemyPool;
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
         private readonly EcsFilter viewLinkFilter;
 
         public ObjectSpawner(EcsWorld world, BlockViewPool blockViewPool, BlockPartViewFactory blockPartViewFactory,
-            CrystalViewPool crystalViewPool, ObstacleViewPool obstacleViewPool, ShieldViewPool shieldViewPool, CloudViewPool cloudViewPool, PlayerViewFactory playerViewFactory, 
+            CrystalViewPool crystalViewPool, ObstacleViewPool obstacleViewPool, ShieldViewPool shieldViewPool, CloudViewPool cloudViewPool, 
+            PlayerViewFactory playerViewFactory, MonsterViewPool monsterViewPool,
             WeaponPickupViewPool weaponPickupViewPool, MountPickupViewPool mountPickupViewPool, AuraPickupViewPool auraPickupViewPool, 
             GameAssetCatalog assetCatalog, AssetManager assetManager)
         {
@@ -58,6 +61,7 @@ namespace STG.CurveDash
             this.shieldViewPool = shieldViewPool;
             this.cloudViewPool = cloudViewPool;
             this.playerViewFactory = playerViewFactory;
+            this.monsterViewPool = monsterViewPool;
             this.weaponPickupViewPool = weaponPickupViewPool;
             this.mountPickupViewPool = mountPickupViewPool;
             this.auraPickupViewPool = auraPickupViewPool;
@@ -75,6 +79,7 @@ namespace STG.CurveDash
             mountPickupPool = world.GetPool<MountPickupComponent>();
             auraPickupPool = world.GetPool<AuraPickupComponent>();
 
+            enemyPool = world.GetPool<EnemyComponent>();
             viewLinkPool = world.GetPool<ViewLinkComponent>();
             viewLinkFilter = world.Filter<ViewLinkComponent>().End();
         }
@@ -89,6 +94,7 @@ namespace STG.CurveDash
             shieldViewPool.Clear();
             cloudViewPool.Clear();
             blockViewPool.Clear();
+            monsterViewPool.Clear();
             weaponPickupViewPool.Clear();
             mountPickupViewPool.Clear();
             auraPickupViewPool.Clear();
@@ -183,11 +189,8 @@ namespace STG.CurveDash
             var obstacleView = obstacleViewPool.Spawn();
             var entity = CreateEntity<ObstacleComponent>(obstacleView.gameObject);
 
-            ref var health = ref enemyHealthPool.Add(entity);
-            health.MaxHealth = 3;
-            health.CurrentHealth = 3;
-
             obstacleView.transform.position = blockPosition + ObstacleOffset;
+
             obstacleView.GetComponent<Rigidbody>().isKinematic = true;
             obstacleView.GetComponent<Rigidbody>().position = obstacleView.transform.position;
 
@@ -196,15 +199,10 @@ namespace STG.CurveDash
 
         public int SpawnShield(Vector3 blockPosition)
         {
-            var shieldView = shieldViewPool.Spawn();
-            var entity = CreateEntity<ShieldComponent>(shieldView.gameObject);
-
-            shieldView.transform.position = blockPosition + CrystalOffset; // Using same offset as Crystal
-            shieldView.GetComponent<Rigidbody>().isKinematic = true;
-            shieldView.GetComponent<Rigidbody>().position = shieldView.transform.position;
-
-            return entity;
+            // Tạm thời vô hiệu hóa
+            return -1;
         }
+
 
         public int SpawnCloud(Vector3 blockPosition)
         {
@@ -250,39 +248,16 @@ namespace STG.CurveDash
 
         public int SpawnMountPickup(Vector3 blockPosition)
         {
-            var mountView = mountPickupViewPool.Spawn();
-            var entity = CreateEntity<MountPickupComponent>(mountView.gameObject);
-
-            if (assetCatalog != null && assetCatalog.MountSkins != null && assetCatalog.MountSkins.Items != null && assetCatalog.MountSkins.Items.Count > 0)
-            {
-                var randomMountIndex = Random.Range(0, assetCatalog.MountSkins.Items.Count);
-                mountView.Setup(randomMountIndex, assetManager);
-            }
-
-            mountView.transform.position = blockPosition + CrystalOffset;
-            mountView.GetComponent<Rigidbody>().isKinematic = true;
-            mountView.GetComponent<Rigidbody>().position = mountView.transform.position;
-
-            return entity;
+            // Tạm thời vô hiệu hóa
+            return -1;
         }
-
+        
         public int SpawnAuraPickup(Vector3 blockPosition)
         {
-            var auraView = auraPickupViewPool.Spawn();
-            var entity = CreateEntity<AuraPickupComponent>(auraView.gameObject);
-
-            if (assetCatalog != null && assetCatalog.Auras != null && assetCatalog.Auras.Items != null && assetCatalog.Auras.Items.Count > 0)
-            {
-                var randomAuraIndex = Random.Range(0, assetCatalog.Auras.Items.Count);
-                auraView.Setup(randomAuraIndex, assetManager);
-            }
-
-            auraView.transform.position = blockPosition + CrystalOffset;
-            auraView.GetComponent<Rigidbody>().isKinematic = true;
-            auraView.GetComponent<Rigidbody>().position = auraView.transform.position;
-
-            return entity;
+            // Tạm thời vô hiệu hóa
+            return -1;
         }
+
 
         private int CreateEntity<T>(GameObject gameObject) where T : struct
         {
@@ -291,65 +266,122 @@ namespace STG.CurveDash
 
             ref var viewLinkComponent = ref world.GetPool<ViewLinkComponent>().Add(entity);
             viewLinkComponent.View = gameObject;
-            viewLinkComponent.View.GetComponent<EntityLinkView>().Entity = world.PackEntity(entity);
+            
+            var link = gameObject.GetComponent<EntityLinkView>();
+            if (link == null) link = gameObject.AddComponent<EntityLinkView>();
+            link.Entity = world.PackEntity(entity);
+            
             viewLinkComponent.Transform = gameObject.transform;
+
+
+            return entity;
+        }
+
+        private Transform GetPoolTransform()
+        {
+            var pool = GameObject.Find("ObjectsPool");
+            return pool != null ? pool.transform : null;
+        }
+
+        public int SpawnMonster(MonsterData data, Vector3 position)
+        {
+            if (data == null) return -1;
+            
+            var monsterView = monsterViewPool.Spawn();
+            monsterView.transform.position = position;
+            monsterView.Setup(data);
+            
+            var entity = CreateEntity<EnemyComponent>(monsterView.gameObject);
+
+
+
+            
+            ref var enemy = ref enemyPool.Get(entity);
+            enemy.Data = data;
+            enemy.MoveSpeed = data.MovementSpeed;
+
+            ref var health = ref enemyHealthPool.Add(entity);
+            health.MaxHealth = data.MaxHealth;
+            health.CurrentHealth = data.MaxHealth;
 
             return entity;
         }
 
         public void DespawnObject(int entity)
         {
-            ref var viewLinkComponent = ref viewLinkPool.Get(entity);
-
-            if (playerPool.Has(entity))
+            if (!viewLinkPool.Has(entity)) 
             {
-                Object.Destroy(viewLinkComponent.View);
+                return;
             }
 
+            ref var viewLinkComponent = ref viewLinkPool.Get(entity);
+            var view = viewLinkComponent.View;
+
+            if (view == null)
+            {
+                world.DelEntity(entity);
+                return;
+            }
+
+            // Safe despawn logic
             if (crystalPool.Has(entity))
             {
-                crystalViewPool.Despawn(viewLinkComponent.View.GetComponent<CrystalView>());
+                var component = view.GetComponent<CrystalView>();
+                if (component != null) crystalViewPool.Despawn(component);
             }
-
-            if (obstaclePool.Has(entity))
+            else if (obstaclePool.Has(entity))
             {
-                obstacleViewPool.Despawn(viewLinkComponent.View.GetComponent<ObstacleView>());
+                var component = view.GetComponent<ObstacleView>();
+                if (component != null) obstacleViewPool.Despawn(component);
             }
-
-            if (shieldPool.Has(entity))
+            else if (enemyPool.Has(entity))
             {
-                shieldViewPool.Despawn(viewLinkComponent.View.GetComponent<ShieldView>());
+                var component = view.GetComponent<MonsterView>();
+                if (component != null) monsterViewPool.Despawn(component);
             }
-
-            if (cloudPool.Has(entity))
+            else if (blockPool.Has(entity))
             {
-                cloudViewPool.Despawn(viewLinkComponent.View.GetComponent<CloudView>());
-            }
-
-            if (blockPool.Has(entity))
-            {
-                if (viewLinkComponent.Transform.childCount > 3) // start block
-                    Object.Destroy(viewLinkComponent.View);
+                if (viewLinkComponent.Transform != null && viewLinkComponent.Transform.childCount > 3) // start block
+                    Object.Destroy(view);
                 else
-                    blockViewPool.Despawn(viewLinkComponent.View.GetComponent<BlockView>());
+                {
+                    var component = view.GetComponent<BlockView>();
+                    if (component != null) blockViewPool.Despawn(component);
+                }
             }
-
-            if (weaponPickupPool.Has(entity))
+            else if (weaponPickupPool.Has(entity))
             {
-                weaponPickupViewPool.Despawn(viewLinkComponent.View.GetComponent<WeaponPickupView>());
+                var component = view.GetComponent<WeaponPickupView>();
+                if (component != null) weaponPickupViewPool.Despawn(component);
             }
-
-            if (mountPickupPool.Has(entity))
+            else if (mountPickupPool.Has(entity))
             {
-                mountPickupViewPool.Despawn(viewLinkComponent.View.GetComponent<MountPickupView>());
+                var component = view.GetComponent<MountPickupView>();
+                if (component != null) mountPickupViewPool.Despawn(component);
             }
-
-            if (auraPickupPool.Has(entity))
+            else if (auraPickupPool.Has(entity))
             {
-                auraPickupViewPool.Despawn(viewLinkComponent.View.GetComponent<AuraPickupView>());
+                var component = view.GetComponent<AuraPickupView>();
+                if (component != null) auraPickupViewPool.Despawn(component);
             }
-
+            else if (shieldPool.Has(entity))
+            {
+                var component = view.GetComponent<ShieldView>();
+                if (component != null) shieldViewPool.Despawn(component);
+            }
+            else if (cloudPool.Has(entity))
+            {
+                var component = view.GetComponent<CloudView>();
+                if (component != null) cloudViewPool.Despawn(component);
+            }
+            else if (playerPool.Has(entity))
+            {
+                Object.Destroy(view);
+            }
+            
             world.DelEntity(entity);
         }
+
+
     }
 }

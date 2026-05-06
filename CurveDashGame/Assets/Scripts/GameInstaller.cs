@@ -26,6 +26,7 @@ namespace STG.CurveDash
             // systems
 
             Container.BindInstance(Prefabs.GameAssetCatalog).AsSingle();
+            Container.BindInstance(Prefabs.MonsterCatalog).AsSingle();
             Container.Bind<AddressablesController>().AsSingle().NonLazy();
             Container.Bind<AssetManager>().AsSingle();
             Container.BindInterfacesAndSelfTo<DataManager>().AsSingle().NonLazy();
@@ -52,6 +53,10 @@ namespace STG.CurveDash
             Container.BindInterfacesAndSelfTo<ObstacleSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<CloudSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<ShieldSystem>().AsSingle();
+            // Container.BindInterfacesAndSelfTo<EnemyMovementSystem>().AsSingle();
+
+
+
 
             Container.BindInterfacesTo<DeleteEventsSystem<PlayerPassedComponent>>().AsSingle();
             Container.BindInterfacesTo<DeleteEventsSystem<PlayerHitCrystalEvent>>().AsSingle();
@@ -91,7 +96,13 @@ namespace STG.CurveDash
             Container.BindMemoryPool<MountPickupView, MountPickupViewPool>()
                 .WithInitialSize(2).FromComponentInNewPrefab(Prefabs.MountPickupPrefab)
                 .UnderTransformGroup("ObjectsPool");
+            Container.BindMemoryPool<MonsterView, MonsterViewPool>()
+                .WithInitialSize(10).FromComponentInNewPrefab(Prefabs.MonsterBasePrefab)
+                .UnderTransformGroup("ObjectsPool");
+
+
             Container.BindMemoryPool<AuraPickupView, AuraPickupViewPool>()
+
                 .WithInitialSize(2).FromComponentInNewPrefab(Prefabs.AuraPickupPrefab)
                 .UnderTransformGroup("ObjectsPool");
         }

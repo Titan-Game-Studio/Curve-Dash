@@ -38,6 +38,8 @@ namespace STG.CurveDash
         private readonly EcsFilter playerHitCrystalFilter;
         private readonly EcsFilter playerHitObstacleFilter;
         private readonly EcsFilter playerHitShieldFilter;
+        private readonly EcsFilter playerHitByEnemyFilter;
+
         private readonly EcsFilter playerFallingFilter;
         private readonly EcsFilter playerLevelUpFilter;
 
@@ -73,6 +75,8 @@ namespace STG.CurveDash
             playerPassedFilter = world.Filter<PlayerPassedComponent>().End();
             playerHitCrystalFilter = world.Filter<PlayerHitCrystalEvent>().End();
             playerHitObstacleFilter = world.Filter<PlayerHitObstacleEvent>().End();
+            playerHitByEnemyFilter = world.Filter<PlayerHitByEnemyEvent>().End();
+
             playerHitShieldFilter = world.Filter<PlayerHitShieldEvent>().End();
             playerFallingFilter = world.Filter<PlayerComponent>().Inc<FallingComponent>().End();
 
@@ -226,21 +230,20 @@ namespace STG.CurveDash
 
             foreach (var _ in playerHitObstacleFilter)
             {
-                ref var playerStatComponent = ref playerStatService.GetPlayerStat();
-                if (playerStatComponent.InvincibleTimer > 0) continue;
-
-#if UNITY_ANDROID || UNITY_IOS
-                Handheld.Vibrate();
-#endif
-                playerStatComponent.InvincibleTimer = 0.1f; // ~1-3 frames
-/*
-                playerStatService.TakeDamage(PlayerStatService.Damege, () =>
-                {
-                    Debug.Log("Ball hit obstacle - Game Over!");
-                    GameOver();
-                });
-*/
+                // Không làm gì hoặc chỉ trừ điểm/mất máu mà không gây chớp trắng
+                // playerStatService.TakeDamage(1, null);
             }
+
+            foreach (var enemyHit in playerHitByEnemyFilter)
+            {
+                var ball = playerFilter.GetRawEntities()[0];
+                ref var viewLink = ref viewLinkPool.Get(ball);
+                var ballView = viewLink.Transform.GetComponent<PlayerView>();
+                if (ballView != null) ballView.FlashWhite(0.5f); // Chớp trắng trong 0.5s
+
+                world.GetPool<PlayerHitByEnemyEvent>().Del(enemyHit);
+            }
+
 
             foreach (var _ in playerLevelUpFilter)
             {
@@ -259,6 +262,12 @@ namespace STG.CurveDash
             spawner.Clear();
 
             playerStatService.Clear();
+
+            // Clear old GameStateComponent entities to avoid duplicates safely
+            while (gameStateFilter.GetEntitiesCount() > 0)
+            {
+                world.DelEntity(gameStateFilter.GetRawEntities()[0]);
+            }
         }
 
         private void InitScene()
@@ -271,10 +280,13 @@ namespace STG.CurveDash
             blockSystem.CreateStartBlocks(GetPartsCountInBlock());
             spawner.SpawnPlayer(new Vector3(0, BallSpawnHeight, 0), GetBallSpeedForCurrentLevel());
             
-            var ballEntity = playerFilter.GetRawEntities()[0];
-            ref var viewLink = ref viewLinkPool.Get(ballEntity);
-            var ballView = viewLink.Transform.GetComponent<PlayerView>();
-            if (ballView != null) ballView.SetRunning(false);
+            if (playerFilter.GetEntitiesCount() > 0)
+            {
+                var ballEntity = playerFilter.GetRawEntities()[0];
+                ref var viewLink = ref viewLinkPool.Get(ballEntity);
+                var ballView = viewLink.Transform.GetComponent<PlayerView>();
+                if (ballView != null) ballView.SetRunning(false);
+            }
         }
 
         private void ChangeState(GameState state)
@@ -306,10 +318,9 @@ namespace STG.CurveDash
 
         public void GameStart(GameMode gameMode)
         {
-            bool recreate = gameSettings.GameMode != gameMode;
             gameSettings.GameMode = gameMode;
             LoadBgmForMode(gameMode);
-            GameStart(recreate);
+            GameStart(true); // Always recreate scene to guarantee a 100% clean, fresh start state
         }
         
         public void RestartGame()
@@ -329,10 +340,18 @@ namespace STG.CurveDash
             ChangeState(GameState.Playing);
             PlayBackgroundMusic();
             
-            var ballEntity = playerFilter.GetRawEntities()[0];
-            ref var viewLink = ref viewLinkPool.Get(ballEntity);
-            var ballView = viewLink.Transform.GetComponent<PlayerView>();
-            if (ballView != null) ballView.SetRunning(true);
+            if (playerFilter.GetEntitiesCount() > 0)
+            {
+                var ballEntity = playerFilter.GetRawEntities()[0];
+                ref var viewLink = ref viewLinkPool.Get(ballEntity);
+                var ballView = viewLink.Transform.GetComponent<PlayerView>();
+                Debug.Log($"[GameStart] Found player entity: {ballEntity}, ballView is {(ballView != null ? "valid" : "null")}");
+                if (ballView != null) ballView.SetRunning(true);
+            }
+            else 
+            {
+                Debug.LogWarning("[GameStart] playerFilter is empty!");
+            }
         }
 
 

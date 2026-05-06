@@ -28,8 +28,9 @@ namespace STG.CurveDash
 
         public void Tick()
         {
-            foreach (var obstacle in playerHitObstacleFilter)
-                spawner.DespawnObject(obstacle);
+            // foreach (var obstacle in playerHitObstacleFilter)
+            //     spawner.DespawnObject(obstacle);
+
 
             foreach (var obstacle in deadEnemyFilter)
                 spawner.DespawnObject(obstacle);

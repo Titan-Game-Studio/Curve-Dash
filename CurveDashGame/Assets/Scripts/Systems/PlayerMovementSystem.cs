@@ -18,6 +18,8 @@ namespace STG.CurveDash
         private readonly EcsPool<CrystalComponent> crystalPool;
         private readonly EcsPool<ObstacleComponent> obstaclePool;
         private readonly EcsPool<ShieldComponent> shieldPool;
+        private readonly EcsPool<EnemyComponent> enemyPool;
+        private readonly EcsPool<WeaponPickupComponent> weaponPickupPool;
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
         private readonly EcsPool<FallingComponent> fallingPool;
         private readonly EcsPool<PlayerPassedComponent> playerPassedPool;
@@ -26,10 +28,11 @@ namespace STG.CurveDash
         private readonly EcsPool<PlayerHitWeaponEvent> playerHitWeaponPool;
         private readonly EcsPool<PlayerHitMountEvent> playerHitMountPool;
         private readonly EcsPool<PlayerHitAuraEvent> playerHitAuraPool;
-        private readonly EcsPool<WeaponPickupComponent> weaponPickupPool;
         private readonly EcsPool<MountPickupComponent> mountPickupPool;
         private readonly EcsPool<AuraPickupComponent> auraPickupPool;
         private readonly EcsPool<PlayerHitObstacleEvent> playerHitObstaclePool;
+        private readonly EcsPool<PlayerHitByEnemyEvent> playerHitByEnemyPool;
+
         private readonly EcsFilter playerFilter;
 
         private readonly Collider[] hitColliders = new Collider[1];
@@ -50,6 +53,8 @@ namespace STG.CurveDash
             crystalPool = world.GetPool<CrystalComponent>();
             obstaclePool = world.GetPool<ObstacleComponent>();
             shieldPool = world.GetPool<ShieldComponent>();
+            enemyPool = world.GetPool<EnemyComponent>();
+            weaponPickupPool = world.GetPool<WeaponPickupComponent>();
             viewLinkPool = world.GetPool<ViewLinkComponent>();
             fallingPool = world.GetPool<FallingComponent>();
             playerPassedPool = world.GetPool<PlayerPassedComponent>();
@@ -62,6 +67,8 @@ namespace STG.CurveDash
             mountPickupPool = world.GetPool<MountPickupComponent>();
             auraPickupPool = world.GetPool<AuraPickupComponent>();
             playerHitObstaclePool = world.GetPool<PlayerHitObstacleEvent>();
+            playerHitByEnemyPool = world.GetPool<PlayerHitByEnemyEvent>();
+
             playerFilter = world.Filter<PlayerComponent>().End();
         }
 
@@ -70,10 +77,24 @@ namespace STG.CurveDash
             ref var viewLinkComponent = ref viewLinkPool.Get(ball);
             var position = viewLinkComponent.Transform.position;
 
-            if (!CheckEntityUnder(position, out _))
+            if (!CheckEntityUnder(position, out var blockEntity))
+            {
+                Debug.LogWarning($"[Movement] ChangeDirection ignored! CheckEntityUnder returned FALSE at position {position}");
                 return; // can't change direction when fall
+            }
 
             ref var playerComponent = ref playerPool.Get(ball);
+            
+            // Log when character starts moving (Direction transitions from zero)
+            if (playerComponent.Direction == Vector3.zero)
+            {
+                Debug.Log($"[Movement] Character started moving! Initial tap on block entity {blockEntity}.");
+            }
+            else
+            {
+                Debug.Log($"[Movement] Direction changed on block entity {blockEntity}.");
+            }
+
             playerComponent.Direction = playerComponent.Direction == Vector3.forward ? -Vector3.left : Vector3.forward;
 
             audioPlayer.Play(audioSettings.BallTurnSound);
@@ -88,12 +109,25 @@ namespace STG.CurveDash
         private void Update(int ball)
         {
             ref var playerComponent = ref playerPool.Get(ball);
+            ref var viewLinkComponent = ref viewLinkPool.Get(ball);
+            
+            // Lấy PlayerView từ Transform để điều khiển animation dựa theo di chuyển thực tế
+            var ballView = viewLinkComponent.Transform != null ? viewLinkComponent.Transform.GetComponent<PlayerView>() : null;
 
             if (playerComponent.Direction == Vector3.zero)
+            {
+                // Nhân vật đứng yên -> Idle animation
+                if (ballView != null) ballView.SetRunning(false);
                 return;
+            }
+            else
+            {
+                // Nhân vật di chuyển -> Run animation
+                if (ballView != null) ballView.SetRunning(true);
+            }
 
-            ref var viewLinkComponent = ref viewLinkPool.Get(ball);
             Transform playerTransform = viewLinkComponent.Transform;
+
 
             if (!fallingPool.Has(ball))
             {
@@ -101,20 +135,31 @@ namespace STG.CurveDash
 
                 if (CheckCollisionWithPickup(position, out int pickupEntity))
                 {
-                    if (crystalPool.Has(pickupEntity))
+                    if (crystalPool.Has(pickupEntity) && !playerHitCrystalPool.Has(pickupEntity))
                         playerHitCrystalPool.Add(pickupEntity);
-                    else if (shieldPool.Has(pickupEntity))
+                    else if (shieldPool.Has(pickupEntity) && !playerHitShieldPool.Has(pickupEntity))
                         playerHitShieldPool.Add(pickupEntity);
-                    else if (weaponPickupPool.Has(pickupEntity))
+                    else if (weaponPickupPool.Has(pickupEntity) && !playerHitWeaponPool.Has(pickupEntity))
                         playerHitWeaponPool.Add(pickupEntity);
-                    else if (mountPickupPool.Has(pickupEntity))
+                    else if (mountPickupPool.Has(pickupEntity) && !playerHitMountPool.Has(pickupEntity))
                         playerHitMountPool.Add(pickupEntity);
-                    else if (auraPickupPool.Has(pickupEntity))
+                    else if (auraPickupPool.Has(pickupEntity) && !playerHitAuraPool.Has(pickupEntity))
                         playerHitAuraPool.Add(pickupEntity);
+
                 }
+
                 
                 if (CheckCollisionWithObstacle(position, out int obstacle) && obstaclePool.Has(obstacle))
                     playerHitObstaclePool.Add(obstacle);
+
+                // Thêm va chạm với Enemy để gây chớp trắng
+                if (CheckCollisionWithEnemy(position, out int enemy) && enemyPool.Has(enemy))
+                {
+                    // Thêm một component đánh dấu bị Enemy chạm vào
+                    if (!world.GetPool<PlayerHitByEnemyEvent>().Has(ball))
+                        world.GetPool<PlayerHitByEnemyEvent>().Add(ball);
+                }
+
 
                 if (CheckEntityUnder(position, out var block) && blockPool.Has(block))
                 {
@@ -150,11 +195,48 @@ namespace STG.CurveDash
         private bool CheckEntityUnder(Vector3 position, out int hitEntity)
         {
             const float SphereCastRadius = 0.1f;
-            if (Physics.SphereCast(position, SphereCastRadius, Vector3.down, out var hit, 0.3f))
+            var hits = Physics.SphereCastAll(position + Vector3.up * 0.5f, SphereCastRadius, Vector3.down, 1.5f);
+            
+            if (hits.Length > 0)
             {
-                var linkView = hit.transform.parent.GetComponent<EntityLinkView>();
+                Debug.Log($"[CheckEntityUnder] Position: {position}, Hit count: {hits.Length}");
+            }
+            
+            foreach (var hit in hits)
+            {
+                var linkView = hit.transform.GetComponent<EntityLinkView>();
+                int entity = -1;
+                bool unpacked = false;
+                bool isBlock = false;
+                
                 if (linkView != null)
-                    return linkView.Entity.Unpack(world, out hitEntity);
+                {
+                    unpacked = linkView.Entity.Unpack(world, out entity);
+                }
+
+                // Nếu bản thân đối tượng va chạm không có LinkView hoặc có nhưng không unpack được thực thể hợp lệ (do prefab có sẵn LinkView trống)
+                // Ta sẽ tìm kiếm trên đối tượng Cha để giải mã thực thể đúng
+                if (!unpacked && hit.transform.parent != null)
+                {
+                    var parentLinkView = hit.transform.parent.GetComponent<EntityLinkView>();
+                    if (parentLinkView != null)
+                    {
+                        unpacked = parentLinkView.Entity.Unpack(world, out entity);
+                    }
+                }
+                
+                if (unpacked)
+                {
+                    isBlock = blockPool.Has(entity);
+                }
+                
+                Debug.Log($"[CheckEntityUnder] Hit: {hit.transform.name} | Parent: {(hit.transform.parent != null ? hit.transform.parent.name : "null")} | Unpacked: {unpacked} | Entity: {entity} | IsBlock: {isBlock}");
+
+                if (unpacked && isBlock)
+                {
+                    hitEntity = entity;
+                    return true;
+                }
             }
 
             hitEntity = -1;
@@ -166,7 +248,21 @@ namespace STG.CurveDash
             if (Physics.OverlapSphereNonAlloc(position, PlayerOverlapRadius, hitColliders, gameSettings.PickupMask) != 0)
             {
                 var linkView = hitColliders[0].transform.GetComponent<EntityLinkView>();
-                return linkView.Entity.Unpack(world, out hitEntity);
+                if (linkView != null)
+                    return linkView.Entity.Unpack(world, out hitEntity);
+            }
+
+            hitEntity = -1;
+            return false;
+        }
+
+        private bool CheckCollisionWithEnemy(Vector3 position, out int hitEntity)
+        {
+            if (Physics.OverlapSphereNonAlloc(position, PlayerOverlapRadius, hitColliders, gameSettings.EnemyMask) != 0)
+            {
+                var linkView = hitColliders[0].transform.GetComponent<EntityLinkView>();
+                if (linkView != null)
+                    return linkView.Entity.Unpack(world, out hitEntity);
             }
 
             hitEntity = -1;
@@ -174,12 +270,13 @@ namespace STG.CurveDash
         }
 
         private bool CheckCollisionWithObstacle(Vector3 position, out int hitEntity)
+
         {
-            if (Physics.OverlapSphereNonAlloc(position, PlayerOverlapRadius, hitColliders1, gameSettings.ObstacleMask) !=
-                0)
+            if (Physics.OverlapSphereNonAlloc(position, PlayerOverlapRadius, hitColliders1, gameSettings.ObstacleMask) != 0)
             {
                 var linkView = hitColliders1[0].transform.GetComponent<EntityLinkView>();
-                return linkView.Entity.Unpack(world, out hitEntity);
+                if (linkView != null)
+                    return linkView.Entity.Unpack(world, out hitEntity);
             }
 
             hitEntity = -1;

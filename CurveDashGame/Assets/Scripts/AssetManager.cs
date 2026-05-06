@@ -83,9 +83,14 @@ namespace STG.CurveDash
             // 3. Fallback: Nếu không tìm thấy gì, load nhân vật đầu tiên để game không bị treo
             if (_catalog.Characters != null && _catalog.Characters.Items.Count > 0)
             {
-                Debug.LogWarning($"[AssetManager] Character ID '{id}' not found. Falling back to first available character.");
+                // Chỉ log cảnh báo nếu ID không phải là rỗng hoặc mặc định cũ
+                if (!string.IsNullOrEmpty(id) && id != "Knight_Default")
+                {
+                    Debug.LogWarning($"[AssetManager] Character ID '{id}' not found. Falling back to first available character.");
+                }
                 LoadGameObjectRefAsync(_catalog.Characters.Items[0].Prefab, onLoaded);
             }
+
             else
             {
                 Debug.LogError($"[AssetManager] Could not load character '{id}' and no fallback available!");

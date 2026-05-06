@@ -9,7 +9,7 @@ namespace STG.CurveDash
         Arrow
     }
 
-    [CreateAssetMenu(fileName = "NewOffHandItem", menuName = "Curve Dash/Weapons/Off-Hand Item (Shield/Arrow)")]
+    [CreateAssetMenu(fileName = "NewOffHandItem", menuName = "Curve Dash/Weapons/Off-Hand Item (Shield-Arrow)")]
     public class OffHandData : EquippableData
     {
         public OffHandType SubType;
