@@ -63,7 +63,15 @@ namespace STG.CurveDash
             {
                 ref var combat = ref combatPool.Get(playerEntity);
 
-                if (combat.CurrentWeapon == null) continue;
+                // Determine attack parameters (support unarmed fallback if no weapon equipped)
+                float attackRange = 2.0f; // Default unarmed attack range
+                float attackSpeed = 1.0f; // Default unarmed attack speed (attacks per second)
+                
+                if (combat.CurrentWeapon != null)
+                {
+                    attackRange = combat.CurrentWeapon.BaseData.BaseAttackRange;
+                    attackSpeed = combat.CurrentWeapon.FinalAttackSpeed;
+                }
 
                 if (combat.CooldownTimer > 0)
                 {
@@ -75,9 +83,15 @@ namespace STG.CurveDash
                 if (playerView.Transform == null) continue;
                 Vector3 playerPos = playerView.Transform.position;
 
-                // Find closest enemy
+                // Sync the player's AttackSpeed property with their real combat attack speed
+                var playerViewComponent = playerView.Transform.GetComponent<PlayerView>();
+                if (playerViewComponent != null)
+                {
+                    playerViewComponent.AttackSpeed = attackSpeed;
+                }
+
+                // Find closest enemy within range
                 int targetEnemy = -1;
-                float attackRange = combat.CurrentWeapon.BaseData.BaseAttackRange;
                 float closestDistSq = attackRange * attackRange;
 
                 foreach (var enemyEntity in enemyFilter)
@@ -86,7 +100,6 @@ namespace STG.CurveDash
                     if (enemyView.Transform == null) continue;
                     
                     float distSq = (enemyView.Transform.position - playerPos).sqrMagnitude;
-
 
                     if (distSq <= closestDistSq)
                     {
@@ -97,49 +110,135 @@ namespace STG.CurveDash
 
                 if (targetEnemy != -1)
                 {
-                    ref var targetHealth = ref healthPool.Get(targetEnemy);
-                    float damage = combat.CurrentWeapon.GetRandomDamage();
-                    targetHealth.CurrentHealth -= damage;
+                    // Deal damage using our refined damage-dealing function
+                    DealDamageToEnemy(playerEntity, targetEnemy, playerViewComponent);
 
-                    Debug.Log($"[Combat] Player attacked an enemy for {damage:F1} damage! Enemy HP left: {targetHealth.CurrentHealth:F1}");
+                    // Set cooldown: Cooldown = 1 / attackSpeed
+                    combat.CooldownTimer = 1f / attackSpeed;
                     
-                    if (targetHealth.CurrentHealth <= 0)
-                    {
-                        deadPool.Add(targetEnemy);
-                    }
-
-                    // Kích hoạt hiệu ứng chớp trắng cho enemy khi nhận sát thương
-                    ref var targetEnemyView = ref viewLinkPool.Get(targetEnemy);
-                    if (targetEnemyView.Transform != null)
-                    {
-                        var monsterView = targetEnemyView.Transform.GetComponent<STG.CurveDash.Views.MonsterView>();
-                        if (monsterView != null)
-                        {
-                            monsterView.FlashWhite(0.25f);
-                        }
-                    }
-
-
-                    // Kích hoạt toàn bộ chiêu thức trong Socket
-                    if (combat.CurrentWeapon.BaseData.Abilities != null)
-                    {
-                        ref var enemyView = ref viewLinkPool.Get(targetEnemy);
-                        foreach (var ability in combat.CurrentWeapon.BaseData.Abilities)
-                        {
-                            if (ability != null)
-                            {
-                                ability.Execute(playerView.Transform.gameObject, enemyView.Transform.position);
-                            }
-                        }
-                    }
-
-                    // Tốc độ đánh: Cooldown = 1 / AttackSpeed
-                    combat.CooldownTimer = 1f / combat.CurrentWeapon.FinalAttackSpeed;
-                    
-                    var playerViewComponent = playerView.Transform.GetComponent<PlayerView>();
                     if (playerViewComponent != null)
                     {
                         playerViewComponent.PlayAttack();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Refined damage-dealing function. Handles base weapon/unarmed damage, off-hand/shield bonus damage,
+        /// critical hits, white flash visual feedback, and executions of weapon & off-hand PoE socketed abilities.
+        /// </summary>
+        private void DealDamageToEnemy(int playerEntity, int enemyEntity, PlayerView playerViewComponent)
+        {
+            ref var combat = ref combatPool.Get(playerEntity);
+            ref var playerView = ref viewLinkPool.Get(playerEntity);
+            ref var targetHealth = ref healthPool.Get(enemyEntity);
+
+            float baseDamage = 0f;
+            float offhandBonus = 0f;
+            float totalDamage = 0f;
+            bool isCrit = false;
+
+            // 1. Calculate Base Weapon or Unarmed Damage
+            if (combat.CurrentWeapon != null)
+            {
+                baseDamage = combat.CurrentWeapon.GetRandomDamage();
+            }
+            else
+            {
+                // Default Unarmed Damage (e.g., 5.0 to 10.0 damage)
+                baseDamage = Random.Range(5f, 10f);
+            }
+
+            // 2. Add Off-hand / Shield Bonus Damage
+            if (playerViewComponent != null)
+            {
+                if (playerViewComponent.LeftHandItem is OffHandData leftOffhand)
+                {
+                    offhandBonus += leftOffhand.BonusDamage;
+                }
+                else if (playerViewComponent.RightHandItem is OffHandData rightOffhand)
+                {
+                    offhandBonus += rightOffhand.BonusDamage;
+                }
+            }
+
+            totalDamage = baseDamage + offhandBonus;
+
+            // 3. Critical Hit Mechanic (Base 10% chance for a 1.5x damage critical hit)
+            float critChance = 10f; 
+            if (Random.Range(0f, 100f) < critChance)
+            {
+                isCrit = true;
+                totalDamage *= 1.5f;
+            }
+
+            // 4. Subtract Health
+            targetHealth.CurrentHealth -= totalDamage;
+
+            // Log damage with rich info
+            if (isCrit)
+            {
+                Debug.Log($"<color=orange>[Combat] CRITICAL HIT! Player dealt {totalDamage:F1} damage (Base: {baseDamage:F1} + Offhand: {offhandBonus:F1}) to enemy! HP left: {targetHealth.CurrentHealth:F1}</color>");
+            }
+            else
+            {
+                Debug.Log($"[Combat] Player dealt {totalDamage:F1} damage (Base: {baseDamage:F1} + Offhand: {offhandBonus:F1}) to enemy! HP left: {targetHealth.CurrentHealth:F1}");
+            }
+
+            // 5. Handle Enemy Death
+            if (targetHealth.CurrentHealth <= 0)
+            {
+                deadPool.Add(enemyEntity);
+            }
+
+            // 6. Flash enemy white on damage
+            ref var targetEnemyView = ref viewLinkPool.Get(enemyEntity);
+            if (targetEnemyView.Transform != null)
+            {
+                var monsterView = targetEnemyView.Transform.GetComponent<STG.CurveDash.Views.MonsterView>();
+                if (monsterView != null)
+                {
+                    monsterView.FlashWhite(0.25f);
+                }
+            }
+
+            // 7. Execute Weapon Socketed Abilities
+            if (combat.CurrentWeapon != null && combat.CurrentWeapon.BaseData.Abilities != null)
+            {
+                ref var enemyView = ref viewLinkPool.Get(enemyEntity);
+                foreach (var ability in combat.CurrentWeapon.BaseData.Abilities)
+                {
+                    if (ability != null)
+                    {
+                        ability.Execute(playerView.Transform.gameObject, enemyView.Transform.position);
+                    }
+                }
+            }
+
+            // 8. Execute Off-hand Socketed Abilities (Shield / Arrows)
+            if (playerViewComponent != null)
+            {
+                if (playerViewComponent.LeftHandItem is OffHandData leftOffHand && leftOffHand.Abilities != null)
+                {
+                    ref var enemyView = ref viewLinkPool.Get(enemyEntity);
+                    foreach (var ability in leftOffHand.Abilities)
+                    {
+                        if (ability != null)
+                        {
+                            ability.Execute(playerView.Transform.gameObject, enemyView.Transform.position);
+                        }
+                    }
+                }
+                else if (playerViewComponent.RightHandItem is OffHandData rightOffHand && rightOffHand.Abilities != null)
+                {
+                    ref var enemyView = ref viewLinkPool.Get(enemyEntity);
+                    foreach (var ability in rightOffHand.Abilities)
+                    {
+                        if (ability != null)
+                        {
+                            ability.Execute(playerView.Transform.gameObject, enemyView.Transform.position);
+                        }
                     }
                 }
             }

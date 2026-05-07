@@ -13,6 +13,7 @@ namespace STG.CurveDash
         [Inject] private AssetManager _assetManager;
         [Inject] private DataManager _dataManager;
         [Inject] private ShopService _shopService;
+        [Inject] private GameSettings _gameSettings;
         
         [SerializeField] private Transform _skinContainerTransform;
         [SerializeField] private Transform _auraContainerTransform;
@@ -53,6 +54,12 @@ namespace STG.CurveDash
         private GameObject _leftWeaponObj;
         private ModularCharacterView _modularView;
         private RangeCircleVisualizer _rangeVisualizer;
+
+        public EquippableData LeftHandItem => _leftHandItem;
+        public EquippableData RightHandItem => _rightHandItem;
+
+        public float MovementSpeed { get; set; } = 5f;
+        public float AttackSpeed { get; set; } = 1f;
 
         private void Start()
         {
@@ -112,6 +119,9 @@ namespace STG.CurveDash
             {
                 // Có thể thêm hiệu ứng mờ alpha ở đây nếu muốn
             }
+
+            // Sync animator speeds based on active states
+            UpdateAnimatorSpeeds();
 
             // Toggle range debug visualization on simulator (runs in built games too)
             if (Input.GetKeyDown(KeyCode.F3))
@@ -512,6 +522,49 @@ namespace STG.CurveDash
             }
 
             _characterAnimator.SetTrigger("Attack");
+        }
+
+        private void UpdateAnimatorSpeeds()
+        {
+            if (_characterAnimator == null) return;
+
+            bool isAttacking = false;
+            for (int i = 0; i < _characterAnimator.layerCount; i++)
+            {
+                var stateInfo = _characterAnimator.GetCurrentAnimatorStateInfo(i);
+                if (stateInfo.IsTag("Attack"))
+                {
+                    isAttacking = true;
+                    break;
+                }
+            }
+
+            if (isAttacking)
+            {
+                // Attack animation speed scales with the attack speed
+                _characterAnimator.speed = AttackSpeed;
+                
+                // Mount doesn't attack, run it at normal speed (or idle)
+                if (_mountAnimator != null) _mountAnimator.speed = 1f;
+            }
+            else if (_isRunning)
+            {
+                // Run animation speed scales with the movement speed
+                // Normalize by baseline movement speed (e.g. BallInitialSpeed)
+                float baseSpeed = _gameSettings != null ? _gameSettings.BallInitialSpeed : 5f;
+                if (baseSpeed <= 0f) baseSpeed = 5f;
+                
+                float runSpeedFactor = MovementSpeed / baseSpeed;
+                _characterAnimator.speed = runSpeedFactor;
+                
+                if (_mountAnimator != null) _mountAnimator.speed = runSpeedFactor;
+            }
+            else
+            {
+                // Idle or other states
+                _characterAnimator.speed = 1f;
+                if (_mountAnimator != null) _mountAnimator.speed = 1f;
+            }
         }
 
         #region DEBUG GIZMOS

@@ -113,6 +113,10 @@ namespace STG.CurveDash
             
             // Lấy PlayerView từ Transform để điều khiển animation dựa theo di chuyển thực tế
             var ballView = viewLinkComponent.Transform != null ? viewLinkComponent.Transform.GetComponent<PlayerView>() : null;
+            if (ballView != null)
+            {
+                ballView.MovementSpeed = playerComponent.Speed;
+            }
 
             if (playerComponent.Direction == Vector3.zero)
             {
