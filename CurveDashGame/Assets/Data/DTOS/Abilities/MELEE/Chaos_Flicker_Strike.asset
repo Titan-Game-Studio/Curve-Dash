@@ -15,6 +15,7 @@ MonoBehaviour:
   AbilityName: Flicker Strike
   Cooldown: 1.5
   ManaCost: 8
+  AnimationTriggerName: 
   Element: 4
   SkillType: 0
   SkillDescription: Teleport instantly to a nearby enemy and strike them down with
@@ -26,5 +27,5 @@ MonoBehaviour:
   ProjectileCount: 1
   Speed: 0
   CastVFX: {fileID: 0}
-  ImpactVFX: {fileID: 517170533460803855, guid: 117f8a505030d254abaa098fdbd5b484,
+  ImpactVFX: {fileID: 2060418090655630911, guid: 4fb7673fa1cb7e34ea16f350b1e1fba9,
     type: 3}

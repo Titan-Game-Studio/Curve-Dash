@@ -34,6 +34,5 @@ MonoBehaviour:
   BaseAttackRange: 4
   UseAnimationEvent: 0
   AttackHitDelay: 0.1
-  Abilities:
-  - {fileID: 11400000, guid: bbafbd7960e858e48b2cf433b01480b6, type: 2}
+  Abilities: []
   DefaultArrow: {fileID: 11400000, guid: 56568e931686b244f9fdfb69a00c5a08, type: 2}
