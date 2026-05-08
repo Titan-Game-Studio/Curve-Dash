@@ -57,6 +57,7 @@ namespace STG.CurveDash
 
         public EquippableData LeftHandItem => _leftHandItem;
         public EquippableData RightHandItem => _rightHandItem;
+        public WeaponInstance CurrentWeaponInstance { get; set; }
 
         public float MovementSpeed { get; set; } = 5f;
         public float AttackSpeed { get; set; } = 1f;
@@ -146,6 +147,11 @@ namespace STG.CurveDash
             _auraCts?.Dispose();
             _characterCts?.Cancel(); 
             _characterCts?.Dispose();
+
+            if (_modularView != null)
+            {
+                _modularView.OnAttackHitEvent -= OnAnimationHitTriggered;
+            }
         }
 
         public void UpdateSkin(int index)
@@ -395,9 +401,18 @@ namespace STG.CurveDash
 
         private void OnVisualLoaded()
         {
+            if (_modularView != null)
+            {
+                _modularView.OnAttackHitEvent -= OnAnimationHitTriggered;
+            }
+
             if (_cachedCharacters.TryGetValue(_characterId, out var characterObj) && characterObj != null)
             {
                 _modularView = characterObj.GetComponent<ModularCharacterView>();
+                if (_modularView != null)
+                {
+                    _modularView.OnAttackHitEvent += OnAnimationHitTriggered;
+                }
                 // Tìm Animator trên chính object nhân vật trước, tránh tìm nhầm vào vũ khí con
                 _characterAnimator = characterObj.GetComponent<Animator>();
                 if (_characterAnimator == null) 
@@ -511,7 +526,70 @@ namespace STG.CurveDash
             if (_mountAnimator != null) _mountAnimator.SetBool("IsRunning", isRunning);
         }
 
-        public void PlayAttack()
+        private Action _onAttackImpactCallback;
+        private Coroutine _attackDelayCoroutine;
+
+        public void TriggerAttack(Action onImpact, float attackSpeed, bool useAnimationEvent, float attackHitDelay, string animationTrigger = "Attack")
+        {
+            if (_attackDelayCoroutine != null)
+            {
+                StopCoroutine(_attackDelayCoroutine);
+                _attackDelayCoroutine = null;
+            }
+
+            _onAttackImpactCallback = onImpact;
+
+            // Trigger the attack animation
+            PlayAttack(animationTrigger);
+
+            if (useAnimationEvent)
+            {
+                // Start a safety timeout (e.g. 1.5s / attackSpeed) to guarantee the attack triggers even if the animation event fails
+                float safetyTimeout = (attackHitDelay > 0 ? attackHitDelay * 2.0f : 1.0f) / attackSpeed;
+                _attackDelayCoroutine = StartCoroutine(CoSafetyTimeout(safetyTimeout));
+            }
+            else
+            {
+                // Start standard delay timer
+                float delay = attackHitDelay / attackSpeed;
+                _attackDelayCoroutine = StartCoroutine(CoAttackDelay(delay));
+            }
+        }
+
+        private void TriggerImpact()
+        {
+            if (_attackDelayCoroutine != null)
+            {
+                StopCoroutine(_attackDelayCoroutine);
+                _attackDelayCoroutine = null;
+            }
+
+            if (_onAttackImpactCallback != null)
+            {
+                var callback = _onAttackImpactCallback;
+                _onAttackImpactCallback = null; // Clear to prevent double triggering
+                callback.Invoke();
+            }
+        }
+
+        private void OnAnimationHitTriggered()
+        {
+            TriggerImpact();
+        }
+
+        private System.Collections.IEnumerator CoAttackDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            TriggerImpact();
+        }
+
+        private System.Collections.IEnumerator CoSafetyTimeout(float timeout)
+        {
+            yield return new WaitForSeconds(timeout);
+            TriggerImpact();
+        }
+
+        public void PlayAttack(string triggerName = "Attack")
         {
             if (_characterAnimator == null) return;
 
@@ -521,7 +599,7 @@ namespace STG.CurveDash
                 if (stateInfo.IsTag("Attack")) return;
             }
 
-            _characterAnimator.SetTrigger("Attack");
+            _characterAnimator.SetTrigger(triggerName);
         }
 
         private void UpdateAnimatorSpeeds()

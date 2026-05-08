@@ -26,4 +26,5 @@ MonoBehaviour:
   ProjectileCount: 1
   Speed: 15
   CastVFX: {fileID: 0}
-  ImpactVFX: {fileID: 0}
+  ImpactVFX: {fileID: 3055684517316691418, guid: 97c7abff57cdc9b4fb54b146d9344f89,
+    type: 3}

@@ -13,7 +13,14 @@ namespace STG.CurveDash
             
             if (SlashVFX != null)
             {
-                Instantiate(SlashVFX, targetPosition, Quaternion.identity);
+                // Tính toán hướng xoay nằm ngang hướng về phía mục tiêu
+                Vector3 direction = (targetPosition - user.transform.position);
+                direction.y = 0; // Đảm bảo hiệu ứng xoay theo trục ngang song song mặt đất
+                Quaternion targetRotation = direction.sqrMagnitude > 0.001f 
+                    ? Quaternion.LookRotation(direction.normalized) 
+                    : user.transform.rotation;
+
+                VfxPoolManager.Instance.Spawn(SlashVFX, targetPosition, targetRotation);
             }
             
             // Additional logic: Play sound, deal extra damage in AOE, etc.

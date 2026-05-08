@@ -110,25 +110,229 @@ namespace STG.CurveDash
 
                 if (targetEnemy != -1)
                 {
-                    // Deal damage using our refined damage-dealing function
-                    DealDamageToEnemy(playerEntity, targetEnemy, playerViewComponent);
-
                     // Set cooldown: Cooldown = 1 / attackSpeed
                     combat.CooldownTimer = 1f / attackSpeed;
-                    
+
                     if (playerViewComponent != null)
                     {
-                        playerViewComponent.PlayAttack();
-                    }
-                }
-            }
-        }
+                        playerViewComponent.CurrentWeaponInstance = combat.CurrentWeapon;
+                        // Get animation synchronization parameters from the weapon or use fallback values
+                        bool useAnimationEvent = false;
+                        float attackHitDelay = 0.25f; // default unarmed delay
+                        string animationTrigger = "Attack"; // default attack trigger name
 
-        /// <summary>
-        /// Refined damage-dealing function. Handles base weapon/unarmed damage, off-hand/shield bonus damage,
-        /// critical hits, white flash visual feedback, and executions of weapon & off-hand PoE socketed abilities.
-        /// </summary>
-        private void DealDamageToEnemy(int playerEntity, int enemyEntity, PlayerView playerViewComponent)
+                        if (combat.CurrentWeapon != null && combat.CurrentWeapon.BaseData != null)
+                        {
+                            useAnimationEvent = combat.CurrentWeapon.BaseData.UseAnimationEvent;
+                            attackHitDelay = combat.CurrentWeapon.BaseData.AttackHitDelay;
+
+                            // Scan socketed abilities to see if any has a custom animation trigger override
+                            var abilities = combat.CurrentWeapon.GetAbilities();
+                            if (abilities != null)
+                            {
+                                foreach (var ab in abilities)
+                                {
+                                    if (ab != null && !string.IsNullOrEmpty(ab.AnimationTriggerName))
+                                    {
+                                        animationTrigger = ab.AnimationTriggerName;
+                                        break; // prioritize the first specified animation override
+                                    }
+                                }
+                            }
+                        }
+
+                        int capturedPlayerEntity = playerEntity;
+                        int capturedTargetEnemy = targetEnemy;
+                        float capturedAttackRange = attackRange;
+
+                        playerViewComponent.TriggerAttack(
+                            onImpact: () =>
+                            {
+                                // At the moment of impact, make sure the player still exists in combat/view pools
+                                if (!combatPool.Has(capturedPlayerEntity) || !viewLinkPool.Has(capturedPlayerEntity)) return;
+
+                                ref var currentPlayerView = ref viewLinkPool.Get(capturedPlayerEntity);
+
+                                // Check if the original target is still valid (alive and in range)
+                                int finalTargetEnemy = capturedTargetEnemy;
+                                bool originalTargetValid = false;
+
+                                if (healthPool.Has(capturedTargetEnemy) && !deadPool.Has(capturedTargetEnemy) && viewLinkPool.Has(capturedTargetEnemy))
+                                {
+                                    ref var enemyView = ref viewLinkPool.Get(capturedTargetEnemy);
+                                    if (enemyView.Transform != null && currentPlayerView.Transform != null)
+                                    {
+                                        float distSq = (enemyView.Transform.position - currentPlayerView.Transform.position).sqrMagnitude;
+                                        if (distSq <= capturedAttackRange * capturedAttackRange)
+                                        {
+                                            originalTargetValid = true;
+                                        }
+                                    }
+                                }
+
+                                // If original target is no longer valid, look for a new closest target within attack range
+                                if (!originalTargetValid)
+                                {
+                                    finalTargetEnemy = -1;
+                                    float closestDistSq = capturedAttackRange * capturedAttackRange;
+
+                                    if (currentPlayerView.Transform != null)
+                                    {
+                                        Vector3 currentPos = currentPlayerView.Transform.position;
+                                        foreach (var enemyEntity in enemyFilter)
+                                        {
+                                            ref var enemyView = ref viewLinkPool.Get(enemyEntity);
+                                            if (enemyView.Transform == null) continue;
+
+                                            float distSq = (enemyView.Transform.position - currentPos).sqrMagnitude;
+                                            if (distSq <= closestDistSq)
+                                            {
+                                                closestDistSq = distSq;
+                                                finalTargetEnemy = enemyEntity;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                 // Resolve all targets to damage based on the cast ability's projectile counts & area of effect
+                                 System.Collections.Generic.List<int> targetsToHit = new System.Collections.Generic.List<int>();
+
+                                 PoEAbility activeSkill = null;
+                                 int finalProjectileCount = 1;
+
+                                 if (combatPool.Has(capturedPlayerEntity))
+                                 {
+                                     ref var combatInside = ref combatPool.Get(capturedPlayerEntity);
+                                     if (combatInside.CurrentWeapon != null)
+                                     {
+                                         var weaponAbilities = combatInside.CurrentWeapon.GetAbilities();
+                                         foreach (var ab in weaponAbilities)
+                                         {
+                                             if (ab is PoEAbility poeAb)
+                                             {
+                                                 activeSkill = poeAb;
+                                                 finalProjectileCount = poeAb.ProjectileCount;
+
+                                                 // Read support gems socketed in the same weapon to scale projectile counts
+                                                 foreach (var subAb in weaponAbilities)
+                                                 {
+                                                     if (subAb is SupportAbilityData support && support.IsCompatible(poeAb))
+                                                     {
+                                                         finalProjectileCount += support.ExtraProjectiles;
+                                                     }
+                                                 }
+                                                 break;
+                                             }
+                                         }
+                                     }
+                                 }
+
+                                 if (currentPlayerView.Transform != null)
+                                 {
+                                     Vector3 playerPos = currentPlayerView.Transform.position;
+
+                                     if (activeSkill != null && activeSkill.AbilityName.ToLower().Contains("cyclone"))
+                                     {
+                                         // 1. Cyclone (AOE Spin): Hit ALL alive enemies within range in a 360-degree circle!
+                                         foreach (var enemyEntity in enemyFilter)
+                                         {
+                                             if (deadPool.Has(enemyEntity)) continue;
+                                             ref var enemyView = ref viewLinkPool.Get(enemyEntity);
+                                             if (enemyView.Transform == null) continue;
+
+                                             float distSq = (enemyView.Transform.position - playerPos).sqrMagnitude;
+                                             if (distSq <= capturedAttackRange * capturedAttackRange)
+                                             {
+                                                 targetsToHit.Add(enemyEntity);
+                                             }
+                                         }
+                                     }
+                                     else if (finalProjectileCount > 1)
+                                      {
+                                         // 2. Multi-Projectile (LMP/GMP or Split Arrow): Hit multiple unique enemies in a frontal cone!
+                                         Vector3 lookDir = currentPlayerView.Transform.forward;
+                                         if (finalTargetEnemy != -1 && viewLinkPool.Has(finalTargetEnemy))
+                                         {
+                                             ref var mainTargetView = ref viewLinkPool.Get(finalTargetEnemy);
+                                             if (mainTargetView.Transform != null)
+                                             {
+                                                 lookDir = (mainTargetView.Transform.position - playerPos);
+                                                 lookDir.y = 0;
+                                                 lookDir.Normalize();
+                                             }
+                                         }
+
+                                         System.Collections.Generic.List<(int entity, float distSq)> enemiesInCone = new System.Collections.Generic.List<(int, float)>();
+                                         float coneAngle = 60f + (finalProjectileCount * 10f); // wider angle for more projectiles
+
+                                         foreach (var enemyEntity in enemyFilter)
+                                         {
+                                             if (deadPool.Has(enemyEntity)) continue;
+                                             ref var enemyView = ref viewLinkPool.Get(enemyEntity);
+                                             if (enemyView.Transform == null) continue;
+
+                                             Vector3 toEnemy = enemyView.Transform.position - playerPos;
+                                             toEnemy.y = 0;
+                                             float distSq = toEnemy.sqrMagnitude;
+
+                                             if (distSq <= capturedAttackRange * capturedAttackRange)
+                                             {
+                                                 float angle = Vector3.Angle(lookDir, toEnemy.normalized);
+                                                 if (angle <= coneAngle / 2f)
+                                                    {
+                                                     enemiesInCone.Add((enemyEntity, distSq));
+                                                 }
+                                             }
+                                         }
+
+                                         // Sort enemies by distance to hit closest targets first
+                                         enemiesInCone.Sort((a, b) => a.distSq.CompareTo(b.distSq));
+
+                                         int hitCount = Mathf.Min(enemiesInCone.Count, finalProjectileCount);
+                                         for (int i = 0; i < hitCount; i++)
+                                         {
+                                             targetsToHit.Add(enemiesInCone[i].entity);
+                                         }
+                                     }
+                                 }
+
+                                 // Fallback: If no custom AOE/cone targets were acquired, hit the primary target
+                                 if (targetsToHit.Count == 0 && finalTargetEnemy != -1)
+                                 {
+                                     targetsToHit.Add(finalTargetEnemy);
+                                 }
+
+                                 // Deal damage to ALL resolved targets!
+                                 bool isFirstTarget = true;
+                                 foreach (var targetEntity in targetsToHit)
+                                 {
+                                     if (healthPool.Has(targetEntity) && !deadPool.Has(targetEntity))
+                                     {
+                                         DealDamageToEnemy(capturedPlayerEntity, targetEntity, playerViewComponent, isFirstTarget);
+                                         isFirstTarget = false;
+                                     }
+                                 }
+                             },
+                             attackSpeed: attackSpeed,
+                             useAnimationEvent: useAnimationEvent,
+                             attackHitDelay: attackHitDelay,
+                             animationTrigger: animationTrigger
+                         );
+                     }
+                     else
+                     {
+                         // Fallback: deal damage immediately if no PlayerView component exists
+                         DealDamageToEnemy(playerEntity, targetEnemy, null, true);
+                     }
+                 }
+             }
+         }
+
+         /// <summary>
+         /// Refined damage-dealing function. Handles base weapon/unarmed damage, off-hand/shield bonus damage,
+         /// critical hits, white flash visual feedback, and executions of weapon & off-hand PoE socketed abilities.
+         /// </summary>
+         private void DealDamageToEnemy(int playerEntity, int enemyEntity, PlayerView playerViewComponent, bool triggerAbilities)
         {
             ref var combat = ref combatPool.Get(playerEntity);
             ref var playerView = ref viewLinkPool.Get(playerEntity);
@@ -204,20 +408,21 @@ namespace STG.CurveDash
             }
 
             // 7. Execute Weapon Socketed Abilities
-            if (combat.CurrentWeapon != null && combat.CurrentWeapon.BaseData.Abilities != null)
+            if (triggerAbilities && combat.CurrentWeapon != null)
             {
                 ref var enemyView = ref viewLinkPool.Get(enemyEntity);
-                foreach (var ability in combat.CurrentWeapon.BaseData.Abilities)
+                var weaponAbilities = combat.CurrentWeapon.GetAbilities();
+                foreach (var ability in weaponAbilities)
                 {
                     if (ability != null)
                     {
-                        ability.Execute(playerView.Transform.gameObject, enemyView.Transform.position);
+                        ability.Execute(playerView.Transform.gameObject, enemyView.Transform.position + Vector3.up * 1f);
                     }
                 }
             }
 
             // 8. Execute Off-hand Socketed Abilities (Shield / Arrows)
-            if (playerViewComponent != null)
+            if (triggerAbilities && playerViewComponent != null)
             {
                 if (playerViewComponent.LeftHandItem is OffHandData leftOffHand && leftOffHand.Abilities != null)
                 {

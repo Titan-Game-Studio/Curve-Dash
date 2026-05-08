@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8d696da2b6f72641b043b7ce694a1f0, type: 3}
+  m_Name: Support_Elemental_Focus
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.SupportAbilityData
+  AbilityName: Elemental Focus
+  Cooldown: 0
+  ManaCost: 0
+  AnimationTriggerName: 
+  SupportDescription: Supports skills that deal elemental damage. Deals 40% MORE
+    fire, cold, or lightning damage.
+  SupportedSkillTypes: 010000000000000002000000
+  SupportedElements: 010000000200000003000000
+  DamageMultiplierPercent: 40
+  AddedFlatDamageBonus: 0
+  CriticalChanceBonus: 0
+  ExtraProjectiles: 0
+  SpeedMultiplierPercent: 0
+  ExtraCastVFX: {fileID: 0}
+  ExtraImpactVFX: {fileID: 0}

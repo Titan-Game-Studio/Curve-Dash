@@ -10,6 +10,18 @@ namespace STG.CurveDash
         public WeaponData BaseData;
         public ItemRarity Rarity;
         public List<StatModifier> Affixes = new List<StatModifier>();
+        public List<AbilityData> DynamicAbilities = new List<AbilityData>();
+
+        public List<AbilityData> GetAbilities()
+        {
+            var list = new List<AbilityData>();
+            if (BaseData != null && BaseData.Abilities != null)
+            {
+                list.AddRange(BaseData.Abilities);
+            }
+            list.AddRange(DynamicAbilities);
+            return list;
+        }
         
         public float FinalMinDamage { get; private set; }
         public float FinalMaxDamage { get; private set; }

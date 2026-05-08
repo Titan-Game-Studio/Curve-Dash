@@ -32,6 +32,9 @@ MonoBehaviour:
   BaseMaxDamage: 20
   BaseAttackSpeed: 1.4
   BaseAttackRange: 1.6
-  Abilities: []
+  UseAnimationEvent: 1
+  AttackHitDelay: 0.3
+  Abilities:
+  - {fileID: 11400000, guid: e8ca76ff97fc8074f966b149ec83ea16, type: 2}
   DualWieldController: {fileID: 0}
   SwordShieldController: {fileID: 0}

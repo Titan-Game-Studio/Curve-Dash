@@ -11,6 +11,14 @@ namespace STG.CurveDash
         public Transform RightHandSlot;
         public Transform LeftHandSlot;
 
+        public System.Action OnAttackHitEvent;
+
+        // Unity Animation Event receiver
+        public void OnAttackHit()
+        {
+            OnAttackHitEvent?.Invoke();
+        }
+
 
         private Dictionary<EquipmentSlot, Transform> _slotRoots = new Dictionary<EquipmentSlot, Transform>();
 

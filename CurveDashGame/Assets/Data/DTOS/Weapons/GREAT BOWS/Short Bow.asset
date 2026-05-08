@@ -32,5 +32,8 @@ MonoBehaviour:
   BaseMaxDamage: 15
   BaseAttackSpeed: 1
   BaseAttackRange: 4
-  Abilities: []
+  UseAnimationEvent: 0
+  AttackHitDelay: 0.1
+  Abilities:
+  - {fileID: 11400000, guid: bbafbd7960e858e48b2cf433b01480b6, type: 2}
   DefaultArrow: {fileID: 11400000, guid: 63a1bd5357daee5459f6171e27a03d1b, type: 2}

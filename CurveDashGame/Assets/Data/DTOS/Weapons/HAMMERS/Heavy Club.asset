@@ -32,4 +32,7 @@ MonoBehaviour:
   BaseMaxDamage: 36
   BaseAttackSpeed: 0.6
   BaseAttackRange: 1.8
-  Abilities: []
+  UseAnimationEvent: 1
+  AttackHitDelay: 0.3
+  Abilities:
+  - {fileID: 11400000, guid: e8ca76ff97fc8074f966b149ec83ea16, type: 2}
