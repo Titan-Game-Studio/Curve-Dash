@@ -1,6 +1,7 @@
 using Leopotam.EcsLite;
 using UnityEngine;
 using Zenject;
+using System.Collections.Generic;
 
 namespace STG.CurveDash
 {
@@ -62,6 +63,18 @@ namespace STG.CurveDash
             foreach (var playerEntity in playerFilter)
             {
                 ref var combat = ref combatPool.Get(playerEntity);
+
+                // Update combo timer
+                if (combat.ComboIndex > 0)
+                {
+                    combat.ComboTimer += Time.deltaTime;
+                    if (combat.ComboTimer > 2.5f) // Reset back to Skill 1 if idle for 2.5 seconds
+                    {
+                        combat.ComboIndex = 0;
+                        combat.ComboTimer = 0f;
+                        Debug.Log("<color=orange>[Combo System] Combo timed out! Resetting to Skill 1.</color>");
+                    }
+                }
 
                 // Determine attack parameters (support unarmed fallback if no weapon equipped)
                 float attackRange = 2.0f; // Default unarmed attack range
@@ -407,46 +420,148 @@ namespace STG.CurveDash
                 }
             }
 
-            // 7. Execute Weapon Socketed Abilities
-            if (triggerAbilities && combat.CurrentWeapon != null)
+            // 7. Gather and Execute all Passive/Aura Abilities (Always active / trigger on hit)
+            if (triggerAbilities)
             {
                 ref var enemyView = ref viewLinkPool.Get(enemyEntity);
-                var weaponAbilities = combat.CurrentWeapon.GetAbilities();
-                foreach (var ability in weaponAbilities)
+                if (enemyView.Transform != null)
                 {
-                    if (ability != null)
+                    Vector3 targetFeetPosition = GetEnemyFeetPosition(enemyView.Transform);
+                    List<PoEAbility> auras = new List<PoEAbility>();
+
+                    if (combat.CurrentWeapon != null)
                     {
-                        ability.Execute(playerView.Transform.gameObject, enemyView.Transform.position + Vector3.up * 1f);
+                        foreach (var ab in combat.CurrentWeapon.GetAbilities())
+                        {
+                            if (ab is PoEAbility active && active.SkillType == PoEAbilityType.Aura)
+                            {
+                                auras.Add(active);
+                            }
+                        }
+                    }
+
+                    if (playerViewComponent != null)
+                    {
+                        foreach (var ab in playerViewComponent.GetEquippedArmorAbilities())
+                        {
+                            if (ab is PoEAbility active && active.SkillType == PoEAbilityType.Aura)
+                            {
+                                auras.Add(active);
+                            }
+                        }
+                    }
+
+                    foreach (var aura in auras)
+                    {
+                        aura.Execute(playerView.Transform.gameObject, targetFeetPosition);
                     }
                 }
             }
 
-            // 8. Execute Off-hand Socketed Abilities (Shield / Arrows)
-            if (triggerAbilities && playerViewComponent != null)
+            // 7.5. Gather all Active Offensive Skills across all gear
+            List<AbilityData> activeOffensiveSkills = new List<AbilityData>();
+
+            // - Weapon active skills
+            if (combat.CurrentWeapon != null)
             {
-                if (playerViewComponent.LeftHandItem is OffHandData leftOffHand && leftOffHand.Abilities != null)
+                var weaponAbilities = combat.CurrentWeapon.GetAbilities();
+                foreach (var ab in weaponAbilities)
                 {
-                    ref var enemyView = ref viewLinkPool.Get(enemyEntity);
-                    foreach (var ability in leftOffHand.Abilities)
+                    if (ab is PoEAbility active && active.SkillType != PoEAbilityType.Aura)
                     {
-                        if (ability != null)
-                        {
-                            ability.Execute(playerView.Transform.gameObject, enemyView.Transform.position);
-                        }
+                        activeOffensiveSkills.Add(active);
                     }
                 }
-                else if (playerViewComponent.RightHandItem is OffHandData rightOffHand && rightOffHand.Abilities != null)
+            }
+
+            // - Armor active skills
+            if (playerViewComponent != null)
+            {
+                var armorAbilities = playerViewComponent.GetEquippedArmorAbilities();
+                foreach (var ab in armorAbilities)
                 {
-                    ref var enemyView = ref viewLinkPool.Get(enemyEntity);
-                    foreach (var ability in rightOffHand.Abilities)
+                    if (ab is PoEAbility active && active.SkillType != PoEAbilityType.Aura)
                     {
-                        if (ability != null)
+                        if (!activeOffensiveSkills.Contains(active))
                         {
-                            ability.Execute(playerView.Transform.gameObject, enemyView.Transform.position);
+                            activeOffensiveSkills.Add(active);
                         }
                     }
                 }
             }
+
+            // - Off-hand active skills
+            if (playerViewComponent != null)
+            {
+                if (playerViewComponent.LeftHandItem is OffHandData leftOffHand && leftOffHand.Abilities != null)
+                {
+                    foreach (var ab in leftOffHand.Abilities)
+                    {
+                        if (ab is PoEAbility active && active.SkillType != PoEAbilityType.Aura)
+                        {
+                            if (!activeOffensiveSkills.Contains(active)) activeOffensiveSkills.Add(active);
+                        }
+                    }
+                }
+                if (playerViewComponent.RightHandItem is OffHandData rightOffHand && rightOffHand.Abilities != null)
+                {
+                    foreach (var ab in rightOffHand.Abilities)
+                    {
+                        if (ab is PoEAbility active && active.SkillType != PoEAbilityType.Aura)
+                        {
+                            if (!activeOffensiveSkills.Contains(active)) activeOffensiveSkills.Add(active);
+                        }
+                    }
+                }
+            }
+
+            // 8. Execute Active Offensive Skills as a Sequential Combo
+            if (triggerAbilities && activeOffensiveSkills.Count > 0)
+            {
+                ref var enemyView = ref viewLinkPool.Get(enemyEntity);
+                if (enemyView.Transform != null)
+                {
+                    Vector3 targetFeetPosition = GetEnemyFeetPosition(enemyView.Transform);
+
+                    // Ensure combo index is valid
+                    if (combat.ComboIndex >= activeOffensiveSkills.Count)
+                    {
+                        combat.ComboIndex = 0;
+                    }
+
+                    // Cast the skill for the current combo step
+                    var skillToCast = activeOffensiveSkills[combat.ComboIndex];
+                    if (skillToCast != null)
+                    {
+                        Debug.Log($"<color=lime>[Combo Combo!] Step {combat.ComboIndex + 1}/{activeOffensiveSkills.Count}: Cast '{skillToCast.AbilityName}'</color>");
+                        skillToCast.Execute(playerView.Transform.gameObject, targetFeetPosition);
+                    }
+
+                    // Advance sequence and reset idle timer
+                    combat.ComboIndex = (combat.ComboIndex + 1) % activeOffensiveSkills.Count;
+                    combat.ComboTimer = 0f;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Finds the exact ground / feet position of an enemy by raycasting downwards.
+        /// Prevents floaty or misaligned VFX on dynamically loaded models with varying pivots.
+        /// </summary>
+        private Vector3 GetEnemyFeetPosition(Transform enemyTransform)
+        {
+            if (enemyTransform == null) return Vector3.zero;
+
+            Vector3 rootPos = enemyTransform.position;
+
+            // Raycast down from a safe height to detect the ground collision point under the enemy
+            if (Physics.Raycast(rootPos + Vector3.up * 1.5f, Vector3.down, out RaycastHit hit, 5f))
+            {
+                return hit.point;
+            }
+
+            // Fallback: If no collider is detected below, use the root position directly (ground floor)
+            return rootPos;
         }
     }
 }

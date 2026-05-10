@@ -15,6 +15,7 @@ MonoBehaviour:
   AbilityName: Heavy Strike
   Cooldown: 0.5
   ManaCost: 5
+  AnimationTriggerName: 
   Element: 0
   SkillType: 0
   SkillDescription: A massive, powerful slam with knockback and high stun multiplier.
@@ -24,6 +25,5 @@ MonoBehaviour:
   AttackRange: 1.8
   ProjectileCount: 1
   Speed: 0
-  CastVFX: {fileID: 0}
-  ImpactVFX: {fileID: 517170533460803855, guid: 117f8a505030d254abaa098fdbd5b484,
-    type: 3}
+  CastVFX: {fileID: 9380231799744250, guid: 197469d1eee2fc1488538f97714cf9de, type: 3}
+  ImpactVFX: {fileID: 0}

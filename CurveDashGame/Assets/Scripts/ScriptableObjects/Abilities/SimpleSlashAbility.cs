@@ -20,7 +20,7 @@ namespace STG.CurveDash
                     ? Quaternion.LookRotation(direction.normalized) 
                     : user.transform.rotation;
 
-                VfxPoolManager.Instance.Spawn(SlashVFX, targetPosition, targetRotation);
+                VfxSystem.RequestSpawn(SlashVFX, targetPosition, targetRotation);
             }
             
             // Additional logic: Play sound, deal extra damage in AOE, etc.

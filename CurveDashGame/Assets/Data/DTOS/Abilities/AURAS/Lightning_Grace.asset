@@ -15,6 +15,7 @@ MonoBehaviour:
   AbilityName: Grace
   Cooldown: 10
   ManaCost: 50
+  AnimationTriggerName: 
   Element: 3
   SkillType: 3
   SkillDescription: An aura that reserves mana to grant a massive boost to movement

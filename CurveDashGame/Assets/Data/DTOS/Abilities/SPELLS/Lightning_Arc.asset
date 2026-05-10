@@ -15,6 +15,7 @@ MonoBehaviour:
   AbilityName: Arc
   Cooldown: 0.6
   ManaCost: 15
+  AnimationTriggerName: 
   Element: 3
   SkillType: 1
   SkillDescription: Releases a bolt of fork lightning that chains through multiple
@@ -25,6 +26,5 @@ MonoBehaviour:
   AttackRange: 7
   ProjectileCount: 1
   Speed: 20
-  CastVFX: {fileID: 0}
-  ImpactVFX: {fileID: 1399132805510176293, guid: 427c42bfed7ef564da438fa457ac6517,
-    type: 3}
+  CastVFX: {fileID: 1914988783019038, guid: bf79162d73e16994d8b477d54f0b0f21, type: 3}
+  ImpactVFX: {fileID: 0}

@@ -106,7 +106,7 @@ namespace STG.CurveDash
             {
                 if (finalProjectileCount <= 1)
                 {
-                    VfxPoolManager.Instance.Spawn(CastVFX, user.transform.position + Vector3.up * 1.0f, baseRotation);
+                    VfxSystem.RequestSpawn(CastVFX, user.transform.position + Vector3.up * 1.0f, baseRotation);
                 }
                 else
                 {
@@ -118,7 +118,7 @@ namespace STG.CurveDash
                     {
                         float currentAngle = startAngle + i * spreadAngle;
                         Quaternion rot = baseRotation * Quaternion.Euler(0, currentAngle, 0);
-                        VfxPoolManager.Instance.Spawn(CastVFX, user.transform.position + Vector3.up * 1.0f, rot);
+                        VfxSystem.RequestSpawn(CastVFX, user.transform.position + Vector3.up * 1.0f, rot);
                     }
                 }
             }
@@ -126,19 +126,19 @@ namespace STG.CurveDash
             // Spawn any extra Cast VFX from support gems
             foreach (var extraVfx in extraCastVFXs)
             {
-                VfxPoolManager.Instance.Spawn(extraVfx, user.transform.position + Vector3.up * 1.0f, baseRotation);
+                VfxSystem.RequestSpawn(extraVfx, user.transform.position + Vector3.up * 1.0f, baseRotation);
             }
             
             // Spawn Impact VFX at target position
             if (ImpactVFX != null)
             {
-                VfxPoolManager.Instance.Spawn(ImpactVFX, targetPosition, baseRotation);
+                VfxSystem.RequestSpawn(ImpactVFX, targetPosition, baseRotation);
             }
 
             // Spawn any extra Impact VFX from support gems
             foreach (var extraVfx in extraImpactVFXs)
             {
-                VfxPoolManager.Instance.Spawn(extraVfx, targetPosition, baseRotation);
+                VfxSystem.RequestSpawn(extraVfx, targetPosition, baseRotation);
             }
         }
     }

@@ -15,6 +15,7 @@ MonoBehaviour:
   AbilityName: Freezing Pulse
   Cooldown: 0.7
   ManaCost: 14
+  AnimationTriggerName: 
   Element: 2
   SkillType: 1
   SkillDescription: Fires a wide wave of freezing ice that pierces all enemies and
@@ -25,6 +26,5 @@ MonoBehaviour:
   AttackRange: 5.5
   ProjectileCount: 1
   Speed: 15
-  CastVFX: {fileID: 0}
-  ImpactVFX: {fileID: 3055684517316691418, guid: 97c7abff57cdc9b4fb54b146d9344f89,
-    type: 3}
+  CastVFX: {fileID: 1854664128299224, guid: 54b3bccc9622b8b44932bc314b6ec605, type: 3}
+  ImpactVFX: {fileID: 0}

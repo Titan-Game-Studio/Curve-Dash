@@ -112,7 +112,7 @@ namespace STG.CurveDash.Views
             {
                 var rangeObj = new GameObject("MonsterRangeVisualizer");
                 rangeObj.transform.SetParent(transform, false);
-                rangeObj.transform.localPosition = new Vector3(0, 1.2f, 0); // slightly above ground
+                rangeObj.transform.localPosition = new Vector3(0, 0.55f, 0); // slightly above ground
                 _rangeVisualizer = rangeObj.AddComponent<RangeCircleVisualizer>();
                 _rangeVisualizer.SetColor(Color.red);
             }

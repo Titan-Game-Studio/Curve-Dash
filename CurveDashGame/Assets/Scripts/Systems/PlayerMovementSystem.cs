@@ -89,13 +89,18 @@ namespace STG.CurveDash
             if (playerComponent.Direction == Vector3.zero)
             {
                 Debug.Log($"[Movement] Character started moving! Initial tap on block entity {blockEntity}.");
+                Vector3 lastDir = playerComponent.LastNonZeroDirection != Vector3.zero 
+                    ? playerComponent.LastNonZeroDirection 
+                    : Vector3.forward;
+                playerComponent.Direction = lastDir == Vector3.forward ? -Vector3.left : Vector3.forward;
             }
             else
             {
                 Debug.Log($"[Movement] Direction changed on block entity {blockEntity}.");
+                playerComponent.Direction = playerComponent.Direction == Vector3.forward ? -Vector3.left : Vector3.forward;
             }
 
-            playerComponent.Direction = playerComponent.Direction == Vector3.forward ? -Vector3.left : Vector3.forward;
+            playerComponent.LastNonZeroDirection = playerComponent.Direction;
 
             audioPlayer.Play(audioSettings.BallTurnSound);
         }
@@ -137,46 +142,77 @@ namespace STG.CurveDash
             {
                 var position = viewLinkComponent.Transform.position;
 
-                if (CheckCollisionWithPickup(position, out int pickupEntity))
+                // Predict if the next step would overshoot and run off the road
+                if (playerComponent.Direction != Vector3.zero)
                 {
-                    if (crystalPool.Has(pickupEntity) && !playerHitCrystalPool.Has(pickupEntity))
-                        playerHitCrystalPool.Add(pickupEntity);
-                    else if (shieldPool.Has(pickupEntity) && !playerHitShieldPool.Has(pickupEntity))
-                        playerHitShieldPool.Add(pickupEntity);
-                    else if (weaponPickupPool.Has(pickupEntity) && !playerHitWeaponPool.Has(pickupEntity))
-                        playerHitWeaponPool.Add(pickupEntity);
-                    else if (mountPickupPool.Has(pickupEntity) && !playerHitMountPool.Has(pickupEntity))
-                        playerHitMountPool.Add(pickupEntity);
-                    else if (auraPickupPool.Has(pickupEntity) && !playerHitAuraPool.Has(pickupEntity))
-                        playerHitAuraPool.Add(pickupEntity);
-
-                }
-
-                
-                if (CheckCollisionWithObstacle(position, out int obstacle) && obstaclePool.Has(obstacle))
-                    playerHitObstaclePool.Add(obstacle);
-
-                // Thêm va chạm với Enemy để gây chớp trắng
-                if (CheckCollisionWithEnemy(position, out int enemy) && enemyPool.Has(enemy))
-                {
-                    // Thêm một component đánh dấu bị Enemy chạm vào
-                    if (!world.GetPool<PlayerHitByEnemyEvent>().Has(ball))
-                        world.GetPool<PlayerHitByEnemyEvent>().Add(ball);
-                }
-
-
-                if (CheckEntityUnder(position, out var block) && blockPool.Has(block))
-                {
-                    if (block != playerComponent.PreviousHitEntity)
+                    Vector3 nextPosition = position + playerComponent.Direction * playerComponent.Speed * Time.deltaTime;
+                    if (!CheckEntityUnder(nextPosition, out var nextBlock) || !blockPool.Has(nextBlock))
                     {
-                        if (playerComponent.PreviousHitEntity != null)
-                            playerPassedPool.Add(playerComponent.PreviousHitEntity.Value);
-                        playerComponent.PreviousHitEntity = block;
+                        // Snap precisely to the current block part's center to prevent overshooting
+                        if (CheckEntityUnder(position, out var currentBlock) && blockPool.Has(currentBlock))
+                        {
+                            ref var blockLink = ref viewLinkPool.Get(currentBlock);
+                            Vector3 closestPartPos = position;
+                            float minDistance = float.MaxValue;
+                            for (int i = 0; i < blockLink.Transform.childCount; i++)
+                            {
+                                var child = blockLink.Transform.GetChild(i);
+                                if (child.gameObject.activeSelf)
+                                {
+                                    float dist = Vector3.Distance(position, child.position);
+                                    if (dist < minDistance)
+                                    {
+                                        minDistance = dist;
+                                        closestPartPos = child.position;
+                                    }
+                                }
+                            }
+                            playerTransform.position = new Vector3(closestPartPos.x, position.y, closestPartPos.z);
+                            position = playerTransform.position; // update local position reference
+                        }
+
+                        // Stop the player smoothly
+                        playerComponent.Direction = Vector3.zero;
+                        if (ballView != null) ballView.SetRunning(false);
+                        Debug.Log("[Movement] Edge reached! Stopped player safely. Tap to turn!");
                     }
                 }
-                else
+
+                // Process collisions and triggers only if the player is actively moving
+                if (playerComponent.Direction != Vector3.zero)
                 {
-                    fallingPool.Add(ball) = new FallingComponent { FallingDelay = 0.0f };
+                    if (CheckCollisionWithPickup(position, out int pickupEntity))
+                    {
+                        if (crystalPool.Has(pickupEntity) && !playerHitCrystalPool.Has(pickupEntity))
+                            playerHitCrystalPool.Add(pickupEntity);
+                        else if (shieldPool.Has(pickupEntity) && !playerHitShieldPool.Has(pickupEntity))
+                            playerHitShieldPool.Add(pickupEntity);
+                        else if (weaponPickupPool.Has(pickupEntity) && !playerHitWeaponPool.Has(pickupEntity))
+                            playerHitWeaponPool.Add(pickupEntity);
+                        else if (mountPickupPool.Has(pickupEntity) && !playerHitMountPool.Has(pickupEntity))
+                            playerHitMountPool.Add(pickupEntity);
+                        else if (auraPickupPool.Has(pickupEntity) && !playerHitAuraPool.Has(pickupEntity))
+                            playerHitAuraPool.Add(pickupEntity);
+                    }
+
+                    if (CheckCollisionWithObstacle(position, out int obstacle) && obstaclePool.Has(obstacle))
+                        playerHitObstaclePool.Add(obstacle);
+
+                    if (CheckCollisionWithEnemy(position, out int enemy) && enemyPool.Has(enemy))
+                    {
+                        if (!world.GetPool<PlayerHitByEnemyEvent>().Has(ball))
+                            world.GetPool<PlayerHitByEnemyEvent>().Add(ball);
+                    }
+
+                    if (CheckEntityUnder(position, out var block) && blockPool.Has(block))
+                    {
+                        if (block != playerComponent.PreviousHitEntity)
+                        {
+                            if (playerComponent.PreviousHitEntity != null)
+                                playerPassedPool.Add(playerComponent.PreviousHitEntity.Value);
+                            playerComponent.PreviousHitEntity = block;
+                        }
+                    }
                 }
             }
 
@@ -192,7 +228,7 @@ namespace STG.CurveDash
             if (!Mathf.Approximately(playerSize, playerComponent.Size))
             {
                 playerSize = playerComponent.Size;
-                playerTransform.GetChild(0).localScale = Vector3.one + (Vector3.one * (playerComponent.Size / 5f));
+                playerTransform.GetChild(0).localScale = Vector3.one;
             }
         }
 

@@ -142,7 +142,7 @@ namespace STG.CurveDash
 
             AddChildBlocks(entity, count, rightSide, spawnPos, color);
 
-            Assert.IsTrue(gameObject.transform.childCount == count);
+            Assert.IsTrue(gameObject.transform.childCount >= count);
             return entity;
         }
 
@@ -152,11 +152,20 @@ namespace STG.CurveDash
 
             ref var viewLinkComponent = ref viewLinkPool.Get(blocks);
             var parent = viewLinkComponent.Transform;
-            bool childExists = parent.childCount > 0;
+            int childCount = parent.childCount;
 
+            // Spawn or reuse up to count
             for (int i = 0; i < count; i++)
-                AddBlockChild(spawnPos + turnDirection * -i, blocks, color,
-                    childExists ? parent.GetChild(i).GetComponent<BlockPartView>() : null);
+            {
+                BlockPartView cachedChild = (i < childCount) ? parent.GetChild(i).GetComponent<BlockPartView>() : null;
+                AddBlockChild(spawnPos + turnDirection * -i, blocks, color, cachedChild);
+            }
+
+            // Deactivate any extra children if the pooled parent has more parts than needed
+            for (int i = count; i < childCount; i++)
+            {
+                parent.GetChild(i).gameObject.SetActive(false);
+            }
         }
 
         private void AddBlockChild(Vector3 position, int blocks, Color color, BlockPartView cachedBlockPartView = null)

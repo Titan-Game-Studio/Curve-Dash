@@ -46,7 +46,7 @@ namespace STG.CurveDash
                         if (weaponView.ItemToGive is WeaponData weaponBase)
                         {
                             // Khởi tạo một bản instance mới (Đây là lúc có thể Roll Affix)
-                            var instance = new WeaponInstance(weaponBase);
+                            var instance = new WeaponInstance(weaponBase, weaponBase.Rarity);
                             
                             // TỰ ĐỘNG THÊM KỸ NĂNG CHỦ ĐỘNG & NGỌC BỔ TRỢ TƯƠNG THÍCH ĐỂ DỄ DÀNG TEST
                             AutoLinkTestingAbilities(instance, weaponBase);

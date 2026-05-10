@@ -15,6 +15,7 @@ MonoBehaviour:
   AbilityName: Hatred
   Cooldown: 10
   ManaCost: 50
+  AnimationTriggerName: 
   Element: 2
   SkillType: 3
   SkillDescription: An aura that reserves mana to grant massive extra cold damage

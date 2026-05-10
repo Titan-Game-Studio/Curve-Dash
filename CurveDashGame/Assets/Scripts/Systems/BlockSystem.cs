@@ -19,6 +19,7 @@ namespace STG.CurveDash
 
         private Vector3 lastSpawnPos;
         private readonly Queue<int> liveBlocksEntities = new Queue<int>();
+        private readonly Queue<int> passedBlocksEntities = new Queue<int>();
         
         private readonly EcsPool<BlockComponent> blockPool;
         private readonly EcsPool<FallingComponent> fallingPool;
@@ -63,6 +64,7 @@ namespace STG.CurveDash
         public void ClearBlocks()
         {
             liveBlocksEntities.Clear();
+            passedBlocksEntities.Clear();
             gameplayStrategies.Reset();
         }
         
@@ -74,13 +76,24 @@ namespace STG.CurveDash
         
         private void OnMovedToNextBlock(int block)
         {
-            Assert.IsTrue(liveBlocksEntities.Contains(block));
+            if (!liveBlocksEntities.Contains(block))
+                return;
 
             int block1 = -1;
             while (block1 != block)
             {
                 block1 = liveBlocksEntities.Dequeue();
-                FallDownBlock(block1);
+                
+                // Enqueue the block that was just passed into our trailing queue
+                passedBlocksEntities.Enqueue(block1);
+                
+                // If we have more than 10 blocks behind the player, despawn the oldest one
+                if (passedBlocksEntities.Count > 10)
+                {
+                    int oldestBlock = passedBlocksEntities.Dequeue();
+                    FallDownBlock(oldestBlock);
+                }
+
                 SpawnNextBlocks();
             }
         }

@@ -298,14 +298,12 @@ namespace STG.CurveDash
 
         private float GetBallSpeedForCurrentLevel()
         {
-            ref var playerStatComponent = ref playerStatService.GetPlayerStat();
-            return gameSettings.BallInitialSpeed + playerStatComponent.Level - 1f;
+            return gameSettings.BallInitialSpeed;
         }
 
         private float GetBallSizeForCurrentLevel()
         {
-            ref var playerStatComponent = ref playerStatService.GetPlayerStat();
-            return gameSettings.BallInitialSize + playerStatComponent.Level - 1f;
+            return gameSettings.BallInitialSize;
         }
 
         private void ShowTitle(bool clearScene = true)
@@ -380,19 +378,7 @@ namespace STG.CurveDash
 
         private int GetPartsCountInBlock()
         {
-            switch (gameSettings.GameMode)
-            {
-                case GameMode.Easy:
-                    return 5;
-                case GameMode.Normal:
-                    return 4;
-                case GameMode.Hard:
-                    return 3;
-                case GameMode.Holes:
-                    return 3;
-                default:
-                    return 5;
-            }
+            return 10;
         }
     }
 }

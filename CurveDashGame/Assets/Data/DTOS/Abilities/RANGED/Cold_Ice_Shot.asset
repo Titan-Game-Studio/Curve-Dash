@@ -15,6 +15,7 @@ MonoBehaviour:
   AbilityName: Ice Shot
   Cooldown: 0.6
   ManaCost: 8
+  AnimationTriggerName: 
   Element: 2
   SkillType: 2
   SkillDescription: Fires an arrow that explodes into a cone of icy shards behind
@@ -25,5 +26,5 @@ MonoBehaviour:
   AttackRange: 8
   ProjectileCount: 1
   Speed: 15
-  CastVFX: {fileID: 8735408722482519607, guid: a048bcf1214005047861302d0a4515da, type: 3}
+  CastVFX: {fileID: 1888593672222384, guid: c91967e27b8a3e34f8aa30566d18b17d, type: 3}
   ImpactVFX: {fileID: 0}

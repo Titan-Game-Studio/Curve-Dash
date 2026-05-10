@@ -27,11 +27,91 @@ namespace STG.CurveDash
         public float FinalMaxDamage { get; private set; }
         public float FinalAttackSpeed { get; private set; }
 
-        public WeaponInstance(WeaponData baseData, ItemRarity rarity = ItemRarity.Normal)
+        public WeaponInstance(WeaponData baseData, ItemRarity rarity = ItemRarity.Normal, bool autoRoll = true)
         {
             BaseData = baseData;
             Rarity = rarity;
+            if (autoRoll)
+            {
+                RollRandomAffixes();
+            }
             CalculateFinalStats();
+        }
+
+        private void RollRandomAffixes()
+        {
+            if (Rarity == ItemRarity.Normal) return;
+
+            var templates = new List<AffixData>();
+#if UNITY_EDITOR
+            string[] guids = UnityEditor.AssetDatabase.FindAssets("t:AffixData");
+            foreach (string guid in guids)
+            {
+                string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                var affix = UnityEditor.AssetDatabase.LoadAssetAtPath<AffixData>(path);
+                if (affix != null) templates.Add(affix);
+            }
+#endif
+            if (templates.Count == 0)
+            {
+                var loaded = Resources.LoadAll<AffixData>("");
+                templates.AddRange(loaded);
+            }
+
+            if (templates.Count == 0) return;
+
+            int numPrefixes = 0;
+            int numSuffixes = 0;
+
+            if (Rarity == ItemRarity.Magic)
+            {
+                numPrefixes = Random.Range(0, 2);
+                numSuffixes = Random.Range(0, 2);
+                if (numPrefixes == 0 && numSuffixes == 0)
+                {
+                    if (Random.value > 0.5f) numPrefixes = 1;
+                    else numSuffixes = 1;
+                }
+            }
+            else if (Rarity == ItemRarity.Rare)
+            {
+                numPrefixes = Random.Range(1, 4);
+                numSuffixes = Random.Range(1, 4);
+            }
+            else if (Rarity == ItemRarity.Unique)
+            {
+                numPrefixes = Random.Range(0, 2);
+                numSuffixes = Random.Range(0, 2);
+            }
+
+            var prefixes = templates.FindAll(t => t.TypeOfAffix == AffixType.Prefix);
+            var suffixes = templates.FindAll(t => t.TypeOfAffix == AffixType.Suffix);
+
+            int pCount = 0;
+            int iter = 0;
+            while (pCount < numPrefixes && prefixes.Count > 0 && iter < 50)
+            {
+                iter++;
+                var p = prefixes[Random.Range(0, prefixes.Count)];
+                if (p != null && !Affixes.Exists(a => a.AffixName == p.AffixName))
+                {
+                    Affixes.Add(p.Roll());
+                    pCount++;
+                }
+            }
+
+            int sCount = 0;
+            iter = 0;
+            while (sCount < numSuffixes && suffixes.Count > 0 && iter < 50)
+            {
+                iter++;
+                var s = suffixes[Random.Range(0, suffixes.Count)];
+                if (s != null && !Affixes.Exists(a => a.AffixName == s.AffixName))
+                {
+                    Affixes.Add(s.Roll());
+                    sCount++;
+                }
+            }
         }
 
         public bool CanAddAffix(AffixType type)

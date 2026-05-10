@@ -15,6 +15,7 @@ MonoBehaviour:
   AbilityName: Cyclone
   Cooldown: 0
   ManaCost: 2
+  AnimationTriggerName: 
   Element: 0
   SkillType: 0
   SkillDescription: Spin continuously, attacking all surrounding targets with rapid
@@ -25,6 +26,5 @@ MonoBehaviour:
   AttackRange: 2.5
   ProjectileCount: 1
   Speed: 0
-  CastVFX: {fileID: 0}
-  ImpactVFX: {fileID: 517170533460803855, guid: 117f8a505030d254abaa098fdbd5b484,
-    type: 3}
+  CastVFX: {fileID: 6438811975416736645, guid: 9f9e5972d4aa84545b6da5d63c048d25, type: 3}
+  ImpactVFX: {fileID: 0}

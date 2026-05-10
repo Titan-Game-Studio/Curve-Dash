@@ -15,6 +15,7 @@ MonoBehaviour:
   AbilityName: Split Arrow
   Cooldown: 0.5
   ManaCost: 6
+  AnimationTriggerName: 
   Element: 0
   SkillType: 2
   SkillDescription: Fires a volley of 5 arrows in a wide frontal cone.
@@ -24,5 +25,5 @@ MonoBehaviour:
   AttackRange: 8
   ProjectileCount: 5
   Speed: 16
-  CastVFX: {fileID: 8735408722482519607, guid: a048bcf1214005047861302d0a4515da, type: 3}
+  CastVFX: {fileID: 1664554866138106, guid: cdf5105e83ab35f4e929972c34b34ed3, type: 3}
   ImpactVFX: {fileID: 0}

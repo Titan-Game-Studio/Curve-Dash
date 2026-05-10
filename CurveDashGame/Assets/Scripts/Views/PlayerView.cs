@@ -59,6 +59,37 @@ namespace STG.CurveDash
         public EquippableData RightHandItem => _rightHandItem;
         public WeaponInstance CurrentWeaponInstance { get; set; }
 
+        /// <summary>
+        /// Retrieves all abilities socketed inside equipped armor pieces (Helmet, Chest, Gloves, Boots)
+        /// using the DataManager's UserData and AssetManager's catalog.
+        /// </summary>
+        public List<AbilityData> GetEquippedArmorAbilities()
+        {
+            var list = new List<AbilityData>();
+            if (_dataManager == null || _assetManager == null || _dataManager.UserData == null || _dataManager.UserData.EquippedItems == null) 
+                return list;
+
+            var slotsToCheck = new List<EquipmentSlot> { EquipmentSlot.Head, EquipmentSlot.Body, EquipmentSlot.Hands, EquipmentSlot.Feet };
+            foreach (var slot in slotsToCheck)
+            {
+                if (_dataManager.UserData.EquippedItems.TryGetValue(slot, out string itemId))
+                {
+                    var item = _assetManager.GetItem(itemId);
+                    if (item is ArmorItemData armor && armor.Abilities != null)
+                    {
+                        foreach (var ab in armor.Abilities)
+                        {
+                            if (ab != null && !list.Contains(ab))
+                            {
+                                list.Add(ab);
+                            }
+                        }
+                    }
+                }
+            }
+            return list;
+        }
+
         public float MovementSpeed { get; set; } = 5f;
         public float AttackSpeed { get; set; } = 1f;
 

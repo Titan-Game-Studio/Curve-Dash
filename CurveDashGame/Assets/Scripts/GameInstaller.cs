@@ -53,6 +53,7 @@ namespace STG.CurveDash
             Container.BindInterfacesAndSelfTo<ObstacleSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<CloudSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<ShieldSystem>().AsSingle();
+            Container.BindInterfacesAndSelfTo<VfxSystem>().AsSingle();
             // Container.BindInterfacesAndSelfTo<EnemyMovementSystem>().AsSingle();
 
 

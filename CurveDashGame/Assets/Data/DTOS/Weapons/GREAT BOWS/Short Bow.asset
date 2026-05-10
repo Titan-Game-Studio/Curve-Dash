@@ -34,5 +34,11 @@ MonoBehaviour:
   BaseAttackRange: 4
   UseAnimationEvent: 0
   AttackHitDelay: 0.1
-  Abilities: []
+  Abilities:
+  - {fileID: 11400000, guid: 99bbd9616667aec4c95dd5b2c5e57b55, type: 2}
+  - {fileID: 11400000, guid: f4e7c6f8c6c7152428afa1d9ec743223, type: 2}
+  - {fileID: 11400000, guid: 9bb00284b54f492419346b129f9ffccf, type: 2}
+  - {fileID: 11400000, guid: a4d573294fed6ae4ba0f40506c2e13c5, type: 2}
+  - {fileID: 11400000, guid: 776bded369780254baec34a9ea685326, type: 2}
+  - {fileID: 11400000, guid: 2fd38960b50c7ac4dbddb7a90871ad4b, type: 2}
   DefaultArrow: {fileID: 11400000, guid: 63a1bd5357daee5459f6171e27a03d1b, type: 2}
