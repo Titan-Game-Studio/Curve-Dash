@@ -163,12 +163,14 @@ namespace STG.CurveDash
             var gameState = gameStateFilter.GetRawEntities()[0];
             ref var gameStateComponent = ref gameStatePool.Get(gameState);
 
+            bool isEscapePressed = UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current[UnityEngine.InputSystem.Key.Escape].wasPressedThisFrame;
+
             switch (gameStateComponent.State)
             {
                 case GameState.Title:
                     if (Application.platform == RuntimePlatform.Android)
                     {
-                        if (Input.GetKeyDown(KeyCode.Escape))
+                        if (isEscapePressed)
                             Application.Quit();
                     }
 
@@ -185,10 +187,16 @@ namespace STG.CurveDash
                     if (ballView != null)
                         ballView.SetInvincible(isInvincible);
 
-                    if (Input.GetKeyDown(KeyCode.Escape))
+                    if (isEscapePressed)
                         ShowTitle();
 
-                    if (Input.GetMouseButtonDown(0))
+                    bool screenTapOrClick = false;
+                    if (UnityEngine.InputSystem.Pointer.current != null && UnityEngine.InputSystem.Pointer.current.press.wasPressedThisFrame)
+                    {
+                        screenTapOrClick = true;
+                    }
+
+                    if (screenTapOrClick)
                         ballSystem.ChangeDirection(playerFilter.GetRawEntities()[0]);
 
                     foreach (var _ in playerFallingFilter)
@@ -202,7 +210,7 @@ namespace STG.CurveDash
                     break;
                 case GameState.GameEnd:
                 {
-                    if (Input.GetKeyDown(KeyCode.Escape))
+                    if (isEscapePressed)
                         ShowTitle();
                 }
                     break;

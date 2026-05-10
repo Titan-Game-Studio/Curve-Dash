@@ -1,4 +1,4 @@
-﻿namespace SRDebugger.Services.Implementation
+namespace SRDebugger.Services.Implementation
 {
     using System.Collections.Generic;
     using Internal;
@@ -123,6 +123,8 @@
         {
             base.Update();
 
+            /* Disable legacy keyboard shortcut polling to prevent InvalidOperationException in New Input System */
+            /*
             if (Settings.Instance.KeyboardEscapeClose && Input.GetKeyDown(KeyCode.Escape) && Service.Panel.IsVisible)
             {
                 SRDebug.Instance.HideDebugPanel();
@@ -157,6 +159,7 @@
                     break;
                 }
             }
+            */
         }
     }
 }

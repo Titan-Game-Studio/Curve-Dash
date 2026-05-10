@@ -156,7 +156,7 @@ namespace STG.CurveDash
             UpdateAnimatorSpeeds();
 
             // Toggle range debug visualization on simulator (runs in built games too)
-            if (Input.GetKeyDown(KeyCode.F3))
+            if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current[UnityEngine.InputSystem.Key.F3].wasPressedThisFrame)
             {
                 RangeCircleVisualizer.IsDebugEnabled = !RangeCircleVisualizer.IsDebugEnabled;
                 Debug.Log($"[Debug] Range circle debug visualization toggled: {RangeCircleVisualizer.IsDebugEnabled}");

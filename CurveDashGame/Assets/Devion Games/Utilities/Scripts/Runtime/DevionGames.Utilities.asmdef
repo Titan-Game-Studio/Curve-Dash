@@ -1,0 +1,7 @@
+{
+    "name": "DevionGames.Utilities",
+    "references": [
+        "Unity.InputSystem"
+    ],
+    "autoReferenced": true
+}

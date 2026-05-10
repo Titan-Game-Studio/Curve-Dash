@@ -1,7 +1,8 @@
 {
     "name": "StompyRobot.SRDebugger",
     "references": [
-        "StompyRobot.SRF"
+        "StompyRobot.SRF",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": []
