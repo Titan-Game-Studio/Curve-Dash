@@ -232,14 +232,13 @@ namespace STG.CurveDash
 
             foreach (var _ in playerHitShieldFilter)
             {
-                playerStatService.AddHeart(1);
+                playerStatService.AddEnergyShield(20f);
                 audioPlayer.Play(audioSettings.BallHitCrystalSound, audioSettings.BallHitCrystalVolume);
             }
 
-            foreach (var _ in playerHitObstacleFilter)
+            foreach (var obstacleHit in playerHitObstacleFilter)
             {
-                // Không làm gì hoặc chỉ trừ điểm/mất máu mà không gây chớp trắng
-                // playerStatService.TakeDamage(1, null);
+                playerStatService.TakeDamage(10f, GameOver);
             }
 
             foreach (var enemyHit in playerHitByEnemyFilter)
@@ -247,7 +246,9 @@ namespace STG.CurveDash
                 var ball = playerFilter.GetRawEntities()[0];
                 ref var viewLink = ref viewLinkPool.Get(ball);
                 var ballView = viewLink.Transform.GetComponent<PlayerView>();
-                if (ballView != null) ballView.FlashWhite(0.5f); // Chớp trắng trong 0.5s
+                if (ballView != null) ballView.FlashWhite(0.5f);
+
+                playerStatService.TakeDamage(15f, GameOver);
 
                 world.GetPool<PlayerHitByEnemyEvent>().Del(enemyHit);
             }

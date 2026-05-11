@@ -16,7 +16,7 @@ namespace STG.CurveDash.Editor
 
         private const string SavePath = "Assets/Data/DTOS/Armors/";
 
-        [MenuItem("Curve Dash/Tools/Armor Generator")]
+        [MenuItem("Curve-Dash/Tools/Armor Generator")]
         public static void ShowWindow()
         {
             GetWindow<ArmorGeneratorEditor>("Armor Generator");
@@ -128,3 +128,4 @@ namespace STG.CurveDash.Editor
         }
     }
 }
+

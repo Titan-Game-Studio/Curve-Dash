@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20a93a8c91388c14b9ef4d3d0c9b4d1b, type: 3}
+  m_Name: Magic_Slink_Boots_Adapter
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashItemAdapter
+  m_Id: f6feed77-3035-411e-955e-c033f339de54
+  m_ItemName: Slink Boots
+  m_UseItemNameAsDisplayName: 1
+  m_DisplayName: New Item
+  m_Icon: {fileID: 0}
+  m_Prefab: {fileID: 0}
+  m_Description: Light and flexible magical running boots.
+  m_Category: {fileID: 8705209814584371102, guid: 17787831f9b1b6f469b7778380828f6a,
+    type: 2}
+  m_IsSellable: 1
+  m_BuyPrice: 10
+  m_CanBuyBack: 1
+  m_BuyCurrency: {fileID: -6623786914046544860, guid: 17787831f9b1b6f469b7778380828f6a,
+    type: 2}
+  m_SellPrice: 5
+  m_SellCurrency: {fileID: -6623786914046544860, guid: 17787831f9b1b6f469b7778380828f6a,
+    type: 2}
+  m_Stack: 1
+  m_MaxStack: 1
+  m_IsDroppable: 1
+  m_DropSound: {fileID: 0}
+  m_OverridePrefab: {fileID: 0}
+  m_IsCraftable: 0
+  m_CraftingDuration: 2
+  m_UseCraftingSkill: 0
+  m_SkillWindow: Skills
+  m_CraftingSkill: {fileID: 0}
+  m_RemoveIngredientsWhenFailed: 0
+  m_MinCraftingSkillValue: 0
+  m_CraftingAnimatorState: Blacksmithy
+  m_CraftingModifier:
+    modifiers: []
+  ingredients: []
+  properties:
+  - name: Item Type
+    typeIndex: 0
+    stringValue: Armor
+    intValue: 0
+    floatValue: 0
+    colorValue: {r: 0, g: 0, b: 0, a: 0}
+    boolValue: 0
+    objectReferenceValue: {fileID: 0}
+    vector2Value: {x: 0, y: 0}
+    vector3Value: {x: 0, y: 0, z: 0}
+    show: 1
+    color: {r: 1, g: 1, b: 1, a: 1}
+  - name: Rarity
+    typeIndex: 0
+    stringValue: Magic
+    intValue: 0
+    floatValue: 0
+    colorValue: {r: 0, g: 0, b: 0, a: 0}
+    boolValue: 0
+    objectReferenceValue: {fileID: 0}
+    vector2Value: {x: 0, y: 0}
+    vector3Value: {x: 0, y: 0, z: 0}
+    show: 1
+    color: {r: 0.35, g: 0.55, b: 1, a: 1}
+  m_OriginalItemData: {fileID: 11400000, guid: ecdcfc2701f68e544a2a4b2e7d240e66, type: 2}

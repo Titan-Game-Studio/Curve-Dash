@@ -8,7 +8,7 @@ namespace STG.CurveDash
         Suffix
     }
 
-    [CreateAssetMenu(fileName = "NewAffix", menuName = "Curve Dash/Items/Affix Template")]
+    [CreateAssetMenu(fileName = "NewAffix", menuName = "Curve-Dash/Items/Affix Template")]
     public class AffixData : ScriptableObject
     {
         public string AffixName; 
@@ -30,3 +30,4 @@ namespace STG.CurveDash
         }
     }
 }
+

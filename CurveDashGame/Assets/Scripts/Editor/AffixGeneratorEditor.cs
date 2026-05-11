@@ -14,7 +14,7 @@ namespace STG.CurveDash.Editor
         
         private const string SavePath = "Assets/Data/DTOS/Affixs/";
 
-        [MenuItem("Curve Dash/Tools/Affix Generator")]
+        [MenuItem("Curve-Dash/Tools/Affix Generator")]
         public static void ShowWindow()
         {
             GetWindow<AffixGeneratorEditor>("Affix Generator");
@@ -96,3 +96,4 @@ namespace STG.CurveDash.Editor
         }
     }
 }
+

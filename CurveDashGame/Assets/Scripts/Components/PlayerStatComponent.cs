@@ -6,7 +6,12 @@ namespace STG.CurveDash
         public int HighScore;
         public int Level;
         public int Gold;
-        public int Heart;
+        public float CurrentLife;
+        public float MaxLife;
+        public float CurrentMana;
+        public float MaxMana;
+        public float CurrentEnergyShield;
+        public float MaxEnergyShield;
         public float InvincibleTimer;
     }
 }

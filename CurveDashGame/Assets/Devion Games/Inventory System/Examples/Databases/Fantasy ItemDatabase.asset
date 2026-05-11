@@ -1045,7 +1045,7 @@ MonoBehaviour:
   m_SellPrice: 17
   m_SellCurrency: {fileID: -2811142919616601772}
   m_Stack: 1
-  m_MaxStack: 1
+  m_MaxStack: 0
   m_IsDroppable: 1
   m_DropSound: {fileID: 0}
   m_OverridePrefab: {fileID: 0}
@@ -1558,7 +1558,7 @@ MonoBehaviour:
   m_SellPrice: 18
   m_SellCurrency: {fileID: -2811142919616601772}
   m_Stack: 1
-  m_MaxStack: 1
+  m_MaxStack: 60
   m_IsDroppable: 1
   m_DropSound: {fileID: 0}
   m_OverridePrefab: {fileID: 0}

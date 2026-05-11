@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2510c0c046da14c4594363ecb37bef83, type: 3}
+  m_Name: Magic_Glinting_Sword
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.OneHandedWeaponData
+  ItemName: Glinting Sword
+  Icon: {fileID: 0}
+  Rarity: 1
+  Type: 0
+  Prefab:
+    m_AssetGUID: 
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
+  Description: Glints with clean steel edge.
+  VisualModel: {fileID: 0}
+  PositionOffset: {x: 0, y: 0, z: 0}
+  RotationOffset: {x: 0, y: 0, z: 0}
+  MainAnimator: {fileID: 0}
+  BaseMinDamage: 14
+  BaseMaxDamage: 20
+  BaseAttackSpeed: 1.4
+  BaseAttackRange: 1.6
+  UseAnimationEvent: 0
+  AttackHitDelay: 0.3
+  Abilities: []
+  DualWieldController: {fileID: 0}
+  SwordShieldController: {fileID: 0}

@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace STG.CurveDash
 {
-    [CreateAssetMenu(fileName = "NewBow", menuName = "Curve Dash/Weapons/Great Bow")]
+    [CreateAssetMenu(fileName = "NewBow", menuName = "Curve-Dash/Weapons/Great Bow")]
     public class BowData : WeaponData
     {
         public override int MaxSockets => 6;
@@ -13,4 +13,5 @@ namespace STG.CurveDash
         public OffHandData DefaultArrow;
     }
 }
+
 

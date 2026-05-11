@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace STG.CurveDash
 {
-    [CreateAssetMenu(fileName = "NewSupportAbility", menuName = "Curve Dash/Abilities/Support Ability")]
+    [CreateAssetMenu(fileName = "NewSupportAbility", menuName = "Curve-Dash/Abilities/Support Ability")]
     public class SupportAbilityData : AbilityData
     {
         [Header("Support Gem Settings")]
@@ -76,3 +76,4 @@ namespace STG.CurveDash
         }
     }
 }
+

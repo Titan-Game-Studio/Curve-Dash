@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace STG.CurveDash
 {
-    [CreateAssetMenu(fileName = "GamePrefabs", menuName = "Curve Dash/Prefabs Settings")]
+    [CreateAssetMenu(fileName = "GamePrefabs", menuName = "Curve-Dash/Prefabs Settings")]
     public class PrefabsSettings : ScriptableObject
     {
         [Header("Player & Environment")]

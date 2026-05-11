@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.Collections;
@@ -24,12 +24,35 @@ namespace DevionGames{
             EditorTools.m_CustomPropertyDrawerLookup = new Dictionary<Type, bool>();
         }
 
+        private static GUIStyle SafeStyle(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return GUIStyle.none;
+
+            // In newer Unity versions, "Seach" typo was corrected to "Search"
+            string correctedName = name.Replace("Seach", "Search");
+
+            GUIStyle style = null;
+            try {
+                style = GUI.skin?.FindStyle(correctedName) ?? GUI.skin?.FindStyle(name);
+            } catch {}
+
+            if (style == null) {
+                try {
+                    style = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector)?.FindStyle(correctedName) ?? 
+                            EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector)?.FindStyle(name);
+                } catch {}
+            }
+
+            return style ?? GUIStyle.none;
+        }
+
         public static string SearchField(string search,bool focus = false, params GUILayoutOption[] options)
         {
             EditorGUILayout.BeginHorizontal();
             string before = search;
 
-            Rect rect = GUILayoutUtility.GetRect(GUIContent.none, "ToolbarSeachTextField", options);
+            GUIStyle textFieldStyle = SafeStyle("ToolbarSeachTextField");
+            Rect rect = GUILayoutUtility.GetRect(GUIContent.none, textFieldStyle, options);
             rect.x += 2f;
             rect.width -= 2f;
             Rect buttonRect = rect;
@@ -47,7 +70,8 @@ namespace DevionGames{
 
             }
             GUI.SetNextControlName("SearchTextFieldFocus");
-            GUIStyle style = new GUIStyle("ToolbarSeachTextField");
+            
+            GUIStyle style = new GUIStyle(textFieldStyle);
             if (before == "Search...")
             {
                 style.normal.textColor = Color.gray;
@@ -57,7 +81,8 @@ namespace DevionGames{
             if(focus)
                 EditorGUI.FocusTextInControl("SearchTextFieldFocus");
 
-            GUI.Button(buttonRect, GUIContent.none, (after != "" && after != "Search...") ? "ToolbarSeachCancelButton" : "ToolbarSeachCancelButtonEmpty");
+            GUIStyle cancelStyle = SafeStyle((after != "" && after != "Search...") ? "ToolbarSeachCancelButton" : "ToolbarSeachCancelButtonEmpty");
+            GUI.Button(buttonRect, GUIContent.none, cancelStyle);
             EditorGUILayout.EndHorizontal();
             return after;
         }
@@ -73,7 +98,8 @@ namespace DevionGames{
 			string[] result = new string[]{filter,search};
 			string before = search;
 
-			Rect rect = GUILayoutUtility.GetRect (GUIContent.none,(GUIStyle)"ToolbarSeachTextFieldPopup",options);
+			GUIStyle popupStyle = SafeStyle("ToolbarSeachTextFieldPopup");
+			Rect rect = GUILayoutUtility.GetRect (GUIContent.none, popupStyle, options);
             rect.x += 2f;
             rect.width -= 2f;
             Rect buttonRect = rect;
@@ -90,7 +116,7 @@ namespace DevionGames{
                 GUI.FocusControl(null);
             }
 
-            GUIStyle style = new GUIStyle("ToolbarSeachTextField");
+            GUIStyle style = new GUIStyle(SafeStyle("ToolbarSeachTextField"));
             if (before == "Search...")
             {
                 style.normal.textColor = Color.gray;
@@ -110,9 +136,10 @@ namespace DevionGames{
                     before = result[0];
                 }
             }
-            string after = EditorGUI.TextField(rect, "", before, (GUIStyle)"ToolbarSeachTextFieldPopup");
+            string after = EditorGUI.TextField(rect, "", before, popupStyle);
 
-            GUI.Button(buttonRect, GUIContent.none, (after != "" && after != "Search...") ? "ToolbarSeachCancelButton" : "ToolbarSeachCancelButtonEmpty");
+            GUIStyle cancelStyle = SafeStyle((after != "" && after != "Search...") ? "ToolbarSeachCancelButton" : "ToolbarSeachCancelButtonEmpty");
+            GUI.Button(buttonRect, GUIContent.none, cancelStyle);
             EditorGUILayout.EndHorizontal();
             result[1] = after;
             return result;

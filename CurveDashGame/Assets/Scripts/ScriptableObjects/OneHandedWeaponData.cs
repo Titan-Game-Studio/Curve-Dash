@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace STG.CurveDash
 {
-    [CreateAssetMenu(fileName = "NewOneHandedWeapon", menuName = "Curve Dash/Weapons/One-Handed Sword")]
+    [CreateAssetMenu(fileName = "NewOneHandedWeapon", menuName = "Curve-Dash/Weapons/One-Handed Sword")]
     public class OneHandedWeaponData : WeaponData
     {
         public override int MaxSockets => 3;
@@ -14,3 +14,4 @@ namespace STG.CurveDash
         public RuntimeAnimatorController SwordShieldController;
     }
 }
+

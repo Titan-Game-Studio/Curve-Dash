@@ -45,7 +45,7 @@ namespace STG.CurveDash.Editor
 
         private const string SavePath = "Assets/Data/DTOS/Abilities/";
 
-        [MenuItem("Curve Dash/Tools/Ability Generator")]
+        [MenuItem("Curve-Dash/Tools/Ability Generator")]
         public static void ShowWindow()
         {
             GetWindow<AbilityGeneratorEditor>("Ability Generator");
@@ -329,3 +329,4 @@ namespace STG.CurveDash.Editor
         }
     }
 }
+

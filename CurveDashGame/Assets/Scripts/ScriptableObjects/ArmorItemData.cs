@@ -16,7 +16,7 @@ namespace STG.CurveDash
         Belt
     }
 
-    [CreateAssetMenu(fileName = "New Armor", menuName = "Curve Dash/Items/Armor Data")]
+    [CreateAssetMenu(fileName = "New Armor", menuName = "Curve-Dash/Items/Armor Data")]
     public class ArmorItemData : ItemData
     {
         public EquipmentSlot Slot;
@@ -62,3 +62,4 @@ namespace STG.CurveDash
         }
     }
 }
+

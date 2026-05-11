@@ -46,6 +46,18 @@ namespace STG.CurveDash.Editor
             }
 
             serializedObject.ApplyModifiedProperties();
+
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("Inventory System Integration", EditorStyles.boldLabel);
+            GUI.backgroundColor = new Color(0.24f, 0.44f, 0.94f, 1f); 
+            if (GUILayout.Button("🛡️ Create/Update Inventory Adapter", GUILayout.Height(32)))
+            {
+                CurveDashInventoryEditorUtility.CreateAdapter(armor);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+            }
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.Space();
         }
 
         private void AddRandomAbilitiesToArmor(ArmorItemData armor)

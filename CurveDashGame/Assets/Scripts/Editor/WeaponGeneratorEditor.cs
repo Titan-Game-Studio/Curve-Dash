@@ -34,7 +34,7 @@ namespace STG.CurveDash.Editor
 
         private const string SavePath = "Assets/Data/DTOS/Weapons/";
 
-        [MenuItem("Curve Dash/Tools/Weapon Generator")]
+        [MenuItem("Curve-Dash/Tools/Weapon Generator")]
         public static void ShowWindow()
         {
             GetWindow<WeaponGeneratorEditor>("Weapon Generator");
@@ -246,3 +246,4 @@ namespace STG.CurveDash.Editor
         }
     }
 }
+

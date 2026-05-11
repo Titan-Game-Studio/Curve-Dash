@@ -22,7 +22,7 @@ namespace STG.CurveDash.Editor
             ClearAllSocketsInternal(false);
         }
 
-        [MenuItem("Curve Dash/Tools/Clear All Testing Sockets", false, 50)]
+        [MenuItem("Curve-Dash/Tools/Clear All Testing Sockets", false, 50)]
         public static void ManualClearAllSockets()
         {
             if (EditorUtility.DisplayDialog("Clear All Testing Sockets?", 
@@ -90,3 +90,4 @@ namespace STG.CurveDash.Editor
         }
     }
 }
+

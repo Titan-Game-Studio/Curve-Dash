@@ -42,7 +42,8 @@ namespace STG.CurveDash
             {
                 playerStatComponent.Level++;
                 playerLevelUpPool.Add(playerStat);
-                AddHeart(1);
+                AddLife(20f);
+                AddMana(10f);
             }
         }
 
@@ -54,26 +55,56 @@ namespace STG.CurveDash
             AddScore(10);
         }
 
-        public void AddHeart(int heart)
+        public void AddLife(float amount)
         {
             var playerStat = playerStatFilter.GetRawEntities()[0];
             ref var playerStatComponent = ref playerStatPool.Get(playerStat);
-            if (playerStatComponent.Heart + heart > MaxHeart)
-            {
-                return;
-            }
-
-            playerStatComponent.Heart += heart;
+            playerStatComponent.CurrentLife = Mathf.Min(playerStatComponent.MaxLife, playerStatComponent.CurrentLife + amount);
         }
 
-        public void TakeDamage(int damage, Action onDeath = null)
+        public void AddMana(float amount)
         {
             var playerStat = playerStatFilter.GetRawEntities()[0];
             ref var playerStatComponent = ref playerStatPool.Get(playerStat);
-            playerStatComponent.Heart -= damage;
+            playerStatComponent.CurrentMana = Mathf.Min(playerStatComponent.MaxMana, playerStatComponent.CurrentMana + amount);
+        }
 
-            if (playerStatComponent.Heart <= 0)
+        public void AddEnergyShield(float amount)
+        {
+            var playerStat = playerStatFilter.GetRawEntities()[0];
+            ref var playerStatComponent = ref playerStatPool.Get(playerStat);
+            playerStatComponent.CurrentEnergyShield = Mathf.Min(playerStatComponent.MaxEnergyShield, playerStatComponent.CurrentEnergyShield + amount);
+        }
+
+        public void TakeDamage(float damage, Action onDeath = null)
+        {
+            var playerStat = playerStatFilter.GetRawEntities()[0];
+            ref var playerStatComponent = ref playerStatPool.Get(playerStat);
+            
+            // 1. Energy Shield absorbs damage first
+            if (playerStatComponent.CurrentEnergyShield > 0)
             {
+                if (playerStatComponent.CurrentEnergyShield >= damage)
+                {
+                    playerStatComponent.CurrentEnergyShield -= damage;
+                    damage = 0;
+                }
+                else
+                {
+                    damage -= playerStatComponent.CurrentEnergyShield;
+                    playerStatComponent.CurrentEnergyShield = 0;
+                }
+            }
+
+            // 2. Excess damage goes to Life
+            if (damage > 0)
+            {
+                playerStatComponent.CurrentLife -= damage;
+            }
+
+            if (playerStatComponent.CurrentLife <= 0)
+            {
+                playerStatComponent.CurrentLife = 0;
                 onDeath?.Invoke();
             }
         }
@@ -86,7 +117,12 @@ namespace STG.CurveDash
             playerStatComponent.Level = level;
             playerStatComponent.Score = 0;
             playerStatComponent.Gold = 0;
-            playerStatComponent.Heart = MaxHeart;
+            playerStatComponent.MaxLife = 100f;
+            playerStatComponent.CurrentLife = 100f;
+            playerStatComponent.MaxMana = 50f;
+            playerStatComponent.CurrentMana = 50f;
+            playerStatComponent.MaxEnergyShield = 30f;
+            playerStatComponent.CurrentEnergyShield = 30f;
             playerStatComponent.InvincibleTimer = 0f;
             RestoreResult(ref playerStatComponent);
         }

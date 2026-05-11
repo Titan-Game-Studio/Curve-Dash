@@ -40,10 +40,12 @@ namespace STG.CurveDash
                 level = playerStatComponent.Level;
             }
 
-            if (playerStatComponent.Heart != heartCount)
+            float lifePercent = playerStatComponent.MaxLife > 0 ? (playerStatComponent.CurrentLife / playerStatComponent.MaxLife) : 0f;
+            int activeHearts = Mathf.RoundToInt(lifePercent * 5f);
+            if (activeHearts != heartCount)
             {
-                UpdateHearts(playerStatComponent.Heart);
-                heartCount = playerStatComponent.Heart;
+                UpdateHearts(activeHearts);
+                heartCount = activeHearts;
             }
         }
 

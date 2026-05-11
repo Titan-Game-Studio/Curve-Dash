@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace STG.CurveDash
 {
-    [CreateAssetMenu(fileName = "NewMonster", menuName = "Curve Dash/Monsters/Monster Data")]
+    [CreateAssetMenu(fileName = "NewMonster", menuName = "Curve-Dash/Monsters/Monster Data")]
     public class MonsterData : ScriptableObject
     {
         public string MonsterName;
@@ -14,3 +14,4 @@ namespace STG.CurveDash
 
     }
 }
+

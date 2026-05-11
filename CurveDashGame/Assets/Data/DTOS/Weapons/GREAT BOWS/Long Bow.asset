@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Long Bow
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.BowData
   ItemName: Long Bow
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
   Rarity: 2
   Type: 0
   Prefab:

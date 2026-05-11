@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace STG.CurveDash
 {
-    [CreateAssetMenu(fileName = "SimpleSlashAbility", menuName = "Curve Dash/Abilities/Simple Slash")]
+    [CreateAssetMenu(fileName = "SimpleSlashAbility", menuName = "Curve-Dash/Abilities/Simple Slash")]
     public class SimpleSlashAbility : AbilityData
     {
         public GameObject SlashVFX;
@@ -27,3 +27,4 @@ namespace STG.CurveDash
         }
     }
 }
+

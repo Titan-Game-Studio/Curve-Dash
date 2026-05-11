@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace STG.CurveDash
 {
-    [CreateAssetMenu(fileName = "GameAssetCatalog", menuName = "Curve Dash/Catalogs/Master Game Asset Catalog")]
+    [CreateAssetMenu(fileName = "GameAssetCatalog", menuName = "Curve-Dash/Catalogs/Master Game Asset Catalog")]
     public class GameAssetCatalog : ScriptableObject
     {
         [Header("Shop Items")]
@@ -24,4 +24,5 @@ namespace STG.CurveDash
         public AudioMappingCatalog AudioCatalog;
     }
 }
+
 

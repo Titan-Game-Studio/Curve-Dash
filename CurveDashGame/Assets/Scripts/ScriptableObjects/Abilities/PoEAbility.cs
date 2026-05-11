@@ -19,7 +19,7 @@ namespace STG.CurveDash
         Aura
     }
 
-    [CreateAssetMenu(fileName = "NewPoEAbility", menuName = "Curve Dash/Abilities/PoE Skill")]
+    [CreateAssetMenu(fileName = "NewPoEAbility", menuName = "Curve-Dash/Abilities/PoE Skill")]
     public class PoEAbility : AbilityData
     {
         [Header("PoE Skill Settings")]

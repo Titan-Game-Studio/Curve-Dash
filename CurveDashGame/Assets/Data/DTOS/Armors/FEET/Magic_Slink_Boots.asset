@@ -27,3 +27,4 @@ MonoBehaviour:
   ModularPartIndex: 1
   Defense: 22
   HealthBonus: 15
+  Abilities: []

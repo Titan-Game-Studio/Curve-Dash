@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -212,7 +212,23 @@ namespace DevionGames
             EditorGUILayout.BeginHorizontal();
             string before = search;
 
-            Rect rect = GUILayoutUtility.GetRect(GUIContent.none, "ToolbarSeachTextField", options);
+            // Get styles with robust fallbacks to avoid skin warnings or errors
+            GUIStyle textStyle = GUI.skin.FindStyle("ToolbarSearchTextField") ?? 
+                                 GUI.skin.FindStyle("ToolbarSeachTextField") ?? 
+                                 GUI.skin.FindStyle("SearchTextField") ?? 
+                                 EditorStyles.textField;
+
+            GUIStyle cancelStyle = GUI.skin.FindStyle("ToolbarSearchCancelButton") ?? 
+                                   GUI.skin.FindStyle("ToolbarSeachCancelButton") ?? 
+                                   GUI.skin.FindStyle("SearchCancelButton") ?? 
+                                   GUIStyle.none;
+
+            GUIStyle cancelEmptyStyle = GUI.skin.FindStyle("ToolbarSearchCancelButtonEmpty") ?? 
+                                        GUI.skin.FindStyle("ToolbarSeachCancelButtonEmpty") ?? 
+                                        GUI.skin.FindStyle("SearchCancelButtonEmpty") ?? 
+                                        GUIStyle.none;
+
+            Rect rect = GUILayoutUtility.GetRect(GUIContent.none, textStyle, options);
             rect.x += 2f;
             rect.width -= 2f;
             Rect buttonRect = rect;
@@ -230,7 +246,7 @@ namespace DevionGames
 
             }
             GUI.SetNextControlName("SearchTextFieldFocus");
-            GUIStyle style = new GUIStyle("ToolbarSeachTextField");
+            GUIStyle style = new GUIStyle(textStyle);
             if (before == "Search...")
             {
                 style.normal.textColor = Color.gray;
@@ -239,7 +255,7 @@ namespace DevionGames
             string after = EditorGUI.TextField(rect, "", before, style);
             EditorGUI.FocusTextInControl("SearchTextFieldFocus");
 
-            GUI.Button(buttonRect, GUIContent.none, (after != "" && after != "Search...") ? "ToolbarSeachCancelButton" : "ToolbarSeachCancelButtonEmpty");
+            GUI.Button(buttonRect, GUIContent.none, (after != "" && after != "Search...") ? cancelStyle : cancelEmptyStyle);
             EditorGUILayout.EndHorizontal();
             return after;
         }

@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91841b94ce3b8574999cf69c5262e69c, type: 3}
+  m_Name: Normal_Splintered_Shield
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.OffHandData
+  ItemName: Splintered Shield
+  Icon: {fileID: 0}
+  Rarity: 0
+  Type: 1
+  Prefab:
+    m_AssetGUID: 
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
+  Description: Barely holds together.
+  VisualModel: {fileID: 0}
+  PositionOffset: {x: 0, y: 0, z: 0}
+  RotationOffset: {x: 0, y: 0, z: 0}
+  MainAnimator: {fileID: 0}
+  SubType: 0
+  BlockChance: 25
+  BonusDamage: 0
+  Abilities: []
