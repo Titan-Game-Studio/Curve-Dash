@@ -23,4 +23,5 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Identifies an item's hidden properties.
+  DevionAdapter: {fileID: 11400000, guid: 1a4cde7e454e3604793037d945443a62, type: 2}
   CurrencyType: 0

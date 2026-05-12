@@ -13,17 +13,19 @@ MonoBehaviour:
   m_Name: Magic_Stealth_Gloves
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Stealth Gloves
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: cfea9c36036ca9e4591419c6c526d558, type: 3}
   Rarity: 1
   Type: 1
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: 8cbf3f77089ba1b4f9ca78dd727d6d28
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Magic gloves that blend with shadows.
+  DevionAdapter: {fileID: 11400000, guid: 0e9fad8e4be0be0499cb5bc6a78a2549, type: 2}
   Slot: 2
-  ModularPartIndex: 1
+  ModularPartIndex: 3
   Defense: 22
   HealthBonus: 15
+  Abilities: []

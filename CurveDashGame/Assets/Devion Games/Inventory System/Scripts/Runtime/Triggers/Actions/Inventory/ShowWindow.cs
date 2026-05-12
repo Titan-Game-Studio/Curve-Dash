@@ -8,6 +8,7 @@ namespace DevionGames.InventorySystem
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon("Item")]
     [ComponentMenu("Inventory System/Show Window")]
+    [System.Serializable]
     public class ShowWindow : Action, ITriggerUnUsedHandler
     {
         [Tooltip("The name of the window to show.")]

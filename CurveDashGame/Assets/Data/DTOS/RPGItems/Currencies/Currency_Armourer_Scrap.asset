@@ -23,4 +23,5 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Improves the quality of an armor piece.
+  DevionAdapter: {fileID: 11400000, guid: 81896f1ca32661e4399785bc60b2cf09, type: 2}
   CurrencyType: 6

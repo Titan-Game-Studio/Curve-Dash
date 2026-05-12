@@ -35,8 +35,8 @@ namespace STG.CurveDash
 
         private readonly EcsFilter playerFilter;
 
-        private readonly Collider[] hitColliders = new Collider[1];
-        private readonly Collider[] hitColliders1 = new Collider[1];
+        private readonly Collider[] hitColliders = new Collider[8];
+        private readonly Collider[] hitColliders1 = new Collider[8];
 
         private float playerSize = 1f;
 
@@ -77,7 +77,8 @@ namespace STG.CurveDash
             ref var viewLinkComponent = ref viewLinkPool.Get(ball);
             var position = viewLinkComponent.Transform.position;
 
-            if (!CheckEntityUnder(position, out var blockEntity))
+            // Use a highly forgiving radius (0.6f) when changing direction so slight animation/combat offsets don't softlock tap controls!
+            if (!CheckEntityUnder(position, out var blockEntity, 0.6f))
             {
                 Debug.LogWarning($"[Movement] ChangeDirection ignored! CheckEntityUnder returned FALSE at position {position}");
                 return; // can't change direction when fall
@@ -88,7 +89,7 @@ namespace STG.CurveDash
             // Log when character starts moving (Direction transitions from zero)
             if (playerComponent.Direction == Vector3.zero)
             {
-                Debug.Log($"[Movement] Character started moving! Initial tap on block entity {blockEntity}.");
+                // Debug.Log($"[Movement] Character started moving! Initial tap on block entity {blockEntity}.");
                 Vector3 lastDir = playerComponent.LastNonZeroDirection != Vector3.zero 
                     ? playerComponent.LastNonZeroDirection 
                     : Vector3.forward;
@@ -96,7 +97,7 @@ namespace STG.CurveDash
             }
             else
             {
-                Debug.Log($"[Movement] Direction changed on block entity {blockEntity}.");
+                // Debug.Log($"[Movement] Direction changed on block entity {blockEntity}.");
                 playerComponent.Direction = playerComponent.Direction == Vector3.forward ? -Vector3.left : Vector3.forward;
             }
 
@@ -184,15 +185,25 @@ namespace STG.CurveDash
                     if (CheckCollisionWithPickup(position, out int pickupEntity))
                     {
                         if (crystalPool.Has(pickupEntity) && !playerHitCrystalPool.Has(pickupEntity))
+                        {
                             playerHitCrystalPool.Add(pickupEntity);
+                        }
                         else if (shieldPool.Has(pickupEntity) && !playerHitShieldPool.Has(pickupEntity))
+                        {
                             playerHitShieldPool.Add(pickupEntity);
+                        }
                         else if (weaponPickupPool.Has(pickupEntity) && !playerHitWeaponPool.Has(pickupEntity))
+                        {
                             playerHitWeaponPool.Add(pickupEntity);
+                        }
                         else if (mountPickupPool.Has(pickupEntity) && !playerHitMountPool.Has(pickupEntity))
+                        {
                             playerHitMountPool.Add(pickupEntity);
+                        }
                         else if (auraPickupPool.Has(pickupEntity) && !playerHitAuraPool.Has(pickupEntity))
+                        {
                             playerHitAuraPool.Add(pickupEntity);
+                        }
                     }
 
                     if (CheckCollisionWithObstacle(position, out int obstacle) && obstaclePool.Has(obstacle))
@@ -232,15 +243,15 @@ namespace STG.CurveDash
             }
         }
 
-        private bool CheckEntityUnder(Vector3 position, out int hitEntity)
+        private bool CheckEntityUnder(Vector3 position, out int hitEntity, float radius = 0.1f)
         {
-            const float SphereCastRadius = 0.1f;
-            var hits = Physics.SphereCastAll(position + Vector3.up * 0.5f, SphereCastRadius, Vector3.down, 1.5f);
+            // Spherecast from a safe height above the position to ensure it hits the block even if jumping, falling, or performing animation-driven root motion
+            var hits = Physics.SphereCastAll(new Vector3(position.x, position.y + 5.0f, position.z), radius, Vector3.down, 10.0f);
             
-            if (hits.Length > 0)
-            {
-                Debug.Log($"[CheckEntityUnder] Position: {position}, Hit count: {hits.Length}");
-            }
+            // if (hits.Length > 0)
+            // {
+            //     Debug.Log($"[CheckEntityUnder] Position: {position}, Hit count: {hits.Length}");
+            // }
             
             foreach (var hit in hits)
             {
@@ -270,7 +281,7 @@ namespace STG.CurveDash
                     isBlock = blockPool.Has(entity);
                 }
                 
-                Debug.Log($"[CheckEntityUnder] Hit: {hit.transform.name} | Parent: {(hit.transform.parent != null ? hit.transform.parent.name : "null")} | Unpacked: {unpacked} | Entity: {entity} | IsBlock: {isBlock}");
+                // Debug.Log($"[CheckEntityUnder] Hit: {hit.transform.name} | Parent: {(hit.transform.parent != null ? hit.transform.parent.name : "null")} | Unpacked: {unpacked} | Entity: {entity} | IsBlock: {isBlock}");
 
                 if (unpacked && isBlock)
                 {
@@ -285,11 +296,33 @@ namespace STG.CurveDash
 
         private bool CheckCollisionWithPickup(Vector3 position, out int hitEntity)
         {
-            if (Physics.OverlapSphereNonAlloc(position, PlayerOverlapRadius, hitColliders, gameSettings.PickupMask) != 0)
+            // Center the sphere at Y = 0.5f and expand radius to 1.2f to cover vertical offset.
+            // Use ~0 (All Layers) and QueryTriggerInteraction.Collide unconditionally to bypass any layer mask mismatches
+            // or disabled "Queries Hit Triggers" global settings in Unity Project settings.
+            int numHits = Physics.OverlapSphereNonAlloc(position + Vector3.up * 0.5f, 1.2f, hitColliders, ~0, QueryTriggerInteraction.Collide);
+
+            for (int i = 0; i < numHits; i++)
             {
-                var linkView = hitColliders[0].transform.GetComponent<EntityLinkView>();
+                var hitCollider = hitColliders[i];
+                var linkView = hitCollider.transform.GetComponentInParent<EntityLinkView>();
+
                 if (linkView != null)
-                    return linkView.Entity.Unpack(world, out hitEntity);
+                {
+                    if (linkView.Entity.Unpack(world, out hitEntity))
+                    {
+                        bool isCrystal = crystalPool.Has(hitEntity);
+                        bool isShield = shieldPool.Has(hitEntity);
+                        bool isWeapon = weaponPickupPool.Has(hitEntity);
+                        bool isMount = mountPickupPool.Has(hitEntity);
+                        bool isAura = auraPickupPool.Has(hitEntity);
+
+                        // Filter out non-pickup entities to prevent player self-selection or duplicate checks
+                        if (isCrystal || isShield || isWeapon || isMount || isAura)
+                        {
+                            return true;
+                        }
+                    }
+                }
             }
 
             hitEntity = -1;
@@ -298,11 +331,20 @@ namespace STG.CurveDash
 
         private bool CheckCollisionWithEnemy(Vector3 position, out int hitEntity)
         {
-            if (Physics.OverlapSphereNonAlloc(position, PlayerOverlapRadius, hitColliders, gameSettings.EnemyMask) != 0)
+            int numHits = Physics.OverlapSphereNonAlloc(position + Vector3.up * 0.5f, 1.2f, hitColliders, ~0, QueryTriggerInteraction.Collide);
+            for (int i = 0; i < numHits; i++)
             {
-                var linkView = hitColliders[0].transform.GetComponent<EntityLinkView>();
+                var linkView = hitColliders[i].transform.GetComponentInParent<EntityLinkView>();
                 if (linkView != null)
-                    return linkView.Entity.Unpack(world, out hitEntity);
+                {
+                    if (linkView.Entity.Unpack(world, out hitEntity))
+                    {
+                        if (enemyPool.Has(hitEntity))
+                        {
+                            return true;
+                        }
+                    }
+                }
             }
 
             hitEntity = -1;
@@ -310,13 +352,21 @@ namespace STG.CurveDash
         }
 
         private bool CheckCollisionWithObstacle(Vector3 position, out int hitEntity)
-
         {
-            if (Physics.OverlapSphereNonAlloc(position, PlayerOverlapRadius, hitColliders1, gameSettings.ObstacleMask) != 0)
+            int numHits = Physics.OverlapSphereNonAlloc(position + Vector3.up * 0.5f, 1.2f, hitColliders1, ~0, QueryTriggerInteraction.Collide);
+            for (int i = 0; i < numHits; i++)
             {
-                var linkView = hitColliders1[0].transform.GetComponent<EntityLinkView>();
+                var linkView = hitColliders1[i].transform.GetComponentInParent<EntityLinkView>();
                 if (linkView != null)
-                    return linkView.Entity.Unpack(world, out hitEntity);
+                {
+                    if (linkView.Entity.Unpack(world, out hitEntity))
+                    {
+                        if (obstaclePool.Has(hitEntity))
+                        {
+                            return true;
+                        }
+                    }
+                }
             }
 
             hitEntity = -1;

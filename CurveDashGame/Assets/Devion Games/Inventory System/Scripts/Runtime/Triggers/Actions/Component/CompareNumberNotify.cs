@@ -9,6 +9,7 @@ namespace DevionGames.InventorySystem
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon("Component")]
     [ComponentMenu("Component/Compare Notify")]
+    [System.Serializable]
     public class CompareNumberNotify : Action, ICondition
     {
         [SerializeField]

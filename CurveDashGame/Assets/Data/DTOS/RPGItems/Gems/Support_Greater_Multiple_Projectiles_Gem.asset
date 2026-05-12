@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: 'Supports socketed skills. Linked Ability: Support_Greater_Multiple_Projectiles'
+  DevionAdapter: {fileID: 11400000, guid: b2d4d3dfe5192d14db38203e7dada8c5, type: 2}
   GemType: 1
   EmbeddedAbility: {fileID: 11400000, guid: 776bded369780254baec34a9ea685326, type: 2}
   SocketColor: {r: 0, g: 0, b: 1, a: 1}

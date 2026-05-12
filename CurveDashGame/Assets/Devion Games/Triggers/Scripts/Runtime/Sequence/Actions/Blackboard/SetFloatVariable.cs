@@ -6,6 +6,7 @@ namespace DevionGames
 {
 
     [ComponentMenu("Blackboard/Set Float Variable")]
+    [System.Serializable]
     public class SetFloatVariable : Action
     {
         [SerializeField]

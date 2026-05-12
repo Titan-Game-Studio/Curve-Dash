@@ -24,6 +24,7 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   Description: 'Grants active ability ''Determination Gem'' when socketed. Cooldown:
     10s.'
+  DevionAdapter: {fileID: 11400000, guid: b65056d7db2b518498031bccc2e26c5e, type: 2}
   GemType: 0
   EmbeddedAbility: {fileID: 11400000, guid: 7863da60f720b0740ad1e86a451959bb, type: 2}
   SocketColor: {r: 1, g: 0, b: 0, a: 1}

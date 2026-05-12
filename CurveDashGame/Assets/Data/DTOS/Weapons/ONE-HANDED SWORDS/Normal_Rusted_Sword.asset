@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Normal_Rusted_Sword
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.OneHandedWeaponData
   ItemName: Rusted Sword
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
   Rarity: 0
   Type: 0
   Prefab:
@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: A simple rusted sword.
+  DevionAdapter: {fileID: 11400000, guid: 89daff30faa04b347af14e7d942d237f, type: 2}
   VisualModel: {fileID: 0}
   PositionOffset: {x: 0, y: 0, z: 0}
   RotationOffset: {x: 0, y: 0, z: 0}

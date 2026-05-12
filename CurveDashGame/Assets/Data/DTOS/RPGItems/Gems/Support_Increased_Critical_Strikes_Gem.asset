@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: 'Supports socketed skills. Linked Ability: Support_Increased_Critical_Strikes'
+  DevionAdapter: {fileID: 11400000, guid: 63bebc8939a9e024eb8307cd54794dbd, type: 2}
   GemType: 1
   EmbeddedAbility: {fileID: 11400000, guid: 9bb00284b54f492419346b129f9ffccf, type: 2}
   SocketColor: {r: 0, g: 0, b: 1, a: 1}

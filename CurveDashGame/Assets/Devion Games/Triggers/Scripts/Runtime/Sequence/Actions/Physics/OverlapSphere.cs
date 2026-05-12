@@ -8,6 +8,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon(typeof(GraphicRaycaster))]
     [ComponentMenu("Physics/Overlap Sphere")]
+    [System.Serializable]
     public class OverlapSphere : Action
     {
         [SerializeField]

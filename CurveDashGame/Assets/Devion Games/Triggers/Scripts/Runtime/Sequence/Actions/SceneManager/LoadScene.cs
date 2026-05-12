@@ -7,6 +7,7 @@ namespace DevionGames
 {
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [ComponentMenu("SceneManager/Load Scene")]
+    [System.Serializable]
     public class LoadScene : Action
     {
         [SerializeField]

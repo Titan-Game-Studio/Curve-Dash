@@ -13,17 +13,19 @@ MonoBehaviour:
   m_Name: Unique_Abyssus
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Abyssus
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 51bcd971274c82b4caa27af35a9cb3ac, type: 3}
   Rarity: 3
   Type: 1
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: c9378e4ea2ca21948961fa20904e7ebb
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Adds massive physical damage but increases damage taken.
+  DevionAdapter: {fileID: 11400000, guid: 39ed5c071bab3974f9f13db333cfa12e, type: 2}
   Slot: 0
-  ModularPartIndex: 3
+  ModularPartIndex: 6
   Defense: 180
   HealthBonus: 0
+  Abilities: []

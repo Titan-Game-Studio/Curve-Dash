@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
@@ -247,6 +247,7 @@ namespace DevionGames.InventorySystem
         }
 
         private IEnumerator RepeatSaving(float seconds) {
+            if (seconds < 5f) seconds = 15f; // Safe minimum of 15 seconds to prevent performance-killing PlayerPrefs thrashing!
             while (true) {
                 yield return new WaitForSeconds(seconds);
                 Save();

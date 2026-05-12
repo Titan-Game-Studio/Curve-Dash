@@ -15,6 +15,16 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: deda10c31c0eac1489b67280a6b8cbb0
   m_SerializeEntries:
+  - m_GUID: 00136e4362eeb964a967da6309274c9c
+    m_Address: FREE ONE HANDED SWORD 2 COLOR 1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 00c6512086b5a4546913730522cc4f09
+    m_Address: FREE GREAT BOW 3 COLOR 1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 01173e6a0a8dfd94ca58cd38c265d681
     m_Address: gamestart
     m_ReadOnly: 0
@@ -22,6 +32,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0133b83d2f970db42aeef66aa736ef47
     m_Address: Owl
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 033b5f4d61fcc5a4892d0e9ff2d26e3f
+    m_Address: FREE SHIELD 1 COLOR 1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -41,8 +56,38 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0b843529f2663db4aa40ec3d45b2519f
+    m_Address: FREE GREAT BOW 3 COLOR 2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0d7a0b4702b417941972c15167149dfc
+    m_Address: Feet Armor Type 4 Color 2 Part
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0d862e01906c82b4681a6efdcc2da5d4
+    m_Address: FREE GREAT SWORD 2 COLOR 3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0e8f6db7937715b4bbbae965aff12ade
+    m_Address: FREE ONE HANDED SWORD 2 COLOR 3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0ed47bebe78e39143b6fb2966a39e9a2
     m_Address: Elephant
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0f8b70df7678d95409168cd80d4da9f9
+    m_Address: Arm Armor Type 5 Color 3 Part
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0ff2b108fb236864190bf512830d3a73
+    m_Address: Feet Armor Type 1 Color 1 Part
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -66,13 +111,53 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 150e31000c24a7b47aae9f04278cb0f5
+    m_Address: FREE GREAT SWORD 2 COLOR 2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1585f80466b711c40ae6df1e889de476
+    m_Address: Arm Armor Type 6 Color 3 Part
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 15d1a8fc0915d85408e38faaa6bccb23
+    m_Address: FREE Arrow Short Color 1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1602fa88e20184448adc5cf6309d83d9
+    m_Address: FREE GREAT BOW 2 COLOR 3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 168d7b49bed6ae740a9bac7cb45591cf
     m_Address: HorsePreview
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 18e8ff361a2b71843bf484e7263f1d72
+    m_Address: FREE Arrow Long Color 2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1bd20eb5cd0bd6346968581c55fe71be
     m_Address: DuckPreview
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1bd7b3dc3168d954b8d92b6a31676edb
+    m_Address: FREE GREAT SWORD 1 COLOR 2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1dde42102c14aa64bb027d3fffb802f9
+    m_Address: FREE SHIELD 1 COLOR 2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1e5adf25871338d46bf7edde0e756481
+    m_Address: FREE SHIELD 2 COLOR 3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -96,6 +181,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 209da9585717a0e41a91f811ed43ce7d
+    m_Address: FREE GREAT BOW 1 COLOR 2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 26169785b8e30c944a512729256a05cd
     m_Address: VFX_Trail_Nature
     m_ReadOnly: 0
@@ -103,6 +193,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 27886274f6ee5ae478702af711008699
     m_Address: Penguin
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2af81e53d3092b840b143fdb902b343d
+    m_Address: FREE GREAT BOW 1 COLOR 3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2b98d3d32acd00c46aa13e6ff6ad538d
+    m_Address: FREE ONE HANDED SWORD 3 COLOR 2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -116,8 +216,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2efe504fa39206949862a2ee9a2d5ec5
+    m_Address: FREE SHIELD 2 COLOR 2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 33918cdf161d1224ba679bded61b21ce
     m_Address: Fish
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 35d19a1e21e61c04886cdd329feea612
+    m_Address: FREE Arrow Medium Color 3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -146,6 +256,31 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3f85231310b14de468a0bfbe9c64b4c6
+    m_Address: FREE GREAT SWORD 3 COLOR 2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 404883cac4511534886e8150ca0b96fa
+    m_Address: FREE GREAT SWORD 1 COLOR 3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 406d1abb3df843a409357bcdf4ac51cb
+    m_Address: FREE SHIELD 1 COLOR 3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 445184725abd30546b35e98e7b6286fe
+    m_Address: FREE HAMMER 3 COLOR 3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 458bb21264f96b149b2be1c12ab3c391
+    m_Address: FREE HAMMER 1 COLOR 3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 45f4c60b69bd0a64b855fb984ea6c987
     m_Address: Turtle
     m_ReadOnly: 0
@@ -166,6 +301,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4853cdb572bb46e40a1c6dc2b195df20
+    m_Address: FREE SHIELD 2 COLOR 1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 49c8b6d1e7bbec14c9730cc1074e2fe9
     m_Address: Tile 7
     m_ReadOnly: 0
@@ -173,6 +313,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4cc05b6b72ea3fb498b16e997436311b
     m_Address: Kid2Preview
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4d9213232ca3cef43b46e69557510707
+    m_Address: FREE Arrow Medium Color 2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -186,6 +331,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4e8148f0393e7fe4aa7b4a30f643fb1c
+    m_Address: Head Armor Type 4 Color 2 Part
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4f01e9e7daad674418154694541c162f
     m_Address: ToucanPreview
     m_ReadOnly: 0
@@ -193,6 +343,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 523ffe33a07777e498de413cdbebd9a4
     m_Address: Tree 1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 57878dfecf6cbae4b952bde5697ed939
+    m_Address: Feet Armor Type 6 Color 3 Part
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -211,13 +366,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5ba921c5d3a579f4b8406b968f8ca5e8
+    m_Address: FREE ONE HANDED SWORD 3 COLOR 3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5e966ec0c45a41f43ae1c3504164d54f
     m_Address: nextlevel
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5fc33f742aba5f347a47ffc814de8622
+    m_Address: FREE GREAT SWORD 1 COLOR 1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6086917b1f065824da7ca0ec0aae9ee8
     m_Address: Fire
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 610d9ae141cc55a4485cc00229ff3d29
+    m_Address: FREE Arrow Short Color 3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -276,6 +446,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6f9a038ba15103f4b96efafca860306c
+    m_Address: Feet Armor Type 5 Color 3 Part
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 70538cb28f8bb3a45abe6316fb6550ae
     m_Address: Crocodile
     m_ReadOnly: 0
@@ -288,6 +463,21 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 73a6c62ddfe23b44bb0a7cc7bd564278
     m_Address: turn
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 757151dfad58fb64fb138f1be7f7af79
+    m_Address: FREE HAMMER 1 COLOR 2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 757be0c78b6294741bf7f276ed1fa8df
+    m_Address: Chest Armor Type 6 Color 3 Part
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 75ebd8b9d99750c47bfa7aea82b92699
+    m_Address: FREE HAMMER 1 COLOR 1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -306,8 +496,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7d22cc3e5b84f454f907f4b458609d08
+    m_Address: Chest Armor Type 5 Color 3 Part
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7e9232d1122d64b4e873b1598e17f5a6
     m_Address: Deer
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8305d74f2e457034a944f92e4768f38c
+    m_Address: FREE GREAT SWORD 3 COLOR 3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -321,8 +521,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 866d94be47c38d746970603c59bf81ce
+    m_Address: FREE Arrow Long Color 3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 88b5fa7ed43176f4d8d3232876209ade
     m_Address: Sound
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 890e652c0a86e2044b9b3cd919398ac4
+    m_Address: FREE HAMMER 2 COLOR 3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8bc53569de53b3144a7db7ca5aa2231d
+    m_Address: FREE GREAT BOW 1 COLOR 1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8cbf3f77089ba1b4f9ca78dd727d6d28
+    m_Address: Arm Armor Type 3 Color 2 Part
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -346,6 +566,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 912f3548970b3e7409aadbfe7dacc355
+    m_Address: FREE GREAT BOW 2 COLOR 2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 936fad0a317858d46a6551d3d3ccdbdc
     m_Address: Cosmos
     m_ReadOnly: 0
@@ -356,6 +581,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 97e762946194d054da2ce0ce3f048462
+    m_Address: FREE GREAT SWORD 2 COLOR 1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9b3c3e2dd36d3354db38768894430737
     m_Address: Kid1Preview
     m_ReadOnly: 0
@@ -363,6 +593,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9bd23c5269f52cb4ba4c4a7b4e4725a8
     m_Address: DeerPreview
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9c2bae9b9c1345047a8b6ef8129f77df
+    m_Address: Chest Armor Type 2 Color 1 Part
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -386,6 +621,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a8b2b40a8ef388d47b3c1a9ce098ff86
+    m_Address: FREE ONE HANDED SWORD 3 COLOR 1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a920f2c056d5c924f8c0974e1e34a662
     m_Address: Shark
     m_ReadOnly: 0
@@ -396,8 +636,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ae0da4fd26885a44c8ea54ba6480df5d
+    m_Address: FREE SHIELD 3 COLOR 3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ae6bdf3417a5d6047a559654858dac31
     m_Address: VFX_Trail_Dark
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ae6fdce18e730664a9b8df54ca14965b
+    m_Address: FREE HAMMER 3 COLOR 1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -421,6 +671,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b8803a039141fdd489fc78c854ca251f
+    m_Address: Arm Armor Type 1 Color 1 Part
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b8c7835543717cb4b824f583592e78a9
     m_Address: BearPreview
     m_ReadOnly: 0
@@ -436,13 +691,69 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bf9db23ee0a25014cbf5a8222b9620a8
+    m_Address: Chest Armor Type 3 Color 2 Part
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c1f779f2e34d39041bfff6c9cfcd5d0b
+    m_Address: FREE ONE HANDED SWORD 1 COLOR 1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c2e10f9e728b8704784b1b020c37ad5f
+    m_Address: FREE GREAT SWORD 3 COLOR 1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c58a0f3d265344c438e99a7d3139dd17
+    m_Address: Head Armor Type 1 Color 1 Part
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c6d97471ca620344a803efe63d109acb
+    m_Address: FREE SHIELD 3 COLOR 1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c9378e4ea2ca21948961fa20904e7ebb
+    m_Address: Head Armor Type 6 Color 3 Part
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ca9b91f6b96d02c4b9e5e6255399c845
+    m_Address: FREE HAMMER 2 COLOR 2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: caa6e1ee007b2d34da93660bd0568844
+    m_Address: FREE Arrow Long Color 1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cc7ba3620ad40724bbd0dda3cd3ba953
+    m_Address: FREE GREAT BOW 3 COLOR 3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ce8121766023134429b1dbdcd2cba052
     m_Address: Fox
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d0275977157ad29488a7ce1fb2d8fccd
+    m_Address: Assets/URP GanzSe Free Modular Character Pack/Prefabs/Non-Skinned
+      Mesh Parts/Armor Parts/Chest Armor Type 1 Color 1 Part.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d13a52f99e250784d95a5794dba8372b
     m_Address: Tile 6
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d15cd699ec3f3fd4ba84bbf50e7dc645
+    m_Address: FREE HAMMER 2 COLOR 1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -456,6 +767,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d7a55af0b7b4e1e4e8f173e55378e40d
+    m_Address: FREE HAMMER 3 COLOR 2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d8f405ac315578a4e8c3874187765452
     m_Address: Frog
     m_ReadOnly: 0
@@ -463,6 +779,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: dc0d32e4741335241afdd5ebfb8bf32a
     m_Address: VFX_Trail_Earth
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dcd6053de98593945894d32128cde038
+    m_Address: FREE GREAT BOW 2 COLOR 1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -511,6 +832,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f1a9a1ad81b5ace4d963f7bbb2b38df1
+    m_Address: Head Armor Type 5 Color 3 Part
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f21e007e2e959e145889156357c181c7
+    m_Address: FREE Arrow Short Color 2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f61d9b5fdce3c524aa41e071522ea885
     m_Address: CatPreview
     m_ReadOnly: 0
@@ -526,8 +857,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f83d46cd750f04e41b559bee58562709
+    m_Address: FREE Arrow Medium Color 1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f8b1ea9ed1981334c94c29a2cd222ccf
     m_Address: Tile6Preview
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f90ad28854ddb714a88481cfdc3a07d5
+    m_Address: FREE SHIELD 3 COLOR 2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fcefe9c5763cedb4b8e77fa9b897dc92
+    m_Address: FREE ONE HANDED SWORD 2 COLOR 2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

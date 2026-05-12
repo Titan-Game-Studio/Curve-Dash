@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: 'Grants active ability ''Fireball Gem'' when socketed. Cooldown: 0.8s.'
+  DevionAdapter: {fileID: 11400000, guid: 2f746269c4da5af4c9683cc0f0242c18, type: 2}
   GemType: 0
   EmbeddedAbility: {fileID: 11400000, guid: 68ce9257d180ca74ebf90c69865a5016, type: 2}
   SocketColor: {r: 0, g: 0, b: 1, a: 1}

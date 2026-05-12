@@ -7,6 +7,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon("Component")]
     [ComponentMenu("Component/Compare")]
+    [System.Serializable]
     public class CompareNumber : Action,ICondition
     {
         [SerializeField]

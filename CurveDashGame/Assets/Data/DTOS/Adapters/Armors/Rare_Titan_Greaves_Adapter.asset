@@ -9,26 +9,25 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 20a93a8c91388c14b9ef4d3d0c9b4d1b, type: 3}
+  m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
   m_Name: Rare_Titan_Greaves_Adapter
-  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashItemAdapter
-  m_Id: bec16679-8e20-49e4-a397-dc5d0c9bc406
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
+  m_Id: 14b23bd1-d1dd-4034-8aa8-b7928da10e14
   m_ItemName: Titan Greaves
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 0}
-  m_Prefab: {fileID: 0}
+  m_Icon: {fileID: 21300000, guid: 0111c36e0cdd38e48952c85e65e30dcb, type: 3}
+  m_Prefab: {fileID: 5108552686938839387, guid: 6f9a038ba15103f4b96efafca860306c,
+    type: 3}
   m_Description: Unshakable metal sabatons.
-  m_Category: {fileID: 8705209814584371102, guid: 17787831f9b1b6f469b7778380828f6a,
+  m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,
     type: 2}
   m_IsSellable: 1
-  m_BuyPrice: 10
+  m_BuyPrice: 69
   m_CanBuyBack: 1
-  m_BuyCurrency: {fileID: -6623786914046544860, guid: 17787831f9b1b6f469b7778380828f6a,
-    type: 2}
-  m_SellPrice: 5
-  m_SellCurrency: {fileID: -6623786914046544860, guid: 17787831f9b1b6f469b7778380828f6a,
-    type: 2}
+  m_BuyCurrency: {fileID: 0}
+  m_SellPrice: 34
+  m_SellCurrency: {fileID: 0}
   m_Stack: 1
   m_MaxStack: 1
   m_IsDroppable: 1
@@ -46,7 +45,7 @@ MonoBehaviour:
     modifiers: []
   ingredients: []
   properties:
-  - name: Item Type
+  - name: Equipment Type
     typeIndex: 0
     stringValue: Armor
     intValue: 0
@@ -70,4 +69,49 @@ MonoBehaviour:
     vector3Value: {x: 0, y: 0, z: 0}
     show: 1
     color: {r: 1, g: 0.85, b: 0, a: 1}
-  m_OriginalItemData: {fileID: 11400000, guid: 5c7916b1a7a9ab54980e8bba7fa472ef, type: 2}
+  - name: Defense
+    typeIndex: 5
+    stringValue: 
+    intValue: 45
+    floatValue: 0
+    colorValue: {r: 0, g: 0, b: 0, a: 0}
+    boolValue: 0
+    objectReferenceValue: {fileID: 0}
+    vector2Value: {x: 0, y: 0}
+    vector3Value: {x: 0, y: 0, z: 0}
+    show: 1
+    color: {r: 0.6, g: 0.8, b: 1, a: 1}
+  - name: Heart
+    typeIndex: 5
+    stringValue: 
+    intValue: 30
+    floatValue: 0
+    colorValue: {r: 0, g: 0, b: 0, a: 0}
+    boolValue: 0
+    objectReferenceValue: {fileID: 0}
+    vector2Value: {x: 0, y: 0}
+    vector3Value: {x: 0, y: 0, z: 0}
+    show: 1
+    color: {r: 0, g: 1, b: 0, a: 1}
+  - name: Armor Slot
+    typeIndex: 0
+    stringValue: Feet
+    intValue: 0
+    floatValue: 0
+    colorValue: {r: 0, g: 0, b: 0, a: 0}
+    boolValue: 0
+    objectReferenceValue: {fileID: 0}
+    vector2Value: {x: 0, y: 0}
+    vector3Value: {x: 0, y: 0, z: 0}
+    show: 1
+    color: {r: 1, g: 1, b: 1, a: 1}
+  m_UseCategoryCooldown: 1
+  m_Cooldown: 1
+  actions: []
+  m_OverrideEquipPrefab: {fileID: 0}
+  m_Region: []
+  m_OriginalEquipmentData: {fileID: 11400000, guid: 5c7916b1a7a9ab54980e8bba7fa472ef,
+    type: 2}
+  references:
+    version: 2
+    RefIds: []

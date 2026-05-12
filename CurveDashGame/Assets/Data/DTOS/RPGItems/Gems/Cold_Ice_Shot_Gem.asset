@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: 'Grants active ability ''Ice Shot Gem'' when socketed. Cooldown: 0.6s.'
+  DevionAdapter: {fileID: 11400000, guid: 1b7d9db957d747f43999e6f7a82a610a, type: 2}
   GemType: 0
   EmbeddedAbility: {fileID: 11400000, guid: bbafbd7960e858e48b2cf433b01480b6, type: 2}
   SocketColor: {r: 0, g: 1, b: 0, a: 1}

@@ -5,6 +5,7 @@ using UnityEngine;
 namespace DevionGames
 {
     [ComponentMenu("Blackboard/Delete Variable")]
+    [System.Serializable]
     public class DeleteVariable : Action
     {
         [SerializeField]

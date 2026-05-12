@@ -7,6 +7,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon(typeof(GameObject))]
     [ComponentMenu("GameObject/Destroy")]
+    [System.Serializable]
     public class Destroy : Action
     {
         [SerializeField]

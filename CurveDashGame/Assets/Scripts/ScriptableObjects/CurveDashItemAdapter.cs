@@ -24,7 +24,12 @@ namespace STG.CurveDash
         protected override void OnEnable()
         {
             base.OnEnable();
-            SyncData();
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                SyncData();
+            }
+#endif
         }
 
         public void SyncData()

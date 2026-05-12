@@ -17,12 +17,13 @@ MonoBehaviour:
   Rarity: 2
   Type: 0
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: 404883cac4511534886e8150ca0b96fa
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: 
+  DevionAdapter: {fileID: 11400000, guid: 6d136ce1325d51641b367e744ec4eb22, type: 2}
   VisualModel: {fileID: 2481575706427970861, guid: 404883cac4511534886e8150ca0b96fa,
     type: 3}
   PositionOffset: {x: -0.047, y: 0.048, z: 0.219}

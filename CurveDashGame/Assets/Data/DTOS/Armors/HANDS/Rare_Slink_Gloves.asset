@@ -13,17 +13,19 @@ MonoBehaviour:
   m_Name: Rare_Slink_Gloves
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Slink Gloves
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: cfea9c36036ca9e4591419c6c526d558, type: 3}
   Rarity: 2
   Type: 1
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: 0f8b70df7678d95409168cd80d4da9f9
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Superbly balanced leather gloves used by masters.
+  DevionAdapter: {fileID: 11400000, guid: 3dfe672abfde1574291e3b1974220d9f, type: 2}
   Slot: 2
-  ModularPartIndex: 2
+  ModularPartIndex: 5
   Defense: 45
   HealthBonus: 30
+  Abilities: []

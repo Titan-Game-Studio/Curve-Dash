@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: 'Grants active ability ''Arc Gem'' when socketed. Cooldown: 0.6s.'
+  DevionAdapter: {fileID: 11400000, guid: 6fc662510918a7f4982ca960843260d9, type: 2}
   GemType: 0
   EmbeddedAbility: {fileID: 11400000, guid: 79afba600107c994186882d4160989ea, type: 2}
   SocketColor: {r: 0, g: 0, b: 1, a: 1}

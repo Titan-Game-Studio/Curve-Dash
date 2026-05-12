@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Basic pointed arrows.
+  DevionAdapter: {fileID: 11400000, guid: a7acfd30a0f00124a9bba9d627e7815c, type: 2}
   VisualModel: {fileID: 0}
   PositionOffset: {x: 0, y: 0, z: 0}
   RotationOffset: {x: 0, y: 0, z: 0}

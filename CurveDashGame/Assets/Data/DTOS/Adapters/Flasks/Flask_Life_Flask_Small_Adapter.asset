@@ -19,7 +19,7 @@ MonoBehaviour:
   m_Icon: {fileID: 21300000, guid: ea19c0346458c0f498898b9175de1cae, type: 3}
   m_Prefab: {fileID: 0}
   m_Description: Recovers 50 Life over 5 seconds.
-  m_Category: {fileID: -6294223960729143046, guid: 17787831f9b1b6f469b7778380828f6a,
+  m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,
     type: 2}
   m_IsSellable: 1
   m_BuyPrice: 8

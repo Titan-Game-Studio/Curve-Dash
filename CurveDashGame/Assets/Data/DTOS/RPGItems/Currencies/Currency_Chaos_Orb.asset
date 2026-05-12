@@ -23,4 +23,5 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Reforges a rare item with new random properties.
+  DevionAdapter: {fileID: 11400000, guid: b45ac88922ee6d84f8b571df21632fff, type: 2}
   CurrencyType: 3

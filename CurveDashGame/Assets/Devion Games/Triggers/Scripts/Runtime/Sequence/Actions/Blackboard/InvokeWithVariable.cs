@@ -7,6 +7,7 @@ namespace DevionGames
 {
 
     [ComponentMenu("Blackboard/Invoke With Variable")]
+    [System.Serializable]
     public class InvokeWithVariable : Action
     {
         [SerializeField]

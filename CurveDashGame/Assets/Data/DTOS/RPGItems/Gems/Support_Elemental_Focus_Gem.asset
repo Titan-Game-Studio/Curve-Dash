@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: 'Supports socketed skills. Linked Ability: Support_Elemental_Focus'
+  DevionAdapter: {fileID: 11400000, guid: a0e3ac48786091d4a909dbfa50201a8c, type: 2}
   GemType: 1
   EmbeddedAbility: {fileID: 11400000, guid: 84b8c53bdbb262b44ac2fca8f8ac601b, type: 2}
   SocketColor: {r: 0, g: 0, b: 1, a: 1}

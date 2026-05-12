@@ -13,17 +13,19 @@ MonoBehaviour:
   m_Name: Unique_Facebreaker
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Facebreaker
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: cfea9c36036ca9e4591419c6c526d558, type: 3}
   Rarity: 3
   Type: 1
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: 1585f80466b711c40ae6df1e889de476
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Grants massive unarmed damage bonuses.
+  DevionAdapter: {fileID: 11400000, guid: 911d7c487c884664b9883829b58d5dbc, type: 2}
   Slot: 2
-  ModularPartIndex: 3
+  ModularPartIndex: 6
   Defense: 20
   HealthBonus: 10
+  Abilities: []

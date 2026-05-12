@@ -5,6 +5,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon(typeof(Animator))]
     [ComponentMenu("Animator/Set Trigger")]
+    [System.Serializable]
     public class SetTrigger: Action
     {
         [SerializeField]

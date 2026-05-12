@@ -7,6 +7,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon("Component")]
     [ComponentMenu("Component/Set Enabled")]
+    [System.Serializable]
     public class SetEnabled : Action
     {
         [SerializeField]

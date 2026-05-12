@@ -13,17 +13,19 @@ MonoBehaviour:
   m_Name: Normal_Iron_Helmet
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Iron Helmet
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 51bcd971274c82b4caa27af35a9cb3ac, type: 3}
   Rarity: 0
   Type: 1
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: c58a0f3d265344c438e99a7d3139dd17
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: A heavy iron bucket for basic skull protection.
+  DevionAdapter: {fileID: 11400000, guid: 8578d1b669cd2554aa493964aab9ead7, type: 2}
   Slot: 0
-  ModularPartIndex: 0
+  ModularPartIndex: 1
   Defense: 15
   HealthBonus: 10
+  Abilities: []

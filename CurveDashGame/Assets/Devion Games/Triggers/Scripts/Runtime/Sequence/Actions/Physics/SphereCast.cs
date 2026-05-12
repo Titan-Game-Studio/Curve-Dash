@@ -8,6 +8,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon(typeof(GraphicRaycaster))]
     [ComponentMenu("Physics/SphereCast")]
+    [System.Serializable]
     public class SphereCast : Action
     {
         [SerializeField]

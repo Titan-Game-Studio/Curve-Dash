@@ -7,6 +7,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon(typeof(GameObject))]
     [ComponentMenu("GameObject/SendMessage")]
+    [System.Serializable]
     public class SendMessage : Action
     {
         [SerializeField]

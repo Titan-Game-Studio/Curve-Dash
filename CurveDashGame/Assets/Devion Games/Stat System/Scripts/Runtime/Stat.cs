@@ -1,4 +1,4 @@
-﻿using DevionGames.Graphs;
+using DevionGames.Graphs;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,6 +19,18 @@ namespace DevionGames.StatSystem
 
         [SerializeField]
         protected float m_BaseValue;
+        public float BaseValue
+        {
+            get => this.m_BaseValue;
+            set
+            {
+                if (this.m_BaseValue != value)
+                {
+                    this.m_BaseValue = value;
+                    CalculateValue();
+                }
+            }
+        }
        /* [HideInInspector]
         [SerializeField]
         protected bool m_InheritBaseValue = true;

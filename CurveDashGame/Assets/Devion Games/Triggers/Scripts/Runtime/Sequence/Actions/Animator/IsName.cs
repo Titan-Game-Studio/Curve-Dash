@@ -7,6 +7,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon(typeof(Animator))]
     [ComponentMenu("Animator/Is Name")]
+    [System.Serializable]
     public class IsName : Action, ICondition
     {
         [SerializeField]

@@ -13,17 +13,19 @@ MonoBehaviour:
   m_Name: Normal_Plate_Vest
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Plate Vest
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: ea8d985057954d54da2d606524af8214, type: 3}
   Rarity: 0
   Type: 1
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: 9c2bae9b9c1345047a8b6ef8129f77df
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: A simple padded leather chest protector.
+  DevionAdapter: {fileID: 11400000, guid: eef280ba585a66e449ae0592f73235ad, type: 2}
   Slot: 1
-  ModularPartIndex: 0
+  ModularPartIndex: 2
   Defense: 35
   HealthBonus: 25
+  Abilities: []

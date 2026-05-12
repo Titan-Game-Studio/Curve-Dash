@@ -7,6 +7,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon(typeof(Transform))]
     [ComponentMenu("Transform/Look At Position")]
+    [System.Serializable]
     public class LookAtPosition : Action
     {
         [SerializeField]

@@ -13,17 +13,19 @@ MonoBehaviour:
   m_Name: Unique_Goldrim
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Goldrim
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 51bcd971274c82b4caa27af35a9cb3ac, type: 3}
   Rarity: 3
   Type: 1
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: c9378e4ea2ca21948961fa20904e7ebb
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Provides excellent elemental resistances for early levels.
+  DevionAdapter: {fileID: 11400000, guid: 76b94f4dd834dfd4dbd4e36c00661705, type: 2}
   Slot: 0
-  ModularPartIndex: 4
+  ModularPartIndex: 6
   Defense: 50
   HealthBonus: 40
+  Abilities: []

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.Events;
 using System.Collections.Generic;
@@ -235,6 +235,7 @@ namespace DevionGames.StatSystem
 
         private IEnumerator RepeatSaving(float seconds)
         {
+            if (seconds < 5f) seconds = 15f; // Safe minimum of 15 seconds to prevent performance-killing PlayerPrefs thrashing!
             while (true)
             {
                 yield return new WaitForSeconds(seconds);
@@ -244,6 +245,11 @@ namespace DevionGames.StatSystem
 
         public static void RegisterStatsHandler(StatsHandler handler)
         {
+            if (StatsManager.current == null || StatsManager.current.m_StatsHandler == null) return;
+            
+            // Clean up destroyed handlers to prevent stale references or memory leaks
+            StatsManager.current.m_StatsHandler.RemoveAll(x => x == null);
+
             if (!StatsManager.current.m_StatsHandler.Contains(handler))
             {
                 StatsManager.current.m_StatsHandler.Add(handler);
@@ -252,7 +258,12 @@ namespace DevionGames.StatSystem
 
         public static StatsHandler GetStatsHandler(string name)
         {
-            return StatsManager.current.m_StatsHandler.Find(x => x.HandlerName == name);
+            if (StatsManager.current == null || StatsManager.current.m_StatsHandler == null) return null;
+
+            // Clean up destroyed handlers to guarantee we only lookup active runtime handlers
+            StatsManager.current.m_StatsHandler.RemoveAll(x => x == null);
+
+            return StatsManager.current.m_StatsHandler.Find(x => x != null && x.HandlerName == name);
         }
 
     }

@@ -9,6 +9,7 @@ namespace DevionGames.InventorySystem
     [Icon("Item")]
     [ComponentMenu("Inventory System/Pickup Item")]
     [RequireComponent(typeof(ItemCollection))]
+    [System.Serializable]
     public class Pickup : Action
     {
         [SerializeField]

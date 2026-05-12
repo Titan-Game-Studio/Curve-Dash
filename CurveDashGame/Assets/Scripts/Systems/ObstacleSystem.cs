@@ -23,7 +23,7 @@ namespace STG.CurveDash
 
             obstacleFilter = world.Filter<ObstacleComponent>().End();
             playerHitObstacleFilter = world.Filter<ObstacleComponent>().Inc<PlayerHitObstacleEvent>().End();
-            deadEnemyFilter = world.Filter<ObstacleComponent>().Inc<EnemyDeadEvent>().End();
+            deadEnemyFilter = world.Filter<EnemyComponent>().Inc<EnemyDeadEvent>().End();
         }
 
         public void Tick()

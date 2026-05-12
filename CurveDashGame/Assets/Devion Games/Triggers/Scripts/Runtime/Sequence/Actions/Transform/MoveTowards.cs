@@ -8,6 +8,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon(typeof(Transform))]
     [ComponentMenu("Transform/Move Towards")]
+    [System.Serializable]
     public class MoveTowards : Action
     {
         [SerializeField]

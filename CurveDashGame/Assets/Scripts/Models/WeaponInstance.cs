@@ -161,7 +161,10 @@ namespace STG.CurveDash
 
             FinalMinDamage = (BaseData.BaseMinDamage + flatAddedDamage) * (1 + increasedDamagePercent / 100f);
             FinalMaxDamage = (BaseData.BaseMaxDamage + flatAddedDamage) * (1 + increasedDamagePercent / 100f);
-            FinalAttackSpeed = BaseData.BaseAttackSpeed * (1 + increasedSpeedPercent / 100f);
+            
+            float baseSpeed = BaseData.BaseAttackSpeed > 0.05f ? BaseData.BaseAttackSpeed : 1.0f;
+            FinalAttackSpeed = baseSpeed * (1 + increasedSpeedPercent / 100f);
+            if (FinalAttackSpeed < 0.1f) FinalAttackSpeed = 0.1f;
         }
 
         public string GetDisplayName()

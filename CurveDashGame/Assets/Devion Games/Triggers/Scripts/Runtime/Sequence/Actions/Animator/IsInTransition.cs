@@ -7,6 +7,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon(typeof(Animator))]
     [ComponentMenu("Animator/IsInTransition")]
+    [System.Serializable]
     public class IsInTransition : Action, ICondition
     {
         [SerializeField]

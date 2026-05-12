@@ -103,6 +103,46 @@ namespace STG.CurveDash
         public int SpawnPlayer(Vector3 pos, float speed)
         {
             var gameObject = playerViewFactory.Create().gameObject;
+
+            // Dynamically attach and configure the Devion Games StatsHandler so stats are registered and visible to the UI
+            var handler = gameObject.GetComponent<DevionGames.StatSystem.StatsHandler>();
+            if (handler == null)
+            {
+                handler = gameObject.AddComponent<DevionGames.StatSystem.StatsHandler>();
+                
+                // Use reflection to set private field m_HandlerName to "Player Stats"
+                var nameField = typeof(DevionGames.StatSystem.StatsHandler).GetField("m_HandlerName", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (nameField != null)
+                {
+                    nameField.SetValue(handler, "Player Stats");
+                }
+
+                // Populate stats list with all stats defined in the Stat Database
+                if (DevionGames.StatSystem.StatsManager.Database != null)
+                {
+                    handler.m_Stats = new List<DevionGames.StatSystem.Stat>();
+                    foreach (var dbStat in DevionGames.StatSystem.StatsManager.Database.items)
+                    {
+                        if (dbStat != null)
+                        {
+                            handler.m_Stats.Add(dbStat);
+                        }
+                    }
+                    UnityEngine.Debug.Log($"<color=green>[ObjectSpawner] Programmatically attached StatsHandler to Player and populated {handler.m_Stats.Count} stats from Database.</color>");
+                }
+                else
+                {
+                    UnityEngine.Debug.LogWarning("[ObjectSpawner] DevionGames StatsManager.Database is currently NULL! Cannot populate player stats.");
+                }
+
+                // Force immediate initialization and registration via Reflection to eliminate 1-frame async delay
+                var startMethod = typeof(DevionGames.StatSystem.StatsHandler).GetMethod("Start", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                if (startMethod != null)
+                {
+                    startMethod.Invoke(handler, null);
+                }
+            }
+
             var entity = CreateEntity<PlayerComponent>(gameObject);
 
             ref var playerComponent = ref world.GetPool<PlayerComponent>().Get(entity);

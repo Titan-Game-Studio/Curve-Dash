@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: 'Grants active ability ''Cyclone Gem'' when socketed. Cooldown: 0s.'
+  DevionAdapter: {fileID: 11400000, guid: f06c8f30e4a0ebc4eb6b4c24b2531e1c, type: 2}
   GemType: 0
   EmbeddedAbility: {fileID: 11400000, guid: 6a138c5116848c645ad861404de9e9a8, type: 2}
   SocketColor: {r: 1, g: 0, b: 0, a: 1}

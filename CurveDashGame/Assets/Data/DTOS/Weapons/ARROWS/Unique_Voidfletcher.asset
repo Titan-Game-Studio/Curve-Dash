@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Fires explosive void arrows.
+  DevionAdapter: {fileID: 11400000, guid: 397c4767d2a41514c8385cf179632414, type: 2}
   VisualModel: {fileID: 0}
   PositionOffset: {x: 0, y: 0, z: 0}
   RotationOffset: {x: 0, y: 0, z: 0}

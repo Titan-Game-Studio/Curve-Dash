@@ -9,14 +9,25 @@ namespace STG.CurveDash
         [SerializeField] Text scoreText;
         [SerializeField] Text highScoreText;
         [SerializeField] Text levelText;
-        [SerializeField] GameObject[] heartIcons; // Assign 5 heart images here in the Unity Editor
+        [SerializeField] GameObject[] heartIcons; // Kept as optional to prevent serialization warnings, but disabled on Start
         
         private int score;
         private int highScore;
         private int level;
-        private int heartCount = -1;
 
         [Inject] private PlayerStatService playerStatService;
+
+        private void Start()
+        {
+            // Automatically deactivate old heart icons on start since we are transitioning entirely to Devion Games UI!
+            if (heartIcons != null)
+            {
+                foreach (var icon in heartIcons)
+                {
+                    if (icon != null) icon.SetActive(false);
+                }
+            }
+        }
         
         private void Update()
         {
@@ -38,26 +49,6 @@ namespace STG.CurveDash
             {
                 levelText.text = "Level: " + playerStatComponent.Level;
                 level = playerStatComponent.Level;
-            }
-
-            float lifePercent = playerStatComponent.MaxLife > 0 ? (playerStatComponent.CurrentLife / playerStatComponent.MaxLife) : 0f;
-            int activeHearts = Mathf.RoundToInt(lifePercent * 5f);
-            if (activeHearts != heartCount)
-            {
-                UpdateHearts(activeHearts);
-                heartCount = activeHearts;
-            }
-        }
-
-        private void UpdateHearts(int currentHearts)
-        {
-            if (heartIcons == null) return;
-            for (int i = 0; i < heartIcons.Length; i++)
-            {
-                if (heartIcons[i] != null)
-                {
-                    heartIcons[i].SetActive(i < currentHearts);
-                }
             }
         }
     }

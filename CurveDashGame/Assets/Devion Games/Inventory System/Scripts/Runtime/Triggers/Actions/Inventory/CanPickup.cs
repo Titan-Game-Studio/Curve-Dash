@@ -9,6 +9,7 @@ namespace DevionGames.InventorySystem
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon("Condition Item")]
     [ComponentMenu("Inventory System/Can Pickup")]
+    [System.Serializable]
     public class CanPickup : Action, ICondition
     {
         [SerializeField]

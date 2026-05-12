@@ -13,17 +13,19 @@ MonoBehaviour:
   m_Name: Unique_Sadimas_Touch
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Sadimas Touch
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: cfea9c36036ca9e4591419c6c526d558, type: 3}
   Rarity: 3
   Type: 1
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: 1585f80466b711c40ae6df1e889de476
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Highly sought gloves that increase item quantity found.
+  DevionAdapter: {fileID: 11400000, guid: 33df33f6d7b01884c8c697ab760a7562, type: 2}
   Slot: 2
-  ModularPartIndex: 4
+  ModularPartIndex: 6
   Defense: 15
   HealthBonus: 20
+  Abilities: []

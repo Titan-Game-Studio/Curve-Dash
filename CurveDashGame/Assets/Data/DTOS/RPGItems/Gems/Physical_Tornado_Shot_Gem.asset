@@ -24,6 +24,7 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   Description: 'Grants active ability ''Tornado Shot Gem'' when socketed. Cooldown:
     0.8s.'
+  DevionAdapter: {fileID: 11400000, guid: 548513fc1069a124192fea199b4668c9, type: 2}
   GemType: 0
   EmbeddedAbility: {fileID: 11400000, guid: f4e7c6f8c6c7152428afa1d9ec743223, type: 2}
   SocketColor: {r: 0, g: 1, b: 0, a: 1}

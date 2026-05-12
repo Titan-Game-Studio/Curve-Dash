@@ -23,4 +23,5 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Improves the quality of a weapon.
+  DevionAdapter: {fileID: 11400000, guid: 45eeb68d118659e44953807182d503c3, type: 2}
   CurrencyType: 5

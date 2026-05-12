@@ -6,6 +6,7 @@ namespace DevionGames
 {
 
     [ComponentMenu("Blackboard/Set Bool Variable")]
+    [System.Serializable]
     public class SetBoolVariable : Action
     {
         [SerializeField]

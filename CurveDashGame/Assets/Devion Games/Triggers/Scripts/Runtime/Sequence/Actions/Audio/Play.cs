@@ -7,6 +7,7 @@ namespace DevionGames
 {
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [ComponentMenu("Audio/Play")]
+    [System.Serializable]
     public class Play : Action
     {
         [SerializeField]

@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Increases Movement Speed by 40% during effect.
+  DevionAdapter: {fileID: 11400000, guid: 0ee2ccb71de05ea4a8ce46bf12dd1e09, type: 2}
   FlaskType: 2
   RecoveryAmount: 0
   Duration: 4

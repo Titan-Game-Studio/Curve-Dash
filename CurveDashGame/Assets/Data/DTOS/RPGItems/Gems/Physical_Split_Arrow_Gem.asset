@@ -24,6 +24,7 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   Description: 'Grants active ability ''Split Arrow Gem'' when socketed. Cooldown:
     0.5s.'
+  DevionAdapter: {fileID: 11400000, guid: 3ac768b891c8bf345a9816439733bf81, type: 2}
   GemType: 0
   EmbeddedAbility: {fileID: 11400000, guid: 99bbd9616667aec4c95dd5b2c5e57b55, type: 2}
   SocketColor: {r: 0, g: 1, b: 0, a: 1}

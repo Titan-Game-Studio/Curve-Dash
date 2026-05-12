@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: 'Grants active ability ''Hatred Gem'' when socketed. Cooldown: 10s.'
+  DevionAdapter: {fileID: 11400000, guid: f03c1c0b6bc64a542a6adc211123996d, type: 2}
   GemType: 0
   EmbeddedAbility: {fileID: 11400000, guid: 78a71f0de2bcd1143bce822ddd8fb094, type: 2}
   SocketColor: {r: 1, g: 0, b: 0, a: 1}

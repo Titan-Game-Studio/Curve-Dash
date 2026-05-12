@@ -7,6 +7,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon(typeof(GameObject))]
     [ComponentMenu("GameObject/Instantiate")]
+    [System.Serializable]
     public class Instantiate : Action
     {
         [SerializeField]

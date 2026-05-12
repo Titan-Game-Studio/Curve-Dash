@@ -7,6 +7,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [ComponentMenu("Time/Wait")]
     [Icon("Time")]
+    [System.Serializable]
     public class Wait : Action
     {
         [SerializeField]

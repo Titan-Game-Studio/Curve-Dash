@@ -23,4 +23,5 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Upgrades a normal item to a magic item.
+  DevionAdapter: {fileID: 11400000, guid: 574c6533ffedf8d41b876a518475d106, type: 2}
   CurrencyType: 1

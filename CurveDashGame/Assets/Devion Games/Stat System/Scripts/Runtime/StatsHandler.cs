@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -29,37 +29,73 @@ namespace DevionGames.StatSystem
         protected List<StatEffect> m_Effects = new List<StatEffect>();
         public System.Action onUpdate;
         private AudioSource m_AudioSource;
+        private bool m_Initialized = false;
 
         private void Start()
         {
-            for (int i = 0; i < this.m_Stats.Count; i++)
-                this.m_Stats[i] = Instantiate(this.m_Stats[i]);
+            if (m_Initialized) return;
+            m_Initialized = true;
 
-
-            if (this.m_StatOverrides.Count < this.m_Stats.Count)
+            UnityEngine.Debug.Log($"<color=cyan>[StatsHandler] Start() called on '{this.gameObject.name}' for handler name: '{this.m_HandlerName}' with {this.m_Stats.Count} stats.</color>");
+            try
             {
-                for (int i = this.m_StatOverrides.Count; i < this.m_Stats.Count; i++)
+                for (int i = 0; i < this.m_Stats.Count; i++)
                 {
-                    this.m_StatOverrides.Insert(i, new StatOverride());
+                    if (this.m_Stats[i] == null)
+                    {
+                        UnityEngine.Debug.LogWarning($"[StatsHandler] Stat at index {i} is NULL!");
+                        continue;
+                    }
+                    this.m_Stats[i] = Instantiate(this.m_Stats[i]);
                 }
+
+                if (this.m_StatOverrides.Count < this.m_Stats.Count)
+                {
+                    for (int i = this.m_StatOverrides.Count; i < this.m_Stats.Count; i++)
+                    {
+                        this.m_StatOverrides.Insert(i, new StatOverride());
+                    }
+                }
+
+                for (int i = 0; i < this.m_Stats.Count; i++)
+                {
+                    if (this.m_Stats[i] != null)
+                    {
+                        this.m_Stats[i].Initialize(this, this.m_StatOverrides[i]);
+                    }
+                }
+
+                for (int i = 0; i < this.m_Stats.Count; i++)
+                {
+                    if (this.m_Stats[i] != null)
+                    {
+                        this.m_Stats[i].ApplyStartValues();
+                    }
+                }
+
+                for (int i = 0; i < this.m_Effects.Count; i++) {
+                    if (this.m_Effects[i] != null)
+                    {
+                        this.m_Effects[i] = Instantiate(this.m_Effects[i]);
+                        this.m_Effects[i].Initialize(this);
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(this.m_HandlerName))
+                {
+                    StatsManager.RegisterStatsHandler(this);
+                    UnityEngine.Debug.Log($"<color=green>[StatsHandler] Successfully registered handler '{this.m_HandlerName}' to StatsManager.</color>");
+                }
+                else
+                {
+                    UnityEngine.Debug.LogWarning("[StatsHandler] m_HandlerName is empty! Cannot register to StatsManager.");
+                }
+                EventHandler.Register<GameObject, Object>(gameObject, "SendDamage", SendDamage);
             }
-
-            for (int i = 0; i < this.m_Stats.Count; i++)
-                this.m_Stats[i].Initialize(this,this.m_StatOverrides[i]);
-
-            for (int i = 0; i < this.m_Stats.Count; i++)
-                this.m_Stats[i].ApplyStartValues();
-
-            for (int i = 0; i < this.m_Effects.Count; i++) {
-                this.m_Effects[i] = Instantiate(this.m_Effects[i]);
-                this.m_Effects[i].Initialize(this);
-            }
-
-            if (!string.IsNullOrEmpty(this.m_HandlerName))
+            catch (System.Exception ex)
             {
-                StatsManager.RegisterStatsHandler(this);
+                UnityEngine.Debug.LogError($"[StatsHandler] Exception in Start(): {ex}");
             }
-            EventHandler.Register<GameObject, Object>(gameObject, "SendDamage", SendDamage);
         }
 
        /* private void OnGUI()

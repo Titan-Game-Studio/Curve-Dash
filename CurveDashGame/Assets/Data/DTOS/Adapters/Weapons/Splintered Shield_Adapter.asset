@@ -19,7 +19,7 @@ MonoBehaviour:
   m_Icon: {fileID: 0}
   m_Prefab: {fileID: 167395121887874946, guid: 033b5f4d61fcc5a4892d0e9ff2d26e3f, type: 3}
   m_Description: 
-  m_Category: {fileID: -6294223960729143046, guid: 17787831f9b1b6f469b7778380828f6a,
+  m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,
     type: 2}
   m_IsSellable: 1
   m_BuyPrice: 10

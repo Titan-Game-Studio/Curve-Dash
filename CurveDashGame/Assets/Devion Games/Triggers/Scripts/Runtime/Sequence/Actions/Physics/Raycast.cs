@@ -6,6 +6,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon(typeof(GraphicRaycaster))]
     [ComponentMenu("Physics/Raycast")]
+    [System.Serializable]
     public class Raycast : Action
     {
         [SerializeField]

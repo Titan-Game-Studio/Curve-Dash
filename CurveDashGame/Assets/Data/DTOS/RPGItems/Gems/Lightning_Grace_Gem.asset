@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: 'Grants active ability ''Grace Gem'' when socketed. Cooldown: 10s.'
+  DevionAdapter: {fileID: 11400000, guid: fb32e0e3e7d3deb4494067065c601ab2, type: 2}
   GemType: 0
   EmbeddedAbility: {fileID: 11400000, guid: 9d6671bc3696c9a4c944e5b7a89cba85, type: 2}
   SocketColor: {r: 1, g: 0, b: 0, a: 1}

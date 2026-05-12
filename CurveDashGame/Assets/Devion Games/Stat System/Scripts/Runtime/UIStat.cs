@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -32,6 +32,7 @@ namespace DevionGames.StatSystem
 
 		private Stat stat;
 		private Stat freePoints;
+		private StatsHandler lastHandler;
 
 		protected virtual void Start() {
 			if (this.m_IncrementButton != null)
@@ -44,18 +45,31 @@ namespace DevionGames.StatSystem
 		}
 
 		protected virtual void Update() {
-			//TODO BETTER FIX, SelectableUIStat is displaying same values for all enemies
-			//if (stat == null) {
-				StatsHandler handler = GetStatsHandler();
-				if (handler == null)
-					return;
-				stat = handler.GetStat(this.m_Stat);
-				if(this.m_FreePoints != null)
-					freePoints = handler.GetStat(this.m_FreePoints);
+			StatsHandler handler = GetStatsHandler();
+			if (handler == null)
+				return;
+			
+			if (stat == null || lastHandler != handler) {
+				lastHandler = handler;
+				if (this.m_Stat != null)
+				{
+					stat = handler.GetStat(this.m_Stat);
+					if (stat == null && this.m_Stat.Name == "Health")
+					{
+						stat = handler.GetStat("Heart");
+					}
+				}
+				else
+					stat = null;
 
-				if (this.m_StatName != null)
+				if (this.m_FreePoints != null)
+					freePoints = handler.GetStat(this.m_FreePoints);
+				else
+					freePoints = null;
+
+				if (this.m_StatName != null && this.stat != null)
 					this.m_StatName.text = this.stat.Name;
-		//	}
+			}
 			Repaint();
 		}
 
@@ -64,9 +78,9 @@ namespace DevionGames.StatSystem
 		}
 
 		protected virtual void Repaint() {
-			if (stat is Attribute attribute)
+			if (stat != null && stat is Attribute attribute)
 			{
-				float normalized = attribute.CurrentValue / attribute.Value;
+				float normalized = attribute.Value > 0f ? attribute.CurrentValue / attribute.Value : 0f;
 
 				if (this.m_StatBar != null)
 				{
@@ -84,9 +98,8 @@ namespace DevionGames.StatSystem
 				}
 			}
 
-			if (this.m_Value != null)
+			if (stat != null && this.m_Value != null)
 			{
-
 				this.m_Value.text = stat.Value.ToString();
 			}
 			
@@ -99,6 +112,11 @@ namespace DevionGames.StatSystem
 		private void OnCharacterLoaded(CallbackEventData data)
 		{
 			if (GetComponentInParent(data.GetData("Slot").GetType()) != (Component)data.GetData("Slot"))
+			{
+				return;
+			}
+			
+			if (this.m_Stat == null)
 			{
 				return;
 			}

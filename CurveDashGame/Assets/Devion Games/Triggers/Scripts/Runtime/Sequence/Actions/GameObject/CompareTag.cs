@@ -7,6 +7,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon(typeof(GameObject))]
     [ComponentMenu("GameObject/Compare Tag")]
+    [System.Serializable]
     public class CompareTag : Action, ICondition
     {
         [SerializeField]

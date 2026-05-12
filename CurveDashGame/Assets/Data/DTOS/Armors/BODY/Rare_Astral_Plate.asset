@@ -13,17 +13,19 @@ MonoBehaviour:
   m_Name: Rare_Astral_Plate
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Astral Plate
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: ea8d985057954d54da2d606524af8214, type: 3}
   Rarity: 2
   Type: 1
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: 7d22cc3e5b84f454f907f4b458609d08
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Heavy steel armor carrying stellar blessings.
+  DevionAdapter: {fileID: 11400000, guid: 2d8007b4b87c860458ad70fc0194111e, type: 2}
   Slot: 1
-  ModularPartIndex: 2
+  ModularPartIndex: 5
   Defense: 180
   HealthBonus: 120
+  Abilities: []

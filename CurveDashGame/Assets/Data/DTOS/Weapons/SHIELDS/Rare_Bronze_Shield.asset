@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Reflective protective guard.
+  DevionAdapter: {fileID: 11400000, guid: 25103a914af075e40ad0377c4790aed8, type: 2}
   VisualModel: {fileID: 0}
   PositionOffset: {x: 0, y: 0, z: 0}
   RotationOffset: {x: 0, y: 0, z: 0}

@@ -5,6 +5,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon(typeof(Animator))]
     [ComponentMenu("Animator/Set Int")]
+    [System.Serializable]
     public class SetInt: Action
     {
         [SerializeField]

@@ -9,26 +9,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 20a93a8c91388c14b9ef4d3d0c9b4d1b, type: 3}
+  m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
   m_Name: Magic_Stealth_Gloves_Adapter
-  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashItemAdapter
-  m_Id: 58bcf9c0-bcb2-4f73-8928-18df4517bc48
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
+  m_Id: ec9ae46c-8169-4b8a-b4c6-9aedffade296
   m_ItemName: Stealth Gloves
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 0}
-  m_Prefab: {fileID: 0}
+  m_Icon: {fileID: 21300000, guid: cfea9c36036ca9e4591419c6c526d558, type: 3}
+  m_Prefab: {fileID: 119710972481333545, guid: 8cbf3f77089ba1b4f9ca78dd727d6d28, type: 3}
   m_Description: Magic gloves that blend with shadows.
-  m_Category: {fileID: 8705209814584371102, guid: 17787831f9b1b6f469b7778380828f6a,
+  m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,
     type: 2}
   m_IsSellable: 1
-  m_BuyPrice: 10
+  m_BuyPrice: 34
   m_CanBuyBack: 1
-  m_BuyCurrency: {fileID: -6623786914046544860, guid: 17787831f9b1b6f469b7778380828f6a,
-    type: 2}
-  m_SellPrice: 5
-  m_SellCurrency: {fileID: -6623786914046544860, guid: 17787831f9b1b6f469b7778380828f6a,
-    type: 2}
+  m_BuyCurrency: {fileID: 0}
+  m_SellPrice: 17
+  m_SellCurrency: {fileID: 0}
   m_Stack: 1
   m_MaxStack: 1
   m_IsDroppable: 1
@@ -46,7 +44,7 @@ MonoBehaviour:
     modifiers: []
   ingredients: []
   properties:
-  - name: Item Type
+  - name: Equipment Type
     typeIndex: 0
     stringValue: Armor
     intValue: 0
@@ -70,4 +68,49 @@ MonoBehaviour:
     vector3Value: {x: 0, y: 0, z: 0}
     show: 1
     color: {r: 0.35, g: 0.55, b: 1, a: 1}
-  m_OriginalItemData: {fileID: 11400000, guid: 3c26c6339af92774c9970642a762c8ff, type: 2}
+  - name: Defense
+    typeIndex: 5
+    stringValue: 
+    intValue: 22
+    floatValue: 0
+    colorValue: {r: 0, g: 0, b: 0, a: 0}
+    boolValue: 0
+    objectReferenceValue: {fileID: 0}
+    vector2Value: {x: 0, y: 0}
+    vector3Value: {x: 0, y: 0, z: 0}
+    show: 1
+    color: {r: 0.6, g: 0.8, b: 1, a: 1}
+  - name: Heart
+    typeIndex: 5
+    stringValue: 
+    intValue: 15
+    floatValue: 0
+    colorValue: {r: 0, g: 0, b: 0, a: 0}
+    boolValue: 0
+    objectReferenceValue: {fileID: 0}
+    vector2Value: {x: 0, y: 0}
+    vector3Value: {x: 0, y: 0, z: 0}
+    show: 1
+    color: {r: 0, g: 1, b: 0, a: 1}
+  - name: Armor Slot
+    typeIndex: 0
+    stringValue: Hands
+    intValue: 0
+    floatValue: 0
+    colorValue: {r: 0, g: 0, b: 0, a: 0}
+    boolValue: 0
+    objectReferenceValue: {fileID: 0}
+    vector2Value: {x: 0, y: 0}
+    vector3Value: {x: 0, y: 0, z: 0}
+    show: 1
+    color: {r: 1, g: 1, b: 1, a: 1}
+  m_UseCategoryCooldown: 1
+  m_Cooldown: 1
+  actions: []
+  m_OverrideEquipPrefab: {fileID: 0}
+  m_Region: []
+  m_OriginalEquipmentData: {fileID: 11400000, guid: 3c26c6339af92774c9970642a762c8ff,
+    type: 2}
+  references:
+    version: 2
+    RefIds: []

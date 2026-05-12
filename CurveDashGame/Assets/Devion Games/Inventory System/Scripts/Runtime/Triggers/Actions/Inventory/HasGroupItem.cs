@@ -8,6 +8,7 @@ namespace DevionGames.InventorySystem
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon("Condition Item")]
     [ComponentMenu("Inventory System/Has Group Item")]
+    [System.Serializable]
     public class HasGroupItem : Action, ICondition
     {
         [ItemGroupPicker]

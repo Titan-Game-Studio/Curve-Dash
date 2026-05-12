@@ -13,17 +13,19 @@ MonoBehaviour:
   m_Name: Normal_Iron_Greaves
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Iron Greaves
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 0111c36e0cdd38e48952c85e65e30dcb, type: 3}
   Rarity: 0
   Type: 1
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: 0ff2b108fb236864190bf512830d3a73
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Basic metal boots.
+  DevionAdapter: {fileID: 11400000, guid: 83f108d649eeac844b26c17290f0de2d, type: 2}
   Slot: 3
-  ModularPartIndex: 0
+  ModularPartIndex: 1
   Defense: 10
   HealthBonus: 5
+  Abilities: []

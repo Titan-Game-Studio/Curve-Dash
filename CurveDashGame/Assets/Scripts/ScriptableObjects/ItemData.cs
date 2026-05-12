@@ -29,5 +29,8 @@ namespace STG.CurveDash
         
         [TextArea]
         public string Description;
+
+        [Header("Devion Inventory Integration")]
+        public DevionGames.InventorySystem.Item DevionAdapter;
     }
 }

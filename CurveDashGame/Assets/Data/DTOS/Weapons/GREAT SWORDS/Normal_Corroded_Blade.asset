@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Normal_Corroded_Blade
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.TwoHandedWeaponData
   ItemName: Corroded Blade
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
   Rarity: 0
   Type: 0
   Prefab:
@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Heavy two-handed rusted blade.
+  DevionAdapter: {fileID: 11400000, guid: 1677ab573079867468e55734273b30ad, type: 2}
   VisualModel: {fileID: 0}
   PositionOffset: {x: 0, y: 0, z: 0}
   RotationOffset: {x: 0, y: 0, z: 0}

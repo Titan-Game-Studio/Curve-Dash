@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Magic_Short_Bow
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.BowData
   ItemName: Short Bow
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
   Rarity: 1
   Type: 0
   Prefab:
@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Compact and quick to draw.
+  DevionAdapter: {fileID: 11400000, guid: 0b6443443ee397f4c907199c5d057eab, type: 2}
   VisualModel: {fileID: 0}
   PositionOffset: {x: 0, y: 0, z: 0}
   RotationOffset: {x: 0, y: 0, z: 0}

@@ -236,21 +236,34 @@ namespace STG.CurveDash
                 audioPlayer.Play(audioSettings.BallHitCrystalSound, audioSettings.BallHitCrystalVolume);
             }
 
-            foreach (var obstacleHit in playerHitObstacleFilter)
+            if (playerHitObstacleFilter.GetRawEntities().Length > 0 || playerHitByEnemyFilter.GetRawEntities().Length > 0)
             {
-                playerStatService.TakeDamage(10f, GameOver);
-            }
+                ref var psc = ref playerStatService.GetPlayerStat();
 
-            foreach (var enemyHit in playerHitByEnemyFilter)
-            {
-                var ball = playerFilter.GetRawEntities()[0];
-                ref var viewLink = ref viewLinkPool.Get(ball);
-                var ballView = viewLink.Transform.GetComponent<PlayerView>();
-                if (ballView != null) ballView.FlashWhite(0.5f);
+                foreach (var obstacleHit in playerHitObstacleFilter)
+                {
+                    if (psc.InvincibleTimer <= 0)
+                    {
+                        playerStatService.TakeDamage(10f, GameOver);
+                        psc.InvincibleTimer = 1.0f; // 1 second of invincibility iframe
+                    }
+                }
 
-                playerStatService.TakeDamage(15f, GameOver);
+                foreach (var enemyHit in playerHitByEnemyFilter)
+                {
+                    var ball = playerFilter.GetRawEntities()[0];
+                    ref var viewLink = ref viewLinkPool.Get(ball);
+                    var ballView = viewLink.Transform.GetComponent<PlayerView>();
+                    if (ballView != null) ballView.FlashWhite(0.5f);
 
-                world.GetPool<PlayerHitByEnemyEvent>().Del(enemyHit);
+                    if (psc.InvincibleTimer <= 0)
+                    {
+                        playerStatService.TakeDamage(15f, GameOver);
+                        psc.InvincibleTimer = 1.0f; // 1 second of invincibility iframe
+                    }
+
+                    world.GetPool<PlayerHitByEnemyEvent>().Del(enemyHit);
+                }
             }
 
 

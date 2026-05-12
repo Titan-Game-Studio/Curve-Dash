@@ -24,6 +24,7 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   Description: 'Grants active ability ''Freezing Pulse Gem'' when socketed. Cooldown:
     0.7s.'
+  DevionAdapter: {fileID: 11400000, guid: 318ca4f193646454a8cb8c792984795c, type: 2}
   GemType: 0
   EmbeddedAbility: {fileID: 11400000, guid: 38b9d22259cba0d45b99271800b8a8de, type: 2}
   SocketColor: {r: 0, g: 0, b: 1, a: 1}

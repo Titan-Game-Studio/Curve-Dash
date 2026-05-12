@@ -13,17 +13,19 @@ MonoBehaviour:
   m_Name: Magic_Sharkskin_Tunic
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Sharkskin Tunic
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: ea8d985057954d54da2d606524af8214, type: 3}
   Rarity: 1
   Type: 1
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: bf9db23ee0a25014cbf5a8222b9620a8
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Lightweight, flexible tunic with subtle magical weaving.
+  DevionAdapter: {fileID: 11400000, guid: 1b8f818137824664882d09eef9dbedb1, type: 2}
   Slot: 1
-  ModularPartIndex: 1
+  ModularPartIndex: 3
   Defense: 80
   HealthBonus: 60
+  Abilities: []

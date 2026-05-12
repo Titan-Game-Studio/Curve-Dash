@@ -22,7 +22,12 @@ namespace STG.CurveDash
         protected override void OnEnable()
         {
             base.OnEnable();
-            SyncData();
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                SyncData();
+            }
+#endif
         }
 
         public void SyncData()
@@ -85,6 +90,16 @@ namespace STG.CurveDash
                 {
                     this.Prefab = equippable.VisualModel;
                 }
+#if UNITY_EDITOR
+                else if (m_OriginalEquipmentData is ArmorItemData armorItem && armorItem.Prefab != null && !string.IsNullOrEmpty(armorItem.Prefab.AssetGUID))
+                {
+                    string armorPath = UnityEditor.AssetDatabase.GUIDToAssetPath(armorItem.Prefab.AssetGUID);
+                    if (!string.IsNullOrEmpty(armorPath))
+                    {
+                        this.Prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(armorPath);
+                    }
+                }
+#endif
 
                 // Sync Rarity, Category, and Prices/Currencies with Devion Games database if available
                 SyncDatabaseReferences();
@@ -108,7 +123,7 @@ namespace STG.CurveDash
                 else if (m_OriginalEquipmentData is ArmorItemData armorItem)
                 {
                     SetOrUpdateProperty("Defense", armorItem.Defense, new Color(0.6f, 0.8f, 1f));
-                    SetOrUpdateProperty("Heart", armorItem.HealthBonus, Color.green);
+                    SetOrUpdateProperty("Health", armorItem.HealthBonus, Color.green);
                     SetOrUpdateProperty("Armor Slot", armorItem.Slot.ToString(), Color.white);
                 }
             }

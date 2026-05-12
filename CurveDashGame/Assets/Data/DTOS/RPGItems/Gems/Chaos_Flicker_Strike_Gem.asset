@@ -24,6 +24,7 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   Description: 'Grants active ability ''Flicker Strike Gem'' when socketed. Cooldown:
     1.5s.'
+  DevionAdapter: {fileID: 11400000, guid: f334a22d81048cf44a20841768c15452, type: 2}
   GemType: 0
   EmbeddedAbility: {fileID: 11400000, guid: e8ca76ff97fc8074f966b149ec83ea16, type: 2}
   SocketColor: {r: 1, g: 0, b: 0, a: 1}

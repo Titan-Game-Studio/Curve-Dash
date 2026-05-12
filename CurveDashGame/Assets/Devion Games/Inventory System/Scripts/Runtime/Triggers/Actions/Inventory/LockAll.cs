@@ -8,6 +8,7 @@ namespace DevionGames.InventorySystem
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon("Item")]
     [ComponentMenu("Inventory System/Lock All")]
+    [System.Serializable]
     public class LockAll : Action
     {
         [SerializeField]

@@ -13,17 +13,19 @@ MonoBehaviour:
   m_Name: Unique_Kaoms_Roots
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Kaoms Roots
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 0111c36e0cdd38e48952c85e65e30dcb, type: 3}
   Rarity: 3
   Type: 1
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: 57878dfecf6cbae4b952bde5697ed939
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Prevents action speed from being slowed below base value.
+  DevionAdapter: {fileID: 11400000, guid: 12d26d1ff8948b843858044e6dbe16ed, type: 2}
   Slot: 3
-  ModularPartIndex: 3
+  ModularPartIndex: 6
   Defense: 100
   HealthBonus: 150
+  Abilities: []

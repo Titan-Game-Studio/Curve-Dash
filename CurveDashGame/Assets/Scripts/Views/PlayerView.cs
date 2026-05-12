@@ -347,7 +347,7 @@ namespace STG.CurveDash
             {
                 if (_leftHandItem == null)
                 {
-                    targetController = sword.MainAnimator;
+                    if (sword.MainAnimator != null) targetController = sword.MainAnimator;
                 }
                 else if (_leftHandItem is OneHandedWeaponData)
                 {
@@ -362,13 +362,18 @@ namespace STG.CurveDash
                 else
                 {
                     // Trường hợp khác (ví dụ cầm kiếm + item lạ)
-                    targetController = sword.MainAnimator;
+                    if (sword.MainAnimator != null) targetController = sword.MainAnimator;
                 }
             }
             // 3. TRƯỜNG HỢP CHỈ CẦM KHIÊN
             else if (_leftHandItem is OffHandData oh && oh.SubType == OffHandType.Shield)
             {
                 if (oh.MainAnimator != null) targetController = oh.MainAnimator;
+            }
+
+            if (targetController == null)
+            {
+                targetController = _originalCharacterController;
             }
 
 
@@ -624,12 +629,7 @@ namespace STG.CurveDash
         {
             if (_characterAnimator == null) return;
 
-            for (int i = 0; i < _characterAnimator.layerCount; i++)
-            {
-                var stateInfo = _characterAnimator.GetCurrentAnimatorStateInfo(i);
-                if (stateInfo.IsTag("Attack")) return;
-            }
-
+            _characterAnimator.ResetTrigger(triggerName);
             _characterAnimator.SetTrigger(triggerName);
         }
 
@@ -650,8 +650,10 @@ namespace STG.CurveDash
 
             if (isAttacking)
             {
-                // Attack animation speed scales with the attack speed
-                _characterAnimator.speed = AttackSpeed;
+                // Attack animation speed scales with the attack speed (enforce a healthy minimum of 0.2f to prevent locking)
+                float attackAnimSpeed = AttackSpeed;
+                if (attackAnimSpeed < 0.2f) attackAnimSpeed = 1.0f;
+                _characterAnimator.speed = attackAnimSpeed;
                 
                 // Mount doesn't attack, run it at normal speed (or idle)
                 if (_mountAnimator != null) _mountAnimator.speed = 1f;

@@ -6,6 +6,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon(typeof(Transform))]
     [ComponentMenu("Transform/Set Position To Target")]
+    [System.Serializable]
     public class SetPositionToTarget : Action
     {
         [SerializeField]

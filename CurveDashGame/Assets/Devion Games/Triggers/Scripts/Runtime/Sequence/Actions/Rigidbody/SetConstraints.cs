@@ -5,6 +5,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon(typeof(Rigidbody))]
     [ComponentMenu("Rigidbody/Set Constraints")]
+    [System.Serializable]
     public class SetConstraints : Action
     {
         [SerializeField]

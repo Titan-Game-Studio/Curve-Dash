@@ -7,6 +7,7 @@ namespace DevionGames
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon(typeof(Transform))]
     [ComponentMenu("Transform/Look At Mouse")]
+    [System.Serializable]
     public class LookAtMouse : Action
     {
         [SerializeField]

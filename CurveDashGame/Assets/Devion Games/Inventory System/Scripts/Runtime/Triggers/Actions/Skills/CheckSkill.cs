@@ -8,6 +8,7 @@ namespace DevionGames.InventorySystem
 {
     [Icon("Item")]
     [ComponentMenu("Inventory System/Check Skill")]
+    [System.Serializable]
     public class CheckSkill : Action, ICondition
     {
         [Tooltip("The name of the window to lock.")]

@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Causes bleed and heavy damage over time.
+  DevionAdapter: {fileID: 11400000, guid: 53b244f94849f1849a11642987b2fe8c, type: 2}
   VisualModel: {fileID: 0}
   PositionOffset: {x: 0, y: 0, z: 0}
   RotationOffset: {x: 0, y: 0, z: 0}

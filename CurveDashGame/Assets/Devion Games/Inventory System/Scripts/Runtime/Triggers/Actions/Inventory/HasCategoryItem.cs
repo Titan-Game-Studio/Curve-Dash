@@ -8,6 +8,7 @@ namespace DevionGames.InventorySystem
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon("Condition Item")]
     [ComponentMenu("Inventory System/Has Category Item")]
+    [System.Serializable]
     public class HasCategoryItem : Action, ICondition
     {
         [SerializeField]

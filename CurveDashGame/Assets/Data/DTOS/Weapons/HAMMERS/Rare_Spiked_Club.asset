@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Rare_Spiked_Club
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.TwoHandedWeaponData
   ItemName: Spiked Club
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
   Rarity: 2
   Type: 0
   Prefab:
@@ -23,6 +23,7 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Deadly spiked war maul.
+  DevionAdapter: {fileID: 11400000, guid: 72a5d87072a95e1478c6c77a919c9bab, type: 2}
   VisualModel: {fileID: 0}
   PositionOffset: {x: 0, y: 0, z: 0}
   RotationOffset: {x: 0, y: 0, z: 0}

@@ -80,10 +80,13 @@ namespace STG.CurveDash
                 float attackRange = 2.0f; // Default unarmed attack range
                 float attackSpeed = 1.0f; // Default unarmed attack speed (attacks per second)
                 
-                if (combat.CurrentWeapon != null)
+                if (combat.CurrentWeapon != null && combat.CurrentWeapon.BaseData != null)
                 {
                     attackRange = combat.CurrentWeapon.BaseData.BaseAttackRange;
+                    if (attackRange <= 0.2f) attackRange = 2.0f; // Safe minimum range (melee fallback)
+
                     attackSpeed = combat.CurrentWeapon.FinalAttackSpeed;
+                    if (attackSpeed < 0.1f) attackSpeed = 1.0f; // Safe minimum attack speed
                 }
 
                 if (combat.CooldownTimer > 0)
@@ -103,7 +106,7 @@ namespace STG.CurveDash
                     playerViewComponent.AttackSpeed = attackSpeed;
                 }
 
-                // Find closest enemy within range
+                // Find closest enemy within range (ignoring vertical Y-axis height differences)
                 int targetEnemy = -1;
                 float closestDistSq = attackRange * attackRange;
 
@@ -112,7 +115,9 @@ namespace STG.CurveDash
                     ref var enemyView = ref viewLinkPool.Get(enemyEntity);
                     if (enemyView.Transform == null) continue;
                     
-                    float distSq = (enemyView.Transform.position - playerPos).sqrMagnitude;
+                    Vector3 diff = enemyView.Transform.position - playerPos;
+                    diff.y = 0; // Lock Y axis
+                    float distSq = diff.sqrMagnitude;
 
                     if (distSq <= closestDistSq)
                     {
@@ -175,7 +180,9 @@ namespace STG.CurveDash
                                     ref var enemyView = ref viewLinkPool.Get(capturedTargetEnemy);
                                     if (enemyView.Transform != null && currentPlayerView.Transform != null)
                                     {
-                                        float distSq = (enemyView.Transform.position - currentPlayerView.Transform.position).sqrMagnitude;
+                                        Vector3 diff = enemyView.Transform.position - currentPlayerView.Transform.position;
+                                        diff.y = 0; // Lock Y axis
+                                        float distSq = diff.sqrMagnitude;
                                         if (distSq <= capturedAttackRange * capturedAttackRange)
                                         {
                                             originalTargetValid = true;
@@ -197,7 +204,9 @@ namespace STG.CurveDash
                                             ref var enemyView = ref viewLinkPool.Get(enemyEntity);
                                             if (enemyView.Transform == null) continue;
 
-                                            float distSq = (enemyView.Transform.position - currentPos).sqrMagnitude;
+                                            Vector3 diff = enemyView.Transform.position - currentPos;
+                                            diff.y = 0; // Lock Y axis
+                                            float distSq = diff.sqrMagnitude;
                                             if (distSq <= closestDistSq)
                                             {
                                                 closestDistSq = distSq;

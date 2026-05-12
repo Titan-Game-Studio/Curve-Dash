@@ -8,6 +8,7 @@ namespace DevionGames.InventorySystem
     [UnityEngine.Scripting.APIUpdating.MovedFromAttribute(true, null, "Assembly-CSharp")]
     [Icon("Item")]
     [ComponentMenu("Inventory System/Lock")]
+    [System.Serializable]
     public class Lock : Action
     {
         [Tooltip("The name of the window to lock.")]
