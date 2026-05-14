@@ -121,24 +121,10 @@ namespace STG.CurveDash
             }
 
             float randomVal = Random.value;
-            if (randomVal < 0.03f) // 3% chance for Weapon
+            if (randomVal < 0.03f) // 3% chance for Item (Weapons, Armors, Gems, Potion/Flask, Currency)
             {
-                SpawnWeaponPickup(block);
+                SpawnItemPickup(block);
             }
-            /* TẠM THỜI TẮT
-            else if (randomVal < 0.05f) // 2% chance for Mount
-            {
-                SpawnMountPickup(block);
-            }
-            else if (randomVal < 0.07f) // 2% chance for Aura
-            {
-                SpawnAuraPickup(block);
-            }
-            else if (gameplayStrategies.GetShieldSpawnStrategy().ShouldSpawn())
-            {
-                SpawnShield(block);
-            }
-            */
             else if (gameplayStrategies.GetCrystalSpawnStrategy().ShouldSpawn())
             {
                 SpawnCrystal(block);
@@ -195,39 +181,15 @@ namespace STG.CurveDash
             }
         }
 
-        private void SpawnWeaponPickup(int block)
+        private void SpawnItemPickup(int block)
         {
             ref var viewLinkComponent = ref viewLinkPool.Get(block);
             var child = viewLinkComponent.Transform.GetChild(Random.Range(0, BlockPartsCount - 1));
             if (child.gameObject.activeSelf)
             {
-                int weapon = spawner.SpawnWeaponPickup(child.position);
+                int item = spawner.SpawnItemPickup(child.position);
                 ref var blockComponent = ref blockPool.Get(block);
-                blockComponent.Crystal = world.PackEntity(weapon);
-            }
-        }
-
-        private void SpawnMountPickup(int block)
-        {
-            ref var viewLinkComponent = ref viewLinkPool.Get(block);
-            var child = viewLinkComponent.Transform.GetChild(Random.Range(0, BlockPartsCount - 1));
-            if (child.gameObject.activeSelf)
-            {
-                int mount = spawner.SpawnMountPickup(child.position);
-                ref var blockComponent = ref blockPool.Get(block);
-                blockComponent.Crystal = world.PackEntity(mount);
-            }
-        }
-
-        private void SpawnAuraPickup(int block)
-        {
-            ref var viewLinkComponent = ref viewLinkPool.Get(block);
-            var child = viewLinkComponent.Transform.GetChild(Random.Range(0, BlockPartsCount - 1));
-            if (child.gameObject.activeSelf)
-            {
-                int aura = spawner.SpawnAuraPickup(child.position);
-                ref var blockComponent = ref blockPool.Get(block);
-                blockComponent.Crystal = world.PackEntity(aura);
+                blockComponent.Crystal = world.PackEntity(item);
             }
         }
         private void SpawnObstacle(int block)

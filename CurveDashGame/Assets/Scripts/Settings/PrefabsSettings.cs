@@ -14,9 +14,7 @@ namespace STG.CurveDash
         [Header("Pickups & Items")]
         public GameObject CrystalPrefab;
         public GameObject ShieldPrefab;
-        public GameObject WeaponPickupPrefab;
-        public GameObject MountPickupPrefab;
-        public GameObject AuraPickupPrefab;
+        public GameObject ItemPickupPrefab;
 
         [Header("Enemies & Obstacles")]
         public GameObject ObstaclePrefab;

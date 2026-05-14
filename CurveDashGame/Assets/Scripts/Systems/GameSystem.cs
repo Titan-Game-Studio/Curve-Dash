@@ -87,6 +87,11 @@ namespace STG.CurveDash
             playerLevelUpFilter = world.Filter<PlayerLevelUpComponent>().End();
         }
 
+        public bool HasGameState()
+        {
+            return gameStateFilter.GetEntitiesCount() > 0;
+        }
+
         public ref GameStateComponent GetGameState()
         {
             var playerStat = gameStateFilter.GetRawEntities()[0];
@@ -238,28 +243,19 @@ namespace STG.CurveDash
 
             if (playerHitObstacleFilter.GetRawEntities().Length > 0 || playerHitByEnemyFilter.GetRawEntities().Length > 0)
             {
-                ref var psc = ref playerStatService.GetPlayerStat();
-
                 foreach (var obstacleHit in playerHitObstacleFilter)
                 {
-                    if (psc.InvincibleTimer <= 0)
-                    {
-                        playerStatService.TakeDamage(10f, GameOver);
-                        psc.InvincibleTimer = 1.0f; // 1 second of invincibility iframe
-                    }
+                    playerStatService.TakeDamage(10f, GameOver);
                 }
 
                 foreach (var enemyHit in playerHitByEnemyFilter)
                 {
-                    var ball = playerFilter.GetRawEntities()[0];
-                    ref var viewLink = ref viewLinkPool.Get(ball);
-                    var ballView = viewLink.Transform.GetComponent<PlayerView>();
-                    if (ballView != null) ballView.FlashWhite(0.5f);
-
-                    if (psc.InvincibleTimer <= 0)
+                    if (playerStatService.TakeDamage(15f, GameOver))
                     {
-                        playerStatService.TakeDamage(15f, GameOver);
-                        psc.InvincibleTimer = 1.0f; // 1 second of invincibility iframe
+                        var ball = playerFilter.GetRawEntities()[0];
+                        ref var viewLink = ref viewLinkPool.Get(ball);
+                        var ballView = viewLink.Transform.GetComponent<PlayerView>();
+                        if (ballView != null) ballView.FlashWhite(0.5f);
                     }
 
                     world.GetPool<PlayerHitByEnemyEvent>().Del(enemyHit);

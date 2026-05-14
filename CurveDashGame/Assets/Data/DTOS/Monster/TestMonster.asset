@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.MonsterData
   MonsterName: BEAR
   Prefab: {fileID: 7921259990484736592, guid: 20448f50d45eeda408a97e8eb78a6d47, type: 3}
-  MaxHealth: 50
+  MaxHealth: 20
   MovementSpeed: 2
   ExperienceReward: 10
+  AttackRange: 1.5

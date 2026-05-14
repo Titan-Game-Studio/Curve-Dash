@@ -19,9 +19,7 @@ namespace STG.CurveDash
         private readonly BlockViewPool blockViewPool;
         private readonly BlockPartViewFactory blockPartViewFactory;
         private readonly PlayerViewFactory playerViewFactory;
-        private readonly WeaponPickupViewPool weaponPickupViewPool;
-        private readonly MountPickupViewPool mountPickupViewPool;
-        private readonly AuraPickupViewPool auraPickupViewPool;
+        private readonly ItemPickupViewPool itemPickupViewPool;
         private readonly GameAssetCatalog assetCatalog;
         private readonly AssetManager assetManager;
 
@@ -37,9 +35,7 @@ namespace STG.CurveDash
         
         private readonly EcsPool<EnemyHealthComponent> enemyHealthPool;
         private readonly EcsPool<PlayerCombatComponent> combatPool;
-        private readonly EcsPool<WeaponPickupComponent> weaponPickupPool;
-        private readonly EcsPool<MountPickupComponent> mountPickupPool;
-        private readonly EcsPool<AuraPickupComponent> auraPickupPool;
+        private readonly EcsPool<ItemPickupComponent> itemPickupPool;
 
         private readonly EcsPool<EnemyComponent> enemyPool;
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
@@ -48,7 +44,7 @@ namespace STG.CurveDash
         public ObjectSpawner(EcsWorld world, BlockViewPool blockViewPool, BlockPartViewFactory blockPartViewFactory,
             CrystalViewPool crystalViewPool, ObstacleViewPool obstacleViewPool, ShieldViewPool shieldViewPool, CloudViewPool cloudViewPool, 
             PlayerViewFactory playerViewFactory, MonsterViewPool monsterViewPool,
-            WeaponPickupViewPool weaponPickupViewPool, MountPickupViewPool mountPickupViewPool, AuraPickupViewPool auraPickupViewPool, 
+            ItemPickupViewPool itemPickupViewPool, 
             GameAssetCatalog assetCatalog, AssetManager assetManager)
         {
             this.world = world;
@@ -62,9 +58,7 @@ namespace STG.CurveDash
             this.cloudViewPool = cloudViewPool;
             this.playerViewFactory = playerViewFactory;
             this.monsterViewPool = monsterViewPool;
-            this.weaponPickupViewPool = weaponPickupViewPool;
-            this.mountPickupViewPool = mountPickupViewPool;
-            this.auraPickupViewPool = auraPickupViewPool;
+            this.itemPickupViewPool = itemPickupViewPool;
 
             playerPool = world.GetPool<PlayerComponent>();
             crystalPool = world.GetPool<CrystalComponent>();
@@ -75,9 +69,7 @@ namespace STG.CurveDash
             
             enemyHealthPool = world.GetPool<EnemyHealthComponent>();
             combatPool = world.GetPool<PlayerCombatComponent>();
-            weaponPickupPool = world.GetPool<WeaponPickupComponent>();
-            mountPickupPool = world.GetPool<MountPickupComponent>();
-            auraPickupPool = world.GetPool<AuraPickupComponent>();
+            itemPickupPool = world.GetPool<ItemPickupComponent>();
 
             enemyPool = world.GetPool<EnemyComponent>();
             viewLinkPool = world.GetPool<ViewLinkComponent>();
@@ -95,9 +87,7 @@ namespace STG.CurveDash
             cloudViewPool.Clear();
             blockViewPool.Clear();
             monsterViewPool.Clear();
-            weaponPickupViewPool.Clear();
-            mountPickupViewPool.Clear();
-            auraPickupViewPool.Clear();
+            itemPickupViewPool.Clear();
         }
 
         public int SpawnPlayer(Vector3 pos, float speed)
@@ -151,6 +141,123 @@ namespace STG.CurveDash
             ref var combat = ref combatPool.Add(entity);
             combat.CurrentWeapon = null;
             combat.CooldownTimer = 0f;
+
+            // 1. Trang bị Vũ khí Khởi đầu & Kỹ năng Active
+            if (assetCatalog != null && assetCatalog.MasterItemCatalog != null)
+            {
+                var weapons = assetCatalog.MasterItemCatalog.Items.OfType<WeaponData>().ToList();
+                if (weapons.Count > 0)
+                {
+                    var starterWeapon = weapons[0]; // Chọn vũ khí cơ bản đầu tiên
+                    var instance = new WeaponInstance(starterWeapon, starterWeapon.Rarity);
+                    
+                    // Tìm một kỹ năng Active để gắn vào vũ khí
+                    var loadedAbilities = Resources.LoadAll<AbilityData>("");
+                    PoEAbility starterActive = null;
+                    foreach (var ab in loadedAbilities)
+                    {
+                        if (ab is PoEAbility active)
+                        {
+                            starterActive = active;
+                            break;
+                        }
+                    }
+                    if (starterActive != null)
+                    {
+                        instance.DynamicAbilities.Add(starterActive);
+                    }
+
+                    combat.CurrentWeapon = instance;
+
+                    var playerView = gameObject.GetComponent<PlayerView>();
+                    if (playerView != null)
+                    {
+                        playerView.Equip(starterWeapon);
+                    }
+
+                    // Tích hợp Devion Games Inventory System cho Actionbar & Inventory
+                    try
+                    {
+                        if (DevionGames.InventorySystem.InventoryManager.Database != null)
+                        {
+                            // Thêm vũ khí vào Equipment / Inventory
+                            var devionAdapter = starterWeapon.DevionAdapter;
+                            if (devionAdapter == null)
+                            {
+                                string targetName = starterWeapon.name + "_Adapter";
+                                foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
+                                {
+                                    if (dbItem != null && dbItem.name == targetName)
+                                    {
+                                        devionAdapter = dbItem;
+                                        starterWeapon.DevionAdapter = dbItem;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (devionAdapter != null)
+                            {
+                                var devionInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(devionAdapter);
+                                if (devionInstance != null)
+                                {
+                                    DevionGames.InventorySystem.ItemContainer.AddItem("Equipment", devionInstance);
+                                    DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", devionInstance);
+                                }
+                            }
+
+                            // 2. Thêm 2 bình Flask (Máu và Mana) vào Actionbar
+                            var flasks = assetCatalog.MasterItemCatalog.Items.OfType<FlaskItemData>().ToList();
+                            foreach (var flask in flasks)
+                            {
+                                var fAdapter = flask.DevionAdapter;
+                                if (fAdapter == null)
+                                {
+                                    string targetName = flask.name + "_Adapter";
+                                    foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
+                                    {
+                                        if (dbItem != null && dbItem.name == targetName)
+                                        {
+                                            fAdapter = dbItem;
+                                            flask.DevionAdapter = dbItem;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (fAdapter != null)
+                                {
+                                    var fInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(fAdapter);
+                                    if (fInstance != null)
+                                    {
+                                        DevionGames.InventorySystem.ItemContainer.AddItem("Actionbar", fInstance);
+                                        DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", fInstance);
+                                    }
+                                }
+                            }
+
+                            // 3. Thêm kỹ năng Active vào Actionbar
+                            if (starterActive != null)
+                            {
+                                foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
+                                {
+                                    if (dbItem != null && (dbItem.name.Contains("Cleave") || dbItem.name.Contains(starterActive.AbilityName)))
+                                    {
+                                        var skillInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(dbItem);
+                                        if (skillInstance != null)
+                                        {
+                                            DevionGames.InventorySystem.ItemContainer.AddItem("Actionbar", skillInstance);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (System.Exception ex)
+                    {
+                        UnityEngine.Debug.LogError($"[StarterEquipment] Exception during starter equipment setup: {ex.Message}");
+                    }
+                }
+            }
 
             gameObject.transform.position = pos;
             return entity;
@@ -271,39 +378,106 @@ namespace STG.CurveDash
             return entity;
         }
 
+        public int SpawnItemPickup(Vector3 blockPosition, ItemData item)
+        {
+            if (item == null) return -1;
+            var itemView = itemPickupViewPool.Spawn();
+            var entity = CreateEntity<ItemPickupComponent>(itemView.gameObject);
+
+            itemView.Setup(item);
+
+            itemView.transform.position = blockPosition + CrystalOffset;
+            var rb = itemView.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.isKinematic = true;
+                rb.position = itemView.transform.position;
+            }
+
+            return entity;
+        }
+
+        public int SpawnItemPickup(Vector3 blockPosition)
+        {
+            if (assetCatalog != null && assetCatalog.MasterItemCatalog != null && assetCatalog.MasterItemCatalog.Items != null)
+            {
+                var items = assetCatalog.MasterItemCatalog.Items;
+                if (items.Count > 0)
+                {
+                    var randomItem = items[Random.Range(0, items.Count)];
+                    return SpawnItemPickup(blockPosition, randomItem);
+                }
+            }
+            return -1;
+        }
+
         public int SpawnWeaponPickup(Vector3 blockPosition)
         {
-            var weaponView = weaponPickupViewPool.Spawn();
-            var entity = CreateEntity<WeaponPickupComponent>(weaponView.gameObject);
-
-            // Select random weapon from MasterItemCatalog
             if (assetCatalog != null && assetCatalog.MasterItemCatalog != null)
             {
                 var weapons = assetCatalog.MasterItemCatalog.Items.OfType<WeaponData>().ToList();
                 if (weapons.Count > 0)
                 {
                     var randomWeapon = weapons[Random.Range(0, weapons.Count)];
-                    weaponView.Setup(randomWeapon);
+                    return SpawnItemPickup(blockPosition, randomWeapon);
                 }
             }
-
-
-            weaponView.transform.position = blockPosition + CrystalOffset;
-            weaponView.GetComponent<Rigidbody>().isKinematic = true;
-            weaponView.GetComponent<Rigidbody>().position = weaponView.transform.position;
-
-            return entity;
-        }
-
-        public int SpawnMountPickup(Vector3 blockPosition)
-        {
-            // Tạm thời vô hiệu hóa
             return -1;
         }
-        
-        public int SpawnAuraPickup(Vector3 blockPosition)
+
+        public int SpawnArmorPickup(Vector3 blockPosition)
         {
-            // Tạm thời vô hiệu hóa
+            if (assetCatalog != null && assetCatalog.MasterItemCatalog != null)
+            {
+                var armors = assetCatalog.MasterItemCatalog.Items.OfType<ArmorItemData>().ToList();
+                if (armors.Count > 0)
+                {
+                    var randomArmor = armors[Random.Range(0, armors.Count)];
+                    return SpawnItemPickup(blockPosition, randomArmor);
+                }
+            }
+            return -1;
+        }
+
+        public int SpawnGemPickup(Vector3 blockPosition)
+        {
+            if (assetCatalog != null && assetCatalog.MasterItemCatalog != null)
+            {
+                var gems = assetCatalog.MasterItemCatalog.Items.OfType<GemItemData>().ToList();
+                if (gems.Count > 0)
+                {
+                    var randomGem = gems[Random.Range(0, gems.Count)];
+                    return SpawnItemPickup(blockPosition, randomGem);
+                }
+            }
+            return -1;
+        }
+
+        public int SpawnFlaskPickup(Vector3 blockPosition)
+        {
+            if (assetCatalog != null && assetCatalog.MasterItemCatalog != null)
+            {
+                var flasks = assetCatalog.MasterItemCatalog.Items.OfType<FlaskItemData>().ToList();
+                if (flasks.Count > 0)
+                {
+                    var randomFlask = flasks[Random.Range(0, flasks.Count)];
+                    return SpawnItemPickup(blockPosition, randomFlask);
+                }
+            }
+            return -1;
+        }
+
+        public int SpawnCurrencyPickup(Vector3 blockPosition)
+        {
+            if (assetCatalog != null && assetCatalog.MasterItemCatalog != null)
+            {
+                var currencies = assetCatalog.MasterItemCatalog.Items.OfType<CurrencyItemData>().ToList();
+                if (currencies.Count > 0)
+                {
+                    var randomCurrency = currencies[Random.Range(0, currencies.Count)];
+                    return SpawnItemPickup(blockPosition, randomCurrency);
+                }
+            }
             return -1;
         }
 
@@ -398,20 +572,10 @@ namespace STG.CurveDash
                     if (component != null) blockViewPool.Despawn(component);
                 }
             }
-            else if (weaponPickupPool.Has(entity))
+            else if (itemPickupPool.Has(entity))
             {
-                var component = view.GetComponent<WeaponPickupView>();
-                if (component != null) weaponPickupViewPool.Despawn(component);
-            }
-            else if (mountPickupPool.Has(entity))
-            {
-                var component = view.GetComponent<MountPickupView>();
-                if (component != null) mountPickupViewPool.Despawn(component);
-            }
-            else if (auraPickupPool.Has(entity))
-            {
-                var component = view.GetComponent<AuraPickupView>();
-                if (component != null) auraPickupViewPool.Despawn(component);
+                var component = view.GetComponent<ItemPickupView>();
+                if (component != null) itemPickupViewPool.Despawn(component);
             }
             else if (shieldPool.Has(entity))
             {
@@ -425,6 +589,19 @@ namespace STG.CurveDash
             }
             else if (playerPool.Has(entity))
             {
+                var handler = view.GetComponent<DevionGames.StatSystem.StatsHandler>();
+                if (handler != null && DevionGames.StatSystem.StatsManager.current != null)
+                {
+                    var field = typeof(DevionGames.StatSystem.StatsManager).GetField("m_StatsHandler", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    if (field != null)
+                    {
+                        var list = field.GetValue(DevionGames.StatSystem.StatsManager.current) as List<DevionGames.StatSystem.StatsHandler>;
+                        if (list != null)
+                        {
+                            list.Remove(handler);
+                        }
+                    }
+                }
                 Object.Destroy(view);
             }
             

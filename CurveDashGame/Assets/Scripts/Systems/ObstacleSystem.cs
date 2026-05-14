@@ -28,12 +28,52 @@ namespace STG.CurveDash
 
         public void Tick()
         {
-            // foreach (var obstacle in playerHitObstacleFilter)
-            //     spawner.DespawnObject(obstacle);
+
 
 
             foreach (var obstacle in deadEnemyFilter)
+            {
+                if (viewLinkPool.Has(obstacle))
+                {
+                    ref var viewLink = ref viewLinkPool.Get(obstacle);
+                    if (viewLink.View != null)
+                    {
+                        Vector3 deathPos = viewLink.View.transform.position;
+                        
+                        // 40% chance of item dropping
+                        if (Random.value <= 0.40f)
+                        {
+                            float roll = Random.value;
+                            if (roll < 0.25f)
+                            {
+                                spawner.SpawnWeaponPickup(deathPos);
+                                Debug.Log("<color=yellow>[EnemyDrop] Enemy dropped a WEAPON!</color>");
+                            }
+                            else if (roll < 0.50f)
+                            {
+                                spawner.SpawnArmorPickup(deathPos);
+                                Debug.Log("<color=yellow>[EnemyDrop] Enemy dropped an ARMOR piece!</color>");
+                            }
+                            else if (roll < 0.70f)
+                            {
+                                spawner.SpawnGemPickup(deathPos);
+                                Debug.Log("<color=yellow>[EnemyDrop] Enemy dropped a GEM!</color>");
+                            }
+                            else if (roll < 0.85f)
+                            {
+                                spawner.SpawnFlaskPickup(deathPos);
+                                Debug.Log("<color=yellow>[EnemyDrop] Enemy dropped a FLASK!</color>");
+                            }
+                            else
+                            {
+                                spawner.SpawnCurrencyPickup(deathPos);
+                                Debug.Log("<color=yellow>[EnemyDrop] Enemy dropped CURRENCY!</color>");
+                            }
+                        }
+                    }
+                }
                 spawner.DespawnObject(obstacle);
+            }
         }
     }
 }

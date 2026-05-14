@@ -1,6 +1,6 @@
 namespace STG.CurveDash
 {
-    public struct WeaponPickupComponent
+    public struct PlayerHitItemEvent
     {
     }
 }

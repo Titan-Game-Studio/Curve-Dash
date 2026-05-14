@@ -19,19 +19,16 @@ namespace STG.CurveDash
         private readonly EcsPool<ObstacleComponent> obstaclePool;
         private readonly EcsPool<ShieldComponent> shieldPool;
         private readonly EcsPool<EnemyComponent> enemyPool;
-        private readonly EcsPool<WeaponPickupComponent> weaponPickupPool;
+        private readonly EcsPool<ItemPickupComponent> itemPickupPool;
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
         private readonly EcsPool<FallingComponent> fallingPool;
         private readonly EcsPool<PlayerPassedComponent> playerPassedPool;
         private readonly EcsPool<PlayerHitCrystalEvent> playerHitCrystalPool;
         private readonly EcsPool<PlayerHitShieldEvent> playerHitShieldPool;
-        private readonly EcsPool<PlayerHitWeaponEvent> playerHitWeaponPool;
-        private readonly EcsPool<PlayerHitMountEvent> playerHitMountPool;
-        private readonly EcsPool<PlayerHitAuraEvent> playerHitAuraPool;
-        private readonly EcsPool<MountPickupComponent> mountPickupPool;
-        private readonly EcsPool<AuraPickupComponent> auraPickupPool;
+        private readonly EcsPool<PlayerHitItemEvent> playerHitItemPool;
         private readonly EcsPool<PlayerHitObstacleEvent> playerHitObstaclePool;
         private readonly EcsPool<PlayerHitByEnemyEvent> playerHitByEnemyPool;
+        private readonly EcsPool<ObstacleHitPlayerTag> obstacleHitTagPool;
 
         private readonly EcsFilter playerFilter;
 
@@ -54,20 +51,16 @@ namespace STG.CurveDash
             obstaclePool = world.GetPool<ObstacleComponent>();
             shieldPool = world.GetPool<ShieldComponent>();
             enemyPool = world.GetPool<EnemyComponent>();
-            weaponPickupPool = world.GetPool<WeaponPickupComponent>();
+            itemPickupPool = world.GetPool<ItemPickupComponent>();
             viewLinkPool = world.GetPool<ViewLinkComponent>();
             fallingPool = world.GetPool<FallingComponent>();
             playerPassedPool = world.GetPool<PlayerPassedComponent>();
             playerHitCrystalPool = world.GetPool<PlayerHitCrystalEvent>();
             playerHitShieldPool = world.GetPool<PlayerHitShieldEvent>();
-            playerHitWeaponPool = world.GetPool<PlayerHitWeaponEvent>();
-            playerHitMountPool = world.GetPool<PlayerHitMountEvent>();
-            playerHitAuraPool = world.GetPool<PlayerHitAuraEvent>();
-            weaponPickupPool = world.GetPool<WeaponPickupComponent>();
-            mountPickupPool = world.GetPool<MountPickupComponent>();
-            auraPickupPool = world.GetPool<AuraPickupComponent>();
+            playerHitItemPool = world.GetPool<PlayerHitItemEvent>();
             playerHitObstaclePool = world.GetPool<PlayerHitObstacleEvent>();
             playerHitByEnemyPool = world.GetPool<PlayerHitByEnemyEvent>();
+            obstacleHitTagPool = world.GetPool<ObstacleHitPlayerTag>();
 
             playerFilter = world.Filter<PlayerComponent>().End();
         }
@@ -192,27 +185,30 @@ namespace STG.CurveDash
                         {
                             playerHitShieldPool.Add(pickupEntity);
                         }
-                        else if (weaponPickupPool.Has(pickupEntity) && !playerHitWeaponPool.Has(pickupEntity))
+                        else if (itemPickupPool.Has(pickupEntity) && !playerHitItemPool.Has(pickupEntity))
                         {
-                            playerHitWeaponPool.Add(pickupEntity);
-                        }
-                        else if (mountPickupPool.Has(pickupEntity) && !playerHitMountPool.Has(pickupEntity))
-                        {
-                            playerHitMountPool.Add(pickupEntity);
-                        }
-                        else if (auraPickupPool.Has(pickupEntity) && !playerHitAuraPool.Has(pickupEntity))
-                        {
-                            playerHitAuraPool.Add(pickupEntity);
+                            playerHitItemPool.Add(pickupEntity);
                         }
                     }
 
                     if (CheckCollisionWithObstacle(position, out int obstacle) && obstaclePool.Has(obstacle))
-                        playerHitObstaclePool.Add(obstacle);
+                    {
+                        if (!obstacleHitTagPool.Has(obstacle))
+                        {
+                            obstacleHitTagPool.Add(obstacle);
+                            playerHitObstaclePool.Add(obstacle);
+                        }
+                    }
 
                     if (CheckCollisionWithEnemy(position, out int enemy) && enemyPool.Has(enemy))
                     {
-                        if (!world.GetPool<PlayerHitByEnemyEvent>().Has(ball))
-                            world.GetPool<PlayerHitByEnemyEvent>().Add(ball);
+                        ref var enemyComp = ref enemyPool.Get(enemy);
+                        if (enemyComp.AttackCooldown <= 0f && !enemyComp.IsChargingAttack)
+                        {
+                            enemyComp.IsChargingAttack = true;
+                            enemyComp.AttackTimer = 0.5f; // 0.5 seconds of charging attack
+                            UnityEngine.Debug.Log($"<color=orange>[EnemyAttack] Enemy {enemy} started charging attack! Hits in 0.5s...</color>");
+                        }
                     }
 
                     if (CheckEntityUnder(position, out var block) && blockPool.Has(block))
@@ -312,12 +308,10 @@ namespace STG.CurveDash
                     {
                         bool isCrystal = crystalPool.Has(hitEntity);
                         bool isShield = shieldPool.Has(hitEntity);
-                        bool isWeapon = weaponPickupPool.Has(hitEntity);
-                        bool isMount = mountPickupPool.Has(hitEntity);
-                        bool isAura = auraPickupPool.Has(hitEntity);
+                        bool isItem = itemPickupPool.Has(hitEntity);
 
                         // Filter out non-pickup entities to prevent player self-selection or duplicate checks
-                        if (isCrystal || isShield || isWeapon || isMount || isAura)
+                        if (isCrystal || isShield || isItem)
                         {
                             return true;
                         }

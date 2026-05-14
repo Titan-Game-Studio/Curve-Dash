@@ -14,9 +14,9 @@ GameObject:
   - component: {fileID: 2830056364503120990}
   - component: {fileID: -307365885568271129}
   - component: {fileID: -988062290415317578}
-  - component: {fileID: -1889173530453126634}
+  - component: {fileID: 4268698702329067452}
   m_Layer: 8
-  m_Name: MountPickup
+  m_Name: IteamPickup
   m_TagString: Crystal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32,8 +32,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 1
+  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -154,7 +154,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91993f0b15344111af4e5a036f4b4a21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &-1889173530453126634
+--- !u!114 &4268698702329067452
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -163,7 +163,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2830056364503120991}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05fe421a02b67b245a702418a709f180, type: 3}
+  m_Script: {fileID: 11500000, guid: 5a2ad0a041da88a40bce1938d4500734, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.MountPickupView
-  MountIndex: 0
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ItemPickupView
+  ItemToGive: {fileID: 0}

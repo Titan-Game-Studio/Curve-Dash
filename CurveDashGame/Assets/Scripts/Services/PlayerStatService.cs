@@ -87,19 +87,25 @@ namespace STG.CurveDash
             SyncWithDevionGames(ref playerStatComponent, true);
         }
 
-        public void TakeDamage(float damage, Action onDeath = null)
+        public bool TakeDamage(float damage, Action onDeath = null)
         {
             var playerStat = playerStatFilter.GetRawEntities()[0];
             ref var playerStatComponent = ref playerStatPool.Get(playerStat);
             
+            if (playerStatComponent.InvincibleTimer > 0f)
+            {
+                // Ignore damage during invincibility frame
+                return false;
+            }
+
             // Sync latest values from Devion Games first
             SyncWithDevionGames(ref playerStatComponent, false);
 
             float oldLife = playerStatComponent.CurrentLife;
             UnityEngine.Debug.Log($"<color=orange>[PlayerStatService] TakeDamage CALLED: damage={damage}, currentLife before={oldLife}</color>");
 
-            // Apply damage directly to Life so that the HUD health bar drops immediately!
             playerStatComponent.CurrentLife -= damage;
+            playerStatComponent.InvincibleTimer = 1.5f; // 1.5 seconds of invincibility iframe
 
             if (playerStatComponent.CurrentLife <= 0)
             {
@@ -112,6 +118,7 @@ namespace STG.CurveDash
 
             // Sync updated values back to Devion Games so the UI and database are perfectly updated
             SyncWithDevionGames(ref playerStatComponent, true);
+            return true;
         }
 
         public void GameStart(int level)
@@ -123,8 +130,8 @@ namespace STG.CurveDash
             playerStatComponent.Level = level;
             playerStatComponent.Score = 0;
             playerStatComponent.Gold = 0;
-            playerStatComponent.MaxLife = 100f;
-            playerStatComponent.CurrentLife = 100f;
+            playerStatComponent.MaxLife = 500f;
+            playerStatComponent.CurrentLife = 500f;
             playerStatComponent.MaxMana = 50f;
             playerStatComponent.CurrentMana = 50f;
             playerStatComponent.MaxEnergyShield = 0f; // Starting shield is 0 so health drops immediately on hit
@@ -241,7 +248,7 @@ namespace STG.CurveDash
 
                     if (cachedHeartStat != null)
                     {
-                        cachedHeartStat.BaseValue = 100f; // Force base max life to 100 to prevent clamping back to 48 from database/loaded values!
+                        cachedHeartStat.BaseValue = 500f; // Force base max life to 500 to prevent clamping back to 48 from database/loaded values!
                         comp.MaxLife = cachedHeartStat.Value;
                         comp.CurrentLife = cachedHeartStat.CurrentValue;
                     }

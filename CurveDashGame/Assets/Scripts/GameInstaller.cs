@@ -42,8 +42,7 @@ namespace STG.CurveDash
             Container.BindInterfacesAndSelfTo<BlockSystem>().AsSingle();
             Container.BindInterfacesTo<FallingSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<CombatSystem>().AsSingle();
-            Container.BindInterfacesAndSelfTo<WeaponPickupSystem>().AsSingle();
-            Container.BindInterfacesAndSelfTo<PowerUpPickupSystem>().AsSingle();
+            Container.BindInterfacesAndSelfTo<ItemPickupSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<TGS.Core.IAP.UnityIapService>().AsSingle();
             Container.BindInterfacesAndSelfTo<LevelPlayAdService>().AsSingle();
             Container.Bind<AudioPlayer>().AsSingle();
@@ -54,7 +53,8 @@ namespace STG.CurveDash
             Container.BindInterfacesAndSelfTo<CloudSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<ShieldSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<VfxSystem>().AsSingle();
-            // Container.BindInterfacesAndSelfTo<EnemyMovementSystem>().AsSingle();
+            Container.BindInterfacesAndSelfTo<EnemyMovementSystem>().AsSingle();
+            Container.BindInterfacesAndSelfTo<MonsterSpawnSystem>().AsSingle();
 
 
 
@@ -64,48 +64,52 @@ namespace STG.CurveDash
             Container.BindInterfacesTo<DeleteEventsSystem<PlayerHitObstacleEvent>>().AsSingle();
             Container.BindInterfacesTo<DeleteEventsSystem<PlayerHitShieldEvent>>().AsSingle();
             Container.BindInterfacesTo<DeleteEventsSystem<PlayerLevelUpComponent>>().AsSingle();
-            Container.BindInterfacesTo<DeleteEventsSystem<PlayerHitWeaponEvent>>().AsSingle();
-            Container.BindInterfacesTo<DeleteEventsSystem<PlayerHitMountEvent>>().AsSingle();
-            Container.BindInterfacesTo<DeleteEventsSystem<PlayerHitAuraEvent>>().AsSingle();
+            Container.BindInterfacesTo<DeleteEventsSystem<PlayerHitItemEvent>>().AsSingle();
 
             // factories
 
-            Container.BindFactory<PlayerView, PlayerViewFactory>().FromComponentInNewPrefab(Prefabs.PlayerPrefab);
+            Container.BindFactory<PlayerView, PlayerViewFactory>()
+                .FromComponentInNewPrefab(GetValidPrefab<PlayerView>(Prefabs.PlayerPrefab, "Player_Fallback"));
             Container.BindFactory<BlockPartView, BlockPartViewFactory>()
-                .FromComponentInNewPrefab(Prefabs.BlockPartPrefab);
+                .FromComponentInNewPrefab(GetValidPrefab<BlockPartView>(Prefabs.BlockPartPrefab, "BlockPart_Fallback"));
 
             // pools
 
             Container.BindMemoryPool<BlockView, BlockViewPool>()
-                .WithInitialSize(30).FromComponentInNewPrefab(Prefabs.BlockPrefab)
+                .WithInitialSize(30).FromComponentInNewPrefab(GetValidPrefab<BlockView>(Prefabs.BlockPrefab, "Block_Fallback"))
                 .UnderTransformGroup("ObjectsPool");
             Container.BindMemoryPool<CrystalView, CrystalViewPool>()
-                .WithInitialSize(5).FromComponentInNewPrefab(Prefabs.CrystalPrefab)
+                .WithInitialSize(5).FromComponentInNewPrefab(GetValidPrefab<CrystalView>(Prefabs.CrystalPrefab, "Crystal_Fallback"))
                 .UnderTransformGroup("ObjectsPool");
             Container.BindMemoryPool<ObstacleView, ObstacleViewPool>()
-                .WithInitialSize(5).FromComponentInNewPrefab(Prefabs.ObstaclePrefab)
+                .WithInitialSize(5).FromComponentInNewPrefab(GetValidPrefab<ObstacleView>(Prefabs.ObstaclePrefab, "Obstacle_Fallback"))
                 .UnderTransformGroup("ObjectsPool");
             Container.BindMemoryPool<ShieldView, ShieldViewPool>()
-                .WithInitialSize(2).FromComponentInNewPrefab(Prefabs.ShieldPrefab)
+                .WithInitialSize(2).FromComponentInNewPrefab(GetValidPrefab<ShieldView>(Prefabs.ShieldPrefab, "Shield_Fallback"))
                 .UnderTransformGroup("ObjectsPool");
             Container.BindMemoryPool<CloudView, CloudViewPool>()
-                .WithInitialSize(5).FromComponentInNewPrefab(Prefabs.CloudPrefab)
+                .WithInitialSize(5).FromComponentInNewPrefab(GetValidPrefab<CloudView>(Prefabs.CloudPrefab, "Cloud_Fallback"))
                 .UnderTransformGroup("ObjectsPool");
-            Container.BindMemoryPool<WeaponPickupView, WeaponPickupViewPool>()
-                .WithInitialSize(2).FromComponentInNewPrefab(Prefabs.WeaponPickupPrefab)
-                .UnderTransformGroup("ObjectsPool");
-            Container.BindMemoryPool<MountPickupView, MountPickupViewPool>()
-                .WithInitialSize(2).FromComponentInNewPrefab(Prefabs.MountPickupPrefab)
+            Container.BindMemoryPool<ItemPickupView, ItemPickupViewPool>()
+                .WithInitialSize(2).FromComponentInNewPrefab(GetValidPrefab<ItemPickupView>(Prefabs.ItemPickupPrefab, "ItemPickup_Fallback"))
                 .UnderTransformGroup("ObjectsPool");
             Container.BindMemoryPool<MonsterView, MonsterViewPool>()
-                .WithInitialSize(10).FromComponentInNewPrefab(Prefabs.MonsterBasePrefab)
+                .WithInitialSize(10).FromComponentInNewPrefab(GetValidPrefab<MonsterView>(Prefabs.MonsterBasePrefab, "MonsterBase_Fallback"))
                 .UnderTransformGroup("ObjectsPool");
+        }
 
+        private UnityEngine.GameObject GetValidPrefab<T>(UnityEngine.GameObject prefab, string fallbackName) where T : UnityEngine.Component
+        {
+            if (prefab != null)
+            {
+                return prefab;
+            }
 
-            Container.BindMemoryPool<AuraPickupView, AuraPickupViewPool>()
-
-                .WithInitialSize(2).FromComponentInNewPrefab(Prefabs.AuraPickupPrefab)
-                .UnderTransformGroup("ObjectsPool");
+            UnityEngine.Debug.LogWarning($"[GameInstaller] Prefab for {typeof(T).Name} is missing in GamePrefabs (ScriptableObject). Creating a temporary fallback prefab '{fallbackName}'.");
+            var fallback = new UnityEngine.GameObject(fallbackName);
+            fallback.AddComponent<T>();
+            fallback.SetActive(false);
+            return fallback;
         }
     }
 }

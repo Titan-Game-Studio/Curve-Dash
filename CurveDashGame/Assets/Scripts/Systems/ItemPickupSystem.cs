@@ -5,103 +5,125 @@ using UnityEngine;
 
 namespace STG.CurveDash
 {
-    public class WeaponPickupSystem : ITickable
+    public class ItemPickupSystem : ITickable
     {
         private readonly ObjectSpawner spawner;
         private readonly GameAssetCatalog assetCatalog;
-        private readonly EcsFilter hitWeaponFilter;
-        private readonly EcsPool<WeaponPickupComponent> weaponPickupPool;
+        private readonly EcsFilter hitItemFilter;
+        private readonly EcsPool<ItemPickupComponent> itemPickupPool;
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
         private readonly EcsPool<PlayerCombatComponent> combatPool;
         private readonly EcsFilter playerFilter;
         
-        private List<AbilityData> _cachedAbilities;
+        private static List<AbilityData> _cachedAbilities;
 
-        public WeaponPickupSystem(EcsWorld world, ObjectSpawner spawner, GameAssetCatalog assetCatalog)
+        public ItemPickupSystem(EcsWorld world, ObjectSpawner spawner, GameAssetCatalog assetCatalog)
         {
             this.spawner = spawner;
             this.assetCatalog = assetCatalog;
-            hitWeaponFilter = world.Filter<WeaponPickupComponent>().Inc<PlayerHitWeaponEvent>().End();
+            hitItemFilter = world.Filter<ItemPickupComponent>().Inc<PlayerHitItemEvent>().End();
             playerFilter = world.Filter<PlayerComponent>().Inc<PlayerCombatComponent>().End();
             
-            weaponPickupPool = world.GetPool<WeaponPickupComponent>();
+            itemPickupPool = world.GetPool<ItemPickupComponent>();
             viewLinkPool = world.GetPool<ViewLinkComponent>();
             combatPool = world.GetPool<PlayerCombatComponent>();
         }
 
         public void Tick()
         {
-            foreach (var weaponEntity in hitWeaponFilter)
+            foreach (var itemEntity in hitItemFilter)
             {
-                ref var weaponViewLink = ref viewLinkPool.Get(weaponEntity);
-                if (weaponViewLink.View != null)
+                Debug.Log($"[ItemPickupSystem] Starting pickup processing for Entity {itemEntity}");
+                try
                 {
-                    var weaponView = weaponViewLink.View.GetComponent<WeaponPickupView>();
-                    if (weaponView != null && weaponView.ItemToGive != null)
+                    ref var itemViewLink = ref viewLinkPool.Get(itemEntity);
+                    if (itemViewLink.View != null)
                     {
-                        foreach (var playerEntity in playerFilter)
+                        var itemView = itemViewLink.View.GetComponent<ItemPickupView>();
+                        if (itemView != null && itemView.ItemToGive != null)
                         {
-                            ref var combat = ref combatPool.Get(playerEntity);
-                            
-                            // Nếu là vũ khí tấn công thì mới cập nhật chỉ số Combat
-                            if (weaponView.ItemToGive is WeaponData weaponBase)
+                            Debug.Log($"[ItemPickupSystem] Detected Item to give: {itemView.ItemToGive.ItemName} ({itemView.ItemToGive.GetType().Name})");
+                            foreach (var playerEntity in playerFilter)
                             {
-                                var instance = new WeaponInstance(weaponBase, weaponBase.Rarity);
-                                AutoLinkTestingAbilities(instance, weaponBase);
+                                ref var combat = ref combatPool.Get(playerEntity);
                                 
-                                combat.CurrentWeapon = instance;
-                                combat.CooldownTimer = 0f;
-                            }
-
-                            ref var playerViewLink = ref viewLinkPool.Get(playerEntity);
-                            if (playerViewLink.View != null)
-                            {
-                                var playerView = playerViewLink.View.GetComponent<PlayerView>();
-                                if (playerView != null)
+                                // Nếu là vũ khí tấn công thì mới cập nhật chỉ số Combat
+                                if (itemView.ItemToGive is WeaponData weaponBase)
                                 {
-                                    playerView.Equip(weaponView.ItemToGive);
+                                    Debug.Log($"[ItemPickupSystem] Initializing WeaponInstance for WeaponData: {weaponBase.ItemName}");
+                                    var instance = new WeaponInstance(weaponBase, weaponBase.Rarity);
+                                    AutoLinkTestingAbilities(instance, weaponBase);
+                                    
+                                    combat.CurrentWeapon = instance;
+                                    combat.CooldownTimer = 0f;
                                 }
-                            }
 
-                            // INTEGRATE DEVION GAMES INVENTORY SYSTEM SAFELY:
-                            try
-                            {
-                                DevionGames.InventorySystem.Item devionAdapter = weaponView.ItemToGive.DevionAdapter;
-                                
-                                if (devionAdapter == null && DevionGames.InventorySystem.InventoryManager.Database != null)
+                                ref var playerViewLink = ref viewLinkPool.Get(playerEntity);
+                                if (playerViewLink.View != null)
                                 {
-                                    string targetName = weaponView.ItemToGive.name + "_Adapter";
-                                    foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
+                                    var playerView = playerViewLink.View.GetComponent<PlayerView>();
+                                    if (playerView != null && itemView.ItemToGive is EquippableData equippable)
                                     {
-                                        if (dbItem != null && dbItem.name == targetName)
+                                        Debug.Log($"[ItemPickupSystem] Calling playerView.Equip for: {equippable.ItemName}");
+                                        playerView.Equip(equippable);
+                                    }
+                                }
+
+                                // INTEGRATE DEVION GAMES INVENTORY SYSTEM SAFELY:
+                                try
+                                {
+                                    Debug.Log($"[ItemPickupSystem] Checking Devion Adapter for: {itemView.ItemToGive.ItemName}");
+                                    DevionGames.InventorySystem.Item devionAdapter = itemView.ItemToGive.DevionAdapter;
+                                    
+                                    if (devionAdapter == null && DevionGames.InventorySystem.InventoryManager.Database != null)
+                                    {
+                                        string targetName = itemView.ItemToGive.name + "_Adapter";
+                                        foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
                                         {
-                                            devionAdapter = dbItem;
-                                            weaponView.ItemToGive.DevionAdapter = dbItem; // Cache it!
-                                            break;
+                                            if (dbItem != null && dbItem.name == targetName)
+                                            {
+                                                devionAdapter = dbItem;
+                                                itemView.ItemToGive.DevionAdapter = dbItem; // Cache it!
+                                                break;
+                                            }
                                         }
                                     }
-                                }
 
-                                if (devionAdapter != null)
-                                {
-                                    var devionInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(devionAdapter);
-                                    if (devionInstance != null)
+                                    if (devionAdapter != null)
                                     {
-                                        DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", devionInstance);
+                                        Debug.Log($"[ItemPickupSystem] Creating Devion instance for: {devionAdapter.name}");
+                                        var devionInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(devionAdapter);
+                                        if (devionInstance != null)
+                                        {
+                                            Debug.Log($"[ItemPickupSystem] Attempting to AddItem to Container 'Inventory'...");
+                                            DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", devionInstance);
+                                            Debug.Log($"[ItemPickupSystem] AddItem successful!");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Debug.LogWarning($"[ItemPickupSystem] Devion Adapter not found for: {itemView.ItemToGive.ItemName}");
                                     }
                                 }
-                            }
-                            catch (System.Exception ex)
-                            {
-                                Debug.LogError($"[WeaponPickupSystem] Exception in Devion Games integration: {ex.Message}\n{ex.StackTrace}");
-                            }
+                                catch (System.Exception ex)
+                                {
+                                    Debug.LogError($"[ItemPickupSystem] Exception inside Devion Games integration block: {ex.Message}\n{ex.StackTrace}");
+                                }
 
-                            Debug.Log($"<color=green>[WeaponPickup] Player picked up '{weaponView.ItemToGive.ItemName}' successfully!</color>");
+                                Debug.Log($"<color=green>[ItemPickup] Player picked up '{itemView.ItemToGive.ItemName}' successfully!</color>");
+                            }
                         }
                     }
                 }
-                
-                spawner.DespawnObject(weaponEntity);
+                catch (System.Exception ex)
+                {
+                    Debug.LogError($"[ItemPickupSystem] Critical error in Tick loop for Entity {itemEntity}: {ex.Message}\n{ex.StackTrace}");
+                }
+                finally
+                {
+                    Debug.Log($"[ItemPickupSystem] Finalizing despawn for Entity {itemEntity}");
+                    spawner.DespawnObject(itemEntity);
+                }
             }
         }
 
@@ -262,7 +284,7 @@ namespace STG.CurveDash
                 }
             }
 
-            Debug.Log($"[WeaponPickupSystem] Collected {_cachedAbilities.Count} unique available abilities for random rolling/auto-testing.");
+            Debug.Log($"[ItemPickupSystem] Collected {_cachedAbilities.Count} unique available abilities for random rolling/auto-testing.");
             return _cachedAbilities;
         }
     }

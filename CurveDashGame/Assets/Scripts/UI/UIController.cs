@@ -19,6 +19,9 @@ namespace STG.CurveDash
         [Inject] 
         private IAdService adService;
 
+        [Inject]
+        private DiContainer container;
+
         private GameState gameState;
         private Dictionary<GameState, GameObject> uiDictionary;
 
@@ -32,12 +35,18 @@ namespace STG.CurveDash
 
         private void Start()
         {
+            if (titleUI != null) container.InjectGameObject(titleUI);
+            if (playingUI != null) container.InjectGameObject(playingUI);
+            if (gameEndUI != null) container.InjectGameObject(gameEndUI);
+
             adService.Initialize();
             adService.ShowBanner();
         }
 
         private void Update()
         {
+            if (gameSystem == null || !gameSystem.HasGameState()) return;
+
             var gameStateComponent = gameSystem.GetGameState();
             if (gameStateComponent.State != gameState)
             {

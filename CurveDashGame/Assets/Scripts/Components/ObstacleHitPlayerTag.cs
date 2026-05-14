@@ -1,6 +1,6 @@
 namespace STG.CurveDash
 {
-    public struct MountPickupComponent
+    public struct ObstacleHitPlayerTag
     {
     }
 }
