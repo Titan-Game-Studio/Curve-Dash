@@ -130,6 +130,7 @@ namespace STG.CurveDash
         public int BlockPartSkinCount => _catalog.BlockPartSkins?.Items?.Count ?? 0;
         
         public ItemData GetItem(string id) => _catalog.MasterItemCatalog?.GetItem(id);
+        public ItemCatalog MasterItemCatalog => _catalog?.MasterItemCatalog;
         
         public void LoadAudioAsync(AudioKey key, Action<AudioClip> onLoaded)
 

@@ -117,6 +117,19 @@ namespace STG.CurveDash
                 if (_equipmentContainer == null)
                 {
                     _equipmentContainer = DevionGames.UIWidgets.WidgetUtility.Find<DevionGames.InventorySystem.ItemContainer>("Equipment");
+                    if (_equipmentContainer == null)
+                    {
+                        var allContainers = UnityEngine.Object.FindObjectsByType<DevionGames.InventorySystem.ItemContainer>(UnityEngine.FindObjectsInactive.Include, UnityEngine.FindObjectsSortMode.None);
+                        foreach (var c in allContainers)
+                        {
+                            if (c != null && c.Name == "Equipment")
+                            {
+                                _equipmentContainer = c;
+                                break;
+                            }
+                        }
+                    }
+
                     if (_equipmentContainer != null)
                     {
                         _equipmentContainer.OnAddItem += OnDevionEquipmentAdded;
@@ -133,6 +146,8 @@ namespace STG.CurveDash
 
         private void OnDevionEquipmentAdded(DevionGames.InventorySystem.Item item, DevionGames.InventorySystem.Slot slot)
         {
+            if (this == null || gameObject == null || !gameObject.activeInHierarchy) return;
+
             if (item is CurveDashEquipmentAdapter adapter && adapter.OriginalEquipmentData != null)
             {
                 if (adapter.OriginalEquipmentData is ArmorItemData armor)
@@ -149,6 +164,12 @@ namespace STG.CurveDash
                 }
                 else if (adapter.OriginalEquipmentData is EquippableData equippable)
                 {
+                    if (equippable is WeaponData weaponBase)
+                    {
+                        var instance = new WeaponInstance(weaponBase, weaponBase.Rarity);
+                        ItemPickupSystem.AutoLinkTestingAbilities(instance, weaponBase, _assetManager?.MasterItemCatalog != null ? _assetManager.MasterItemCatalog : null);
+                        this.CurrentWeaponInstance = instance;
+                    }
                     Equip(equippable);
                 }
             }
@@ -156,6 +177,8 @@ namespace STG.CurveDash
 
         private void OnDevionEquipmentRemoved(DevionGames.InventorySystem.Item item, int amount, DevionGames.InventorySystem.Slot slot)
         {
+            if (this == null || gameObject == null || !gameObject.activeInHierarchy) return;
+
             if (item is CurveDashEquipmentAdapter adapter && adapter.OriginalEquipmentData != null)
             {
                 if (adapter.OriginalEquipmentData is ArmorItemData armor)
@@ -170,9 +193,16 @@ namespace STG.CurveDash
                         Debug.Log($"<color=cyan>[PlayerView] Modular mesh cleared for slot {armor.Slot}</color>");
                     }
                 }
+                else if (adapter.OriginalEquipmentData is EquippableData equippable)
+                {
+                    if (equippable is WeaponData)
+                    {
+                        this.CurrentWeaponInstance = null;
+                    }
+                    Unequip(equippable);
+                }
             }
         }
-
 
         private void OnEnable()
         {
@@ -196,6 +226,11 @@ namespace STG.CurveDash
 
         private void Update()
         {
+            if (_equipmentContainer == null)
+            {
+                SyncEquipmentContainerListeners();
+            }
+
             if (_damageFlashTimer > 0)
             {
                 _damageFlashTimer -= Time.deltaTime;
@@ -245,6 +280,12 @@ namespace STG.CurveDash
 
         private void OnDestroy()
         {
+            if (_equipmentContainer != null)
+            {
+                _equipmentContainer.OnAddItem -= OnDevionEquipmentAdded;
+                _equipmentContainer.OnRemoveItem -= OnDevionEquipmentRemoved;
+            }
+
             _skinCts?.Cancel(); 
             _skinCts?.Dispose();
             _auraCts?.Cancel(); 
@@ -357,6 +398,17 @@ namespace STG.CurveDash
                     _rightHandItem = offHand;
                 }
             }
+
+            RefreshWeaponVisuals();
+            RefreshAnimator();
+            UpdateRangeVisualizer();
+        }
+
+        public void Unequip(EquippableData item)
+        {
+            if (item == null) return;
+            if (_leftHandItem == item) _leftHandItem = null;
+            if (_rightHandItem == item) _rightHandItem = null;
 
             RefreshWeaponVisuals();
             RefreshAnimator();

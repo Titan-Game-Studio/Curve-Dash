@@ -239,8 +239,13 @@ namespace DevionGames.InventorySystem
                     return;
                 }
             
-                if (Container.useButton.HasFlag((InputButton)Mathf.Clamp(((int)eventData.button * 2), 1, int.MaxValue)) && ObservedItem != null)
+                if (Container.useButton.HasFlag((InputButton)Mathf.Clamp(((int)eventData.button * 2), 1, int.MaxValue)) || eventData.button == PointerEventData.InputButton.Left)
                 {
+                    if (ObservedItem != null)
+                    {
+                        UnityEngine.Debug.Log($"<color=cyan>[ItemSlot] PointerUp (Click/Tap) detected on item '{ObservedItem.DisplayName}'. Triggering Use logic.</color>");
+                    }
+
                     if (Container.UseContextMenu)
                     {
                         UIWidgets.ContextMenu menu = InventoryManager.UI.contextMenu;
@@ -437,17 +442,39 @@ namespace DevionGames.InventorySystem
                             setupMethod.Invoke(pickupViewComponent, new object[] { originalData });
                         }
 
-                        // Tìm ObjectSpawner bằng Reflection
-                        var spawnerType = System.Type.GetType("STG.CurveDash.ObjectSpawner, Assembly-CSharp");
-                        if (spawnerType != null)
+                        // Tìm ObjectSpawner từ Zenject Container bằng Reflection
+                        UnityEngine.Debug.Log($"<color=yellow>[ItemSlot] Resolving Zenject GlobalContainer to register dropped item: {item.Name}</color>");
+                        var installerType = System.Type.GetType("STG.CurveDash.GameInstaller, Assembly-CSharp");
+                        if (installerType != null)
                         {
-                            var spawnerObj = UnityEngine.Object.FindAnyObjectByType(spawnerType);
-                            if (spawnerObj != null)
+                            var containerField = installerType.GetField("GlobalContainer", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                            if (containerField != null)
                             {
-                                var regMethod = spawnerObj.GetType().GetMethod("RegisterDroppedItemEntity");
-                                if (regMethod != null)
+                                var containerObj = containerField.GetValue(null);
+                                if (containerObj != null)
                                 {
-                                    regMethod.Invoke(spawnerObj, new object[] { pickupViewComponent });
+                                    var resolveMethod = containerObj.GetType().GetMethod("Resolve", new System.Type[] { typeof(System.Type) });
+                                    if (resolveMethod != null)
+                                    {
+                                        var spawnerType = System.Type.GetType("STG.CurveDash.ObjectSpawner, Assembly-CSharp");
+                                        if (spawnerType != null)
+                                        {
+                                            var spawnerObj = resolveMethod.Invoke(containerObj, new object[] { spawnerType });
+                                            if (spawnerObj != null)
+                                            {
+                                                var regMethod = spawnerObj.GetType().GetMethod("RegisterDroppedItemEntity");
+                                                if (regMethod != null)
+                                                {
+                                                    regMethod.Invoke(spawnerObj, new object[] { pickupViewComponent });
+                                                    UnityEngine.Debug.Log($"<color=lime>[ItemSlot] Successfully registered dropped item Entity with ECS ObjectSpawner!</color>");
+                                                }
+                                            }
+                                            else
+                                            {
+                                                UnityEngine.Debug.LogWarning("[ItemSlot] Failed to resolve ObjectSpawner from Zenject Container!");
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -529,6 +556,11 @@ namespace DevionGames.InventorySystem
                 return;
             }
 
+            if (ObservedItem != null)
+            {
+                UnityEngine.Debug.Log($"<color=yellow>[ItemSlot] Executing Use() on item '{ObservedItem.DisplayName}' in Container '{Container.Name}'</color>");
+            }
+
             Container.NotifyTryUseItem(ObservedItem, this);
             //Check if the item can be used.
             if (CanUse())
@@ -546,10 +578,76 @@ namespace DevionGames.InventorySystem
                 //Try to move item
                 if (!MoveItem())
                 {
-                    CloseTooltip();
-                    ObservedItem.Use();
-                    Container.NotifyUseItem(ObservedItem, this);
+                    UnityEngine.Debug.Log($"<color=magenta>[ItemSlot] MoveItem() returned false. Triggering intelligent ECS Equipping Fallback for '{ObservedItem?.DisplayName}'</color>");
+                    
+                    bool autoEquipped = false;
+                    if (ObservedItem is EquipmentItem equipItem)
+                    {
+                        ItemContainer equipContainer = null;
+                        var allContainers = UnityEngine.Object.FindObjectsByType<ItemContainer>(UnityEngine.FindObjectsInactive.Include, UnityEngine.FindObjectsSortMode.None);
+                        foreach (var c in allContainers)
+                        {
+                            if (c != null && c.Name == "Equipment")
+                            {
+                                equipContainer = c;
+                                break;
+                            }
+                        }
+
+                        if (equipContainer != null)
+                        {
+                            Slot targetSlot = null;
+                            for (int i = 0; i < equipContainer.Slots.Count; i++)
+                            {
+                                if (equipContainer.Slots[i].CanAddItem(equipItem))
+                                {
+                                    targetSlot = equipContainer.Slots[i];
+                                    break;
+                                }
+                            }
+                            if (targetSlot == null && equipContainer.Slots.Count > 0)
+                            {
+                                for (int i = 0; i < equipContainer.Slots.Count; i++)
+                                {
+                                    if (equipContainer.Slots[i].IsEmpty)
+                                    {
+                                        targetSlot = equipContainer.Slots[i];
+                                        break;
+                                    }
+                                }
+                                if (targetSlot == null) targetSlot = equipContainer.Slots[0];
+                            }
+
+                            if (targetSlot != null)
+                            {
+                                Item oldItem = targetSlot.ObservedItem;
+                                if (oldItem != null)
+                                {
+                                    Container.AddItem(oldItem);
+                                }
+
+                                string itemName = equipItem != null ? equipItem.DisplayName : "Item";
+                                equipContainer.ReplaceItem(targetSlot.Index, equipItem);
+                                Container.RemoveItem(Index);
+                                autoEquipped = true;
+                                UnityEngine.Debug.Log($"<color=lime>[ItemSlot] Flawlessly auto-equipped '{itemName}' into Equipment container via programmatic fallback!</color>");
+                            }
+                        }
+                    }
+
+                    if (!autoEquipped)
+                    {
+                        CloseTooltip();
+                        ObservedItem.Use();
+                        Container.NotifyUseItem(ObservedItem, this);
+                    }
+                    else
+                    {
+                        CloseTooltip();
+                        ShowTooltip();
+                    }
                 } else {
+                    UnityEngine.Debug.Log($"<color=lime>[ItemSlot] MoveItem() returned true! Item '{ObservedItem?.DisplayName}' successfully moved/equipped to destination container.</color>");
                     CloseTooltip();
                     ShowTooltip();
                 }

@@ -173,94 +173,120 @@ namespace STG.CurveDash
                     if (playerView != null)
                     {
                         playerView.Equip(starterWeapon);
-                    }
-
-                    // Tích hợp Devion Games Inventory System cho Actionbar & Inventory
-                    try
-                    {
-                        if (DevionGames.InventorySystem.InventoryManager.Database != null)
-                        {
-                            // Thêm vũ khí vào Equipment / Inventory
-                            var devionAdapter = starterWeapon.DevionAdapter;
-                            if (devionAdapter == null)
-                            {
-                                string targetName = starterWeapon.name + "_Adapter";
-                                foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
-                                {
-                                    if (dbItem != null && dbItem.name == targetName)
-                                    {
-                                        devionAdapter = dbItem;
-                                        starterWeapon.DevionAdapter = dbItem;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (devionAdapter != null)
-                            {
-                                var devionInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(devionAdapter);
-                                if (devionInstance != null)
-                                {
-                                    DevionGames.InventorySystem.ItemContainer.AddItem("Equipment", devionInstance);
-                                    DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", devionInstance);
-                                }
-                            }
-
-                            // 2. Thêm 2 bình Flask (Máu và Mana) vào Actionbar
-                            var flasks = assetCatalog.MasterItemCatalog.Items.OfType<FlaskItemData>().ToList();
-                            foreach (var flask in flasks)
-                            {
-                                var fAdapter = flask.DevionAdapter;
-                                if (fAdapter == null)
-                                {
-                                    string targetName = flask.name + "_Adapter";
-                                    foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
-                                    {
-                                        if (dbItem != null && dbItem.name == targetName)
-                                        {
-                                            fAdapter = dbItem;
-                                            flask.DevionAdapter = dbItem;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (fAdapter != null)
-                                {
-                                    var fInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(fAdapter);
-                                    if (fInstance != null)
-                                    {
-                                        DevionGames.InventorySystem.ItemContainer.AddItem("Actionbar", fInstance);
-                                        DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", fInstance);
-                                    }
-                                }
-                            }
-
-                            // 3. Thêm kỹ năng Active vào Actionbar
-                            if (starterActive != null)
-                            {
-                                foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
-                                {
-                                    if (dbItem != null && (dbItem.name.Contains("Cleave") || dbItem.name.Contains(starterActive.AbilityName)))
-                                    {
-                                        var skillInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(dbItem);
-                                        if (skillInstance != null)
-                                        {
-                                            DevionGames.InventorySystem.ItemContainer.AddItem("Actionbar", skillInstance);
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    catch (System.Exception ex)
-                    {
-                        UnityEngine.Debug.LogError($"[StarterEquipment] Exception during starter equipment setup: {ex.Message}");
+                        playerView.StartCoroutine(GiveStarterEquipmentRoutine(starterWeapon, starterActive));
                     }
                 }
             }
 
             gameObject.transform.position = pos;
             return entity;
+        }
+
+        private System.Collections.IEnumerator GiveStarterEquipmentRoutine(WeaponData starterWeapon, PoEAbility starterActive)
+        {
+            UnityEngine.Debug.Log("<color=orange>[StarterEquipment] Step 1: Clearing old saved PlayerPrefs for Inventory/Equipment to start fresh.</color>");
+            UnityEngine.PlayerPrefs.DeleteKey("Inventory");
+            UnityEngine.PlayerPrefs.DeleteKey("Equipment");
+            UnityEngine.PlayerPrefs.DeleteKey("Actionbar");
+            UnityEngine.PlayerPrefs.Save();
+
+            // Chờ đến khi Devion UI hoàn toàn tỉnh dậy và InventoryManager tải xong dữ liệu
+            while (DevionGames.InventorySystem.InventoryManager.current == null || !DevionGames.InventorySystem.InventoryManager.IsLoaded)
+            {
+                yield return null;
+            }
+
+            // Chờ đến khi các UI Container đăng ký vào WidgetUtility
+            while (DevionGames.UIWidgets.WidgetUtility.FindAll<DevionGames.InventorySystem.ItemContainer>("Equipment").Length == 0 ||
+                   DevionGames.UIWidgets.WidgetUtility.FindAll<DevionGames.InventorySystem.ItemContainer>("Inventory").Length == 0)
+            {
+                yield return null;
+            }
+
+            UnityEngine.Debug.Log("<color=orange>[StarterEquipment] Step 2: Devion UI Containers are fully loaded! Wiping runtime container slots.</color>");
+            DevionGames.InventorySystem.ItemContainer.RemoveItems("Equipment");
+            DevionGames.InventorySystem.ItemContainer.RemoveItems("Inventory");
+            DevionGames.InventorySystem.ItemContainer.RemoveItems("Actionbar");
+
+            yield return new UnityEngine.WaitForSeconds(0.2f); // Chờ 0.2s đảm bảo giao diện đã dọn dẹp sạch sẽ
+
+            UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Step 3: Giving starter item '{starterWeapon.name}' into Inventory bag!</color>");
+            if (DevionGames.InventorySystem.InventoryManager.Database != null)
+            {
+                // Thêm vũ khí vào Inventory
+                var devionAdapter = starterWeapon.DevionAdapter;
+                if (devionAdapter == null)
+                {
+                    string targetName = starterWeapon.name + "_Adapter";
+                    foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
+                    {
+                        if (dbItem != null && dbItem.name == targetName)
+                        {
+                            devionAdapter = dbItem;
+                            starterWeapon.DevionAdapter = dbItem;
+                            break;
+                        }
+                    }
+                }
+
+                if (devionAdapter != null)
+                {
+                    var devionInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(devionAdapter);
+                    if (devionInstance != null)
+                    {
+                        bool added = DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", devionInstance);
+                        UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Starter weapon added to Inventory result: {added}</color>");
+                    }
+                }
+
+                // Thêm Flask vào Inventory & Actionbar
+                var flasks = assetCatalog.MasterItemCatalog.Items.OfType<FlaskItemData>().ToList();
+                foreach (var flask in flasks)
+                {
+                    var fAdapter = flask.DevionAdapter;
+                    if (fAdapter == null)
+                    {
+                        string targetName = flask.name + "_Adapter";
+                        foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
+                        {
+                            if (dbItem != null && dbItem.name == targetName)
+                            {
+                                fAdapter = dbItem;
+                                flask.DevionAdapter = dbItem;
+                                break;
+                            }
+                        }
+                    }
+                    if (fAdapter != null)
+                    {
+                        var fInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(fAdapter);
+                        if (fInstance != null)
+                        {
+                            DevionGames.InventorySystem.ItemContainer.AddItem("Actionbar", fInstance);
+                            DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", fInstance);
+                        }
+                    }
+                }
+
+                // Thêm kỹ năng Active vào Actionbar
+                if (starterActive != null)
+                {
+                    foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
+                    {
+                        if (dbItem != null && (dbItem.name.Contains("Cleave") || dbItem.name.Contains(starterActive.AbilityName)))
+                        {
+                            var skillInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(dbItem);
+                            if (skillInstance != null)
+                            {
+                                DevionGames.InventorySystem.ItemContainer.AddItem("Actionbar", skillInstance);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            UnityEngine.Debug.Log("<color=green>[StarterEquipment] All starter items successfully populated! Ready for gameplay.</color>");
         }
 
         public int SpawnStartPlatform(Color color)

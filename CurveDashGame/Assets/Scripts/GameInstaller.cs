@@ -7,10 +7,12 @@ namespace STG.CurveDash
 {
     public class GameInstaller : MonoInstaller
     {
+        public static DiContainer GlobalContainer;
         public PrefabsSettings Prefabs;
 
         public override void InstallBindings()
         {
+            GlobalContainer = Container;
             UnityEngine.Assertions.Assert.IsNotNull(Prefabs, "[LỖI SETUP] Bạn chưa kéo file GamePrefabs (ScriptableObject) vào ô 'Prefabs' của GameInstaller trong Unity Inspector!");
 
             // ecs

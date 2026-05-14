@@ -17,7 +17,7 @@ MonoBehaviour:
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
   m_Icon: {fileID: 21300000, guid: 51bcd971274c82b4caa27af35a9cb3ac, type: 3}
-  m_Prefab: {fileID: 2830056364503120991, guid: 182672a8f1b817f4aac75863c739d9e9,
+  m_Prefab: {fileID: 5380602553740735314, guid: c9378e4ea2ca21948961fa20904e7ebb,
     type: 3}
   m_Description: Provides excellent elemental resistances for early levels.
   m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,

@@ -27,7 +27,7 @@ MonoBehaviour:
   VisualModel: {fileID: 0}
   PositionOffset: {x: 0, y: 0, z: 0}
   RotationOffset: {x: 0, y: 0, z: 0}
-  MainAnimator: {fileID: 0}
+  MainAnimator: {fileID: 9100000, guid: c15afe06600cf2940a2d0bdf6ce630d5, type: 2}
   BaseMinDamage: 24
   BaseMaxDamage: 36
   BaseAttackSpeed: 0.6

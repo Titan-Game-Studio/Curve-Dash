@@ -39,10 +39,22 @@ namespace STG.CurveDash
                 this.Name = m_OriginalItemData.ItemName;
 
 #if UNITY_EDITOR
-                var pickupPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Pickups/ItemPickup.prefab");
-                if (pickupPrefab != null)
+                string prefabPath = "";
+                if (m_OriginalItemData is CurrencyItemData) prefabPath = "Assets/Prefabs/Pickups/CurencyDefault.prefab";
+                else if (m_OriginalItemData is FlaskItemData) prefabPath = "Assets/Prefabs/Pickups/FlaskDefault.prefab";
+                else if (m_OriginalItemData is GemItemData) prefabPath = "Assets/Prefabs/Pickups/GemDefault.prefab";
+
+                if (!string.IsNullOrEmpty(prefabPath))
                 {
-                    this.Prefab = pickupPrefab;
+                    var pickupPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                    if (pickupPrefab != null)
+                    {
+                        this.Prefab = pickupPrefab;
+                    }
+                }
+                else
+                {
+                    this.Prefab = null;
                 }
 
                 // Auto-healing for missing icons on the original item asset

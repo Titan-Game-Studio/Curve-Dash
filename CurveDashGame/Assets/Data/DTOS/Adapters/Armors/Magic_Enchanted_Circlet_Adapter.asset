@@ -17,7 +17,7 @@ MonoBehaviour:
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
   m_Icon: {fileID: 21300000, guid: 51bcd971274c82b4caa27af35a9cb3ac, type: 3}
-  m_Prefab: {fileID: 2830056364503120991, guid: 182672a8f1b817f4aac75863c739d9e9,
+  m_Prefab: {fileID: 4089317230495592276, guid: 4e8148f0393e7fe4aa7b4a30f643fb1c,
     type: 3}
   m_Description: Radiating soft blue mana glow.
   m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,

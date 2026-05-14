@@ -43,32 +43,6 @@ namespace STG.CurveDash
                         if (itemView != null && itemView.ItemToGive != null)
                         {
                             Debug.Log($"[ItemPickupSystem] Detected Item to give: {itemView.ItemToGive.ItemName} ({itemView.ItemToGive.GetType().Name})");
-                            foreach (var playerEntity in playerFilter)
-                            {
-                                ref var combat = ref combatPool.Get(playerEntity);
-                                
-                                // Nếu là vũ khí tấn công thì mới cập nhật chỉ số Combat
-                                if (itemView.ItemToGive is WeaponData weaponBase)
-                                {
-                                    Debug.Log($"[ItemPickupSystem] Initializing WeaponInstance for WeaponData: {weaponBase.ItemName}");
-                                    var instance = new WeaponInstance(weaponBase, weaponBase.Rarity);
-                                    AutoLinkTestingAbilities(instance, weaponBase);
-                                    
-                                    combat.CurrentWeapon = instance;
-                                    combat.CooldownTimer = 0f;
-                                }
-
-                                ref var playerViewLink = ref viewLinkPool.Get(playerEntity);
-                                if (playerViewLink.View != null)
-                                {
-                                    var playerView = playerViewLink.View.GetComponent<PlayerView>();
-                                    if (playerView != null && itemView.ItemToGive is EquippableData equippable)
-                                    {
-                                        Debug.Log($"[ItemPickupSystem] Calling playerView.Equip for: {equippable.ItemName}");
-                                        playerView.Equip(equippable);
-                                    }
-                                }
-
                                 // INTEGRATE DEVION GAMES INVENTORY SYSTEM SAFELY:
                                 try
                                 {
@@ -111,7 +85,6 @@ namespace STG.CurveDash
                                 }
 
                                 Debug.Log($"<color=green>[ItemPickup] Player picked up '{itemView.ItemToGive.ItemName}' successfully!</color>");
-                            }
                         }
                     }
                 }
@@ -127,7 +100,7 @@ namespace STG.CurveDash
             }
         }
 
-        private void AutoLinkTestingAbilities(WeaponInstance instance, WeaponData weaponBase)
+        public static void AutoLinkTestingAbilities(WeaponInstance instance, WeaponData weaponBase, ItemCatalog catalog = null)
         {
             if (instance == null || weaponBase == null) return;
 
@@ -135,7 +108,7 @@ namespace STG.CurveDash
             instance.DynamicAbilities.Clear();
 
             // Load all available abilities (active & support) from catalog/resources/Editor database
-            var allAbilities = GetAvailableAbilities();
+            var allAbilities = GetAvailableAbilities(catalog);
             
             // Separate them into Active abilities (PoEAbility) and Support abilities (SupportAbilityData)
             List<PoEAbility> activeAbilities = new List<PoEAbility>();
@@ -232,16 +205,16 @@ namespace STG.CurveDash
         /// <summary>
         /// Thu thập tất cả các kỹ năng độc bản hiện hữu trong Catalog hoặc nạp từ thư mục Resources/AssetDatabase
         /// </summary>
-        private List<AbilityData> GetAvailableAbilities()
+        public static List<AbilityData> GetAvailableAbilities(ItemCatalog catalog = null)
         {
             if (_cachedAbilities != null) return _cachedAbilities;
 
             _cachedAbilities = new List<AbilityData>();
 
             // Cách 1: Quét toàn bộ MasterItemCatalog để thu thập kỹ năng từ các vũ khí mẫu
-            if (assetCatalog != null && assetCatalog.MasterItemCatalog != null)
+            if (catalog != null)
             {
-                foreach (var item in assetCatalog.MasterItemCatalog.Items)
+                foreach (var item in catalog.Items)
                 {
                     if (item is WeaponData weapon && weapon.Abilities != null)
                     {
