@@ -17,7 +17,7 @@ MonoBehaviour:
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
   m_Icon: {fileID: 21300000, guid: cfea9c36036ca9e4591419c6c526d558, type: 3}
-  m_Prefab: {fileID: 6283810249110538892, guid: 1585f80466b711c40ae6df1e889de476,
+  m_Prefab: {fileID: 2830056364503120991, guid: 182672a8f1b817f4aac75863c739d9e9,
     type: 3}
   m_Description: Grants massive unarmed damage bonuses.
   m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,
@@ -105,10 +105,23 @@ MonoBehaviour:
     vector3Value: {x: 0, y: 0, z: 0}
     show: 1
     color: {r: 1, g: 1, b: 1, a: 1}
+  - name: Health
+    typeIndex: 5
+    stringValue: 
+    intValue: 10
+    floatValue: 0
+    colorValue: {r: 0, g: 0, b: 0, a: 0}
+    boolValue: 0
+    objectReferenceValue: {fileID: 0}
+    vector2Value: {x: 0, y: 0}
+    vector3Value: {x: 0, y: 0, z: 0}
+    show: 1
+    color: {r: 0, g: 1, b: 0, a: 1}
   m_UseCategoryCooldown: 1
   m_Cooldown: 1
   actions: []
-  m_OverrideEquipPrefab: {fileID: 0}
+  m_OverrideEquipPrefab: {fileID: 3517828984631180630, guid: c0c2e1a54ed77034384794a6d4e09a1c,
+    type: 3}
   m_Region: []
   m_OriginalEquipmentData: {fileID: 11400000, guid: 57b97a099bf8bb844ab5569ef52e15de,
     type: 2}

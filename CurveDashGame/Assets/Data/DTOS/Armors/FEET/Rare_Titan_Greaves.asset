@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: Unshakable metal sabatons.
   DevionAdapter: {fileID: 11400000, guid: 1cc7e75aeb652f342b66193dd162946d, type: 2}
   Slot: 3
-  ModularPartIndex: 5
+  ModularPartIndex: 14
+  MeshPartName: Feet Armor Type 5 Color 3
   Defense: 45
   HealthBonus: 30
   Abilities: []

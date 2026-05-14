@@ -35,9 +35,6 @@ MonoBehaviour:
   BaseAttackRange: 1.7
   UseAnimationEvent: 1
   AttackHitDelay: 0.3
-  Abilities:
-  - {fileID: 11400000, guid: e8ca76ff97fc8074f966b149ec83ea16, type: 2}
-  - {fileID: 11400000, guid: 9d6671bc3696c9a4c944e5b7a89cba85, type: 2}
-  - {fileID: 11400000, guid: 9bb00284b54f492419346b129f9ffccf, type: 2}
+  Abilities: []
   DualWieldController: {fileID: 0}
   SwordShieldController: {fileID: 0}

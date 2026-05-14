@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: Basic metal boots.
   DevionAdapter: {fileID: 11400000, guid: 83f108d649eeac844b26c17290f0de2d, type: 2}
   Slot: 3
-  ModularPartIndex: 1
+  ModularPartIndex: 0
+  MeshPartName: Feet Armor Type 1 Color 1
   Defense: 10
   HealthBonus: 5
   Abilities: []

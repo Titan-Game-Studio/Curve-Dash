@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: An ornate crown of pure mystical energy.
   DevionAdapter: {fileID: 11400000, guid: 2f3d75d2cc8421747a91264134306292, type: 2}
   Slot: 0
-  ModularPartIndex: 5
+  ModularPartIndex: 14
+  MeshPartName: Head Armor Type 5 Color 3
   Defense: 75
   HealthBonus: 55
   Abilities: []

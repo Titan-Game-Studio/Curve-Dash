@@ -94,8 +94,9 @@ namespace STG.CurveDash.Editor
             itemDisplayName = item.DisplayName;
             useItemNameAsDisplayName = true; // Default behavior
             itemIcon = item.Icon;
-            
+
             // Handle description using reflection
+
             itemDescription = "";
             var descField = typeof(Item).GetField("m_Description", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             if (descField != null)
@@ -176,8 +177,9 @@ namespace STG.CurveDash.Editor
             GUILayout.Space(10);
             Rect rect = EditorGUILayout.GetControlRect(false, 40);
             GUI.Box(rect, "", new GUIStyle("HelpBox"));
-            
+
             // Header text
+
             GUIStyle headerStyle = new GUIStyle(EditorStyles.boldLabel)
             {
                 fontSize = 18,
@@ -185,8 +187,9 @@ namespace STG.CurveDash.Editor
             };
             headerStyle.normal.textColor = new Color(1f, 0.65f, 0f); // Beautiful PoE Gold
 
-            string dbTitle = currentTab == Tab.ActiveAbilities 
-                ? "Active Abilities & Spells Database" 
+            string dbTitle = currentTab == Tab.ActiveAbilities
+                ? "Active Abilities & Spells Database"
+
                 : "Passive Constellations & Stats Database";
 
             GUI.Label(rect, "⚡ " + dbTitle.ToUpper() + " ⚡", headerStyle);
@@ -198,9 +201,11 @@ namespace STG.CurveDash.Editor
             EditorGUILayout.BeginVertical(new GUIStyle("HelpBox"));
             {
                 GUILayout.Space(20);
-                EditorGUILayout.HelpBox($"Database file could not be found automatically at expected path!\nExpected: " + 
+                EditorGUILayout.HelpBox($"Database file could not be found automatically at expected path!\nExpected: " +
+
                     (currentTab == Tab.ActiveAbilities ? ActiveDatabasePath : PassiveDatabasePath), MessageType.Warning);
-                
+
+
                 GUILayout.Space(10);
                 if (currentTab == Tab.ActiveAbilities)
                 {
@@ -274,8 +279,9 @@ namespace STG.CurveDash.Editor
         private void DrawListItem(Item item, ItemDatabase db)
         {
             bool isSelected = (selectedItem == item && !isCreatingNew);
-            
+
             // Custom item style
+
             GUIStyle itemStyle = new GUIStyle(GUI.skin.button);
             itemStyle.alignment = TextAnchor.MiddleLeft;
             itemStyle.padding = new RectOffset(6, 6, 6, 6);
@@ -300,7 +306,8 @@ namespace STG.CurveDash.Editor
                 // Item Select Button
                 string label = $"{item.Name}\n<color=cyan>{(item.Category != null ? item.Category.Name : "No Category")}</color>";
                 GUIStyle richTextLabel = new GUIStyle(EditorStyles.label) { richText = true, fontSize = 11 };
-                
+
+
                 if (GUILayout.Button(label, richTextLabel, GUILayout.ExpandWidth(true), GUILayout.Height(30)))
                 {
                     PopulateFormFromItem(item);
@@ -340,8 +347,9 @@ namespace STG.CurveDash.Editor
                     itemDisplayName = EditorGUILayout.TextField("Display Name", itemDisplayName);
 
                     GUILayout.Space(5);
-                    
+
                     // Icon Picker
+
                     itemIcon = (Sprite)EditorGUILayout.ObjectField("Icon Sprite", itemIcon, typeof(Sprite), false, GUILayout.Height(64));
 
                     GUILayout.Space(5);
@@ -477,8 +485,9 @@ namespace STG.CurveDash.Editor
             AssetDatabase.Refresh();
 
             Debug.Log($"<color=lime>[Skill Generator] Successfully added sub-asset skill '{itemName}' to database {db.name}!</color>");
-            
+
             // Reload and select the new skill
+
             PopulateFormFromItem(newSkill);
         }
 
@@ -528,8 +537,9 @@ namespace STG.CurveDash.Editor
             AssetDatabase.Refresh();
 
             Debug.Log($"<color=cyan>[Skill Generator] Successfully updated skill '{itemName}' inside database {db.name}!</color>");
-            
+
             // Re-select to repaint
+
             PopulateFormFromItem(selectedItem);
         }
 
@@ -538,8 +548,9 @@ namespace STG.CurveDash.Editor
             if (item == null) return;
 
             db.items.Remove(item);
-            
+
             // If the item is currently selected, reset the form
+
             if (selectedItem == item)
             {
                 ResetForm();

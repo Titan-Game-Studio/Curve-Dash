@@ -90,16 +90,19 @@ namespace STG.CurveDash
                 {
                     this.Prefab = equippable.VisualModel;
                 }
-#if UNITY_EDITOR
-                else if (m_OriginalEquipmentData is ArmorItemData armorItem && armorItem.Prefab != null && !string.IsNullOrEmpty(armorItem.Prefab.AssetGUID))
+                else if (m_OriginalEquipmentData is ArmorItemData armorItem)
                 {
-                    string armorPath = UnityEditor.AssetDatabase.GUIDToAssetPath(armorItem.Prefab.AssetGUID);
-                    if (!string.IsNullOrEmpty(armorPath))
+#if UNITY_EDITOR
+                    if (armorItem.Prefab != null && !string.IsNullOrEmpty(armorItem.Prefab.AssetGUID))
                     {
-                        this.Prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(armorPath);
+                        string armorPath = UnityEditor.AssetDatabase.GUIDToAssetPath(armorItem.Prefab.AssetGUID);
+                        if (!string.IsNullOrEmpty(armorPath))
+                        {
+                            this.Prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(armorPath);
+                        }
                     }
-                }
 #endif
+                }
 
                 // Sync Rarity, Category, and Prices/Currencies with Devion Games database if available
                 SyncDatabaseReferences();
@@ -272,6 +275,43 @@ namespace STG.CurveDash
                 if (sellPriceField != null)
                 {
                     sellPriceField.SetValue(this, baseSellPrice);
+                }
+
+                // 4. Auto-assign correct EquipmentRegion to prevent Devion from overwriting MainHand weapon!
+                if (db.equipments != null && db.equipments.Count > 0)
+                {
+                    string targetRegionName = "Main Hand";
+                    if (m_OriginalEquipmentData is WeaponData) targetRegionName = "Main Hand";
+                    else if (m_OriginalEquipmentData is OffHandData) targetRegionName = "Off Hand";
+                    else if (m_OriginalEquipmentData is ArmorItemData armorItem)
+                    {
+                        switch (armorItem.Slot)
+                        {
+                            case EquipmentSlot.Head: targetRegionName = "Head"; break;
+                            case EquipmentSlot.Body: targetRegionName = "Torso"; break;
+                            case EquipmentSlot.Hands: targetRegionName = "Hands"; break;
+                            case EquipmentSlot.Feet: targetRegionName = "Feet"; break;
+                            case EquipmentSlot.Amulet: targetRegionName = "Amulet"; break;
+                            case EquipmentSlot.Ring1:
+                            case EquipmentSlot.Ring2: targetRegionName = "Ring"; break;
+                            case EquipmentSlot.Belt: targetRegionName = "Belt"; break;
+                            default: targetRegionName = "Torso"; break;
+                        }
+                    }
+
+                    var matchingRegion = db.equipments.Find(r => r.Name.IndexOf(targetRegionName, System.StringComparison.OrdinalIgnoreCase) >= 0);
+                    if (matchingRegion == null)
+                    {
+                        if (targetRegionName == "Torso") matchingRegion = db.equipments.Find(r => r.Name.IndexOf("Body", System.StringComparison.OrdinalIgnoreCase) >= 0 || r.Name.IndexOf("Chest", System.StringComparison.OrdinalIgnoreCase) >= 0);
+                        else if (targetRegionName == "Feet") matchingRegion = db.equipments.Find(r => r.Name.IndexOf("Legs", System.StringComparison.OrdinalIgnoreCase) >= 0 || r.Name.IndexOf("Boots", System.StringComparison.OrdinalIgnoreCase) >= 0);
+                        else if (targetRegionName == "Hands") matchingRegion = db.equipments.Find(r => r.Name.IndexOf("Gloves", System.StringComparison.OrdinalIgnoreCase) >= 0);
+                    }
+                    if (matchingRegion == null)
+                    {
+                        matchingRegion = db.equipments[0];
+                    }
+
+                    this.Region = new System.Collections.Generic.List<DevionGames.InventorySystem.EquipmentRegion> { matchingRegion };
                 }
             }
         }

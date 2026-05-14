@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: Lightweight, flexible tunic with subtle magical weaving.
   DevionAdapter: {fileID: 11400000, guid: 1b8f818137824664882d09eef9dbedb1, type: 2}
   Slot: 1
-  ModularPartIndex: 3
+  ModularPartIndex: 7
+  MeshPartName: Chest Armor Type 3 Color 2
   Defense: 80
   HealthBonus: 60
   Abilities: []

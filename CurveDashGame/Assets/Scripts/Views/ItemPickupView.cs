@@ -40,8 +40,15 @@ namespace STG.CurveDash
                 {
                     spawnedVisual = Instantiate(modelPrefab, transform);
                     
-                    // Set scale to around 0.5f for 3D prefabs as well to keep them visible
-                    spawnedVisual.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+                    // Set scale to 1.0f for 3D prefabs as requested
+                    spawnedVisual.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+
+                    // Remove all child colliders from instantiated 3D models so they don't block player movement
+                    var childColliders = spawnedVisual.GetComponentsInChildren<Collider>();
+                    foreach (var cCollider in childColliders)
+                    {
+                        if (cCollider != null) Destroy(cCollider);
+                    }
 
                     var renderers = spawnedVisual.GetComponentsInChildren<Renderer>();
                     if (renderers.Length > 0)
@@ -61,9 +68,9 @@ namespace STG.CurveDash
                 }
                 else
                 {
-                    // Choose distinctive primitive shape based on item category with size around 0.5
+                    // Choose distinctive primitive shape based on item category with size 1.0
                     PrimitiveType shapeType = PrimitiveType.Cube;
-                    Vector3 shapeScale = new Vector3(0.5f, 0.5f, 0.5f);
+                    Vector3 shapeScale = new Vector3(1.0f, 1.0f, 1.0f);
                     Quaternion customRotation = Quaternion.identity;
                     Color customColor = Color.white;
                     bool hasCustomColor = false;
@@ -71,30 +78,23 @@ namespace STG.CurveDash
                     if (data is GemItemData)
                     {
                         shapeType = PrimitiveType.Sphere;
-                        shapeScale = new Vector3(0.5f, 0.5f, 0.5f); // Sphere
+                        shapeScale = new Vector3(1.0f, 1.0f, 1.0f); // Sphere
                         customColor = new Color(0.1f, 0.9f, 0.4f); // Beautiful Emerald Green
                         hasCustomColor = true;
                     }
                     else if (data is FlaskItemData)
                     {
                         shapeType = PrimitiveType.Capsule; // Capsule pill shape
-                        shapeScale = new Vector3(0.35f, 0.35f, 0.35f); // Beautiful pill proportion (capsule is naturally taller)
+                        shapeScale = new Vector3(0.7f, 0.7f, 0.7f);
                         customColor = new Color(0.9f, 0.1f, 0.2f); // Healing red potion
                         hasCustomColor = true;
                     }
                     else if (data is CurrencyItemData)
                     {
                         shapeType = PrimitiveType.Cube; // Cube standing on vertex (diamond)
-                        shapeScale = new Vector3(0.5f, 0.5f, 0.5f);
+                        shapeScale = new Vector3(1.0f, 1.0f, 1.0f);
                         customRotation = Quaternion.Euler(45f, 45f, 0f); // Rotate X and Y to point a corner straight down
                         customColor = new Color(1.0f, 0.75f, 0.0f); // Bright Gold
-                        hasCustomColor = true;
-                    }
-                    else if (data is ArmorItemData)
-                    {
-                        shapeType = PrimitiveType.Cube;
-                        shapeScale = new Vector3(0.5f, 0.5f, 0.5f);
-                        customColor = new Color(0.5f, 0.5f, 0.5f); // Iron/Steel Gray
                         hasCustomColor = true;
                     }
 
@@ -131,6 +131,12 @@ namespace STG.CurveDash
                     placeholder.transform.SetParent(transform, false);
                     placeholder.transform.localPosition = Vector3.zero;
                 }
+
+                // Guaranteed Trigger SphereCollider on root object for flawless pickup detection by OverlapSphereNonAlloc!
+                var triggerCollider = gameObject.GetComponent<SphereCollider>();
+                if (triggerCollider == null) triggerCollider = gameObject.AddComponent<SphereCollider>();
+                triggerCollider.isTrigger = true;
+                triggerCollider.radius = 1.0f;
             }
         }
 

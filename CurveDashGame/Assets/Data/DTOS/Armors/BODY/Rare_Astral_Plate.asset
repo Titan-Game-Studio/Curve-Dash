@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: Heavy steel armor carrying stellar blessings.
   DevionAdapter: {fileID: 11400000, guid: 2d8007b4b87c860458ad70fc0194111e, type: 2}
   Slot: 1
-  ModularPartIndex: 5
+  ModularPartIndex: 14
+  MeshPartName: Chest Armor Type 5 Color 3
   Defense: 180
   HealthBonus: 120
   Abilities: []

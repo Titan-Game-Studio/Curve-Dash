@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: A simple padded leather chest protector.
   DevionAdapter: {fileID: 11400000, guid: eef280ba585a66e449ae0592f73235ad, type: 2}
   Slot: 1
-  ModularPartIndex: 2
+  ModularPartIndex: 3
+  MeshPartName: Chest Armor Type 2 Color 1
   Defense: 35
   HealthBonus: 25
   Abilities: []

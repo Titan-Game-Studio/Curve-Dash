@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: Light and flexible magical running boots.
   DevionAdapter: {fileID: 11400000, guid: 9787538c0367850479d040cd5599c851, type: 2}
   Slot: 3
-  ModularPartIndex: 4
+  ModularPartIndex: 10
+  MeshPartName: Feet Armor Type 4 Color 2
   Defense: 22
   HealthBonus: 15
   Abilities: []

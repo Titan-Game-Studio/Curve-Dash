@@ -151,6 +151,9 @@ namespace STG.CurveDash.Editor
                 string prefabName = $"{prefix} Type {type} Color {color} Part.prefab";
                 string prefabPath = Path.Combine(armorPartsDir, prefabName).Replace('\\', '/');
 
+                int exactChildIndex = (type - 1) * 3 + (color - 1);
+                string exactPartName = $"{prefix} Type {type} Color {color}";
+
                 GameObject prefabAsset = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
                 if (prefabAsset != null)
                 {
@@ -163,10 +166,11 @@ namespace STG.CurveDash.Editor
                         var assetRef = new UnityEngine.AddressableAssets.AssetReferenceGameObject(prefabGuid);
                         
                         // Check if it's already assigned or index needs syncing
-                        if (armorData.Prefab == null || armorData.Prefab.AssetGUID != prefabGuid || armorData.ModularPartIndex != type)
+                        if (armorData.Prefab == null || armorData.Prefab.AssetGUID != prefabGuid || armorData.ModularPartIndex != exactChildIndex || armorData.MeshPartName != exactPartName)
                         {
                             armorData.Prefab = assetRef;
-                            armorData.ModularPartIndex = type; // Synchronize ModularIndex!
+                            armorData.ModularPartIndex = exactChildIndex; // Synchronize exact ModularIndex!
+                            armorData.MeshPartName = exactPartName; // Synchronize exact MeshPartName!
                             EditorUtility.SetDirty(armorData);
                             linkedCount++;
                         }
@@ -181,6 +185,23 @@ namespace STG.CurveDash.Editor
             string[] guids = AssetDatabase.FindAssets("t:ItemData");
             int createdOrUpdatedCount = 0;
 
+            // Tải Devion ItemDatabase để tự động đăng ký tất cả Adapter vào hệ thống!
+            DevionGames.InventorySystem.ItemDatabase devionDB = null;
+            string[] dbGuids = AssetDatabase.FindAssets("t:ItemDatabase");
+            if (dbGuids.Length > 0)
+            {
+                devionDB = AssetDatabase.LoadAssetAtPath<DevionGames.InventorySystem.ItemDatabase>(AssetDatabase.GUIDToAssetPath(dbGuids[0]));
+            }
+
+            string dummyPath = "Assets/Data/DTOS/DummyArmorEquip.prefab";
+            GameObject dummyPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(dummyPath);
+            if (dummyPrefab == null)
+            {
+                var go = new GameObject("DummyArmorEquip");
+                dummyPrefab = PrefabUtility.SaveAsPrefabAsset(go, dummyPath);
+                Object.DestroyImmediate(go);
+            }
+
             foreach (string guid in guids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
@@ -190,6 +211,15 @@ namespace STG.CurveDash.Editor
                     if (CreateAdapter(itemData))
                     {
                         createdOrUpdatedCount++;
+
+                        if (devionDB != null && itemData.DevionAdapter != null)
+                        {
+                            if (!devionDB.items.Contains(itemData.DevionAdapter))
+                            {
+                                devionDB.items.Add(itemData.DevionAdapter);
+                                EditorUtility.SetDirty(devionDB);
+                            }
+                        }
                     }
                 }
             }

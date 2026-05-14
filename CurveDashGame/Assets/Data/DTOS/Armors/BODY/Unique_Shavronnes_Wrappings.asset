@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: Chaos damage does not bypass Energy Shield.
   DevionAdapter: {fileID: 11400000, guid: ca802daab7d9f0b4fa4e7724afe7f219, type: 2}
   Slot: 1
-  ModularPartIndex: 6
+  ModularPartIndex: 17
+  MeshPartName: Chest Armor Type 6 Color 3
   Defense: 250
   HealthBonus: 80
   Abilities: []

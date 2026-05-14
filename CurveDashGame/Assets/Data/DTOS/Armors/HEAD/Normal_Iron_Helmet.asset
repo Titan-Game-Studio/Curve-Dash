@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: A heavy iron bucket for basic skull protection.
   DevionAdapter: {fileID: 11400000, guid: 8578d1b669cd2554aa493964aab9ead7, type: 2}
   Slot: 0
-  ModularPartIndex: 1
+  ModularPartIndex: 0
+  MeshPartName: Head Armor Type 1 Color 1
   Defense: 15
   HealthBonus: 10
   Abilities: []

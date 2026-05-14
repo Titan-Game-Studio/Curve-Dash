@@ -104,6 +104,73 @@ namespace STG.CurveDash
             _rangeVisualizer = rangeObj.AddComponent<RangeCircleVisualizer>();
             _rangeVisualizer.SetColor(Color.cyan);
             UpdateRangeVisualizer();
+
+            SyncEquipmentContainerListeners();
+        }
+
+        private DevionGames.InventorySystem.ItemContainer _equipmentContainer;
+
+        private void SyncEquipmentContainerListeners()
+        {
+            try
+            {
+                if (_equipmentContainer == null)
+                {
+                    _equipmentContainer = DevionGames.UIWidgets.WidgetUtility.Find<DevionGames.InventorySystem.ItemContainer>("Equipment");
+                    if (_equipmentContainer != null)
+                    {
+                        _equipmentContainer.OnAddItem += OnDevionEquipmentAdded;
+                        _equipmentContainer.OnRemoveItem += OnDevionEquipmentRemoved;
+                        Debug.Log("<color=green>[PlayerView] Successfully subscribed to Devion Equipment container events.</color>");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[PlayerView] Could not subscribe to Devion Equipment container: {ex.Message}");
+            }
+        }
+
+        private void OnDevionEquipmentAdded(DevionGames.InventorySystem.Item item, DevionGames.InventorySystem.Slot slot)
+        {
+            if (item is CurveDashEquipmentAdapter adapter && adapter.OriginalEquipmentData != null)
+            {
+                if (adapter.OriginalEquipmentData is ArmorItemData armor)
+                {
+                    if (_dataManager != null && _dataManager.UserData != null && _dataManager.UserData.EquippedItems != null)
+                    {
+                        _dataManager.UserData.EquippedItems[armor.Slot] = armor.name;
+                    }
+                    if (_modularView != null)
+                    {
+                        _modularView.SetPartByName(armor.Slot, armor.MeshPartName, armor.ModularPartIndex);
+                        Debug.Log($"<color=cyan>[PlayerView] Modular mesh updated for slot {armor.Slot} to name {armor.MeshPartName}</color>");
+                    }
+                }
+                else if (adapter.OriginalEquipmentData is EquippableData equippable)
+                {
+                    Equip(equippable);
+                }
+            }
+        }
+
+        private void OnDevionEquipmentRemoved(DevionGames.InventorySystem.Item item, int amount, DevionGames.InventorySystem.Slot slot)
+        {
+            if (item is CurveDashEquipmentAdapter adapter && adapter.OriginalEquipmentData != null)
+            {
+                if (adapter.OriginalEquipmentData is ArmorItemData armor)
+                {
+                    if (_dataManager != null && _dataManager.UserData != null && _dataManager.UserData.EquippedItems != null)
+                    {
+                        _dataManager.UserData.EquippedItems.Remove(armor.Slot);
+                    }
+                    if (_modularView != null)
+                    {
+                        _modularView.SetPart(armor.Slot, -1);
+                        Debug.Log($"<color=cyan>[PlayerView] Modular mesh cleared for slot {armor.Slot}</color>");
+                    }
+                }
+            }
         }
 
 
@@ -154,6 +221,12 @@ namespace STG.CurveDash
 
             // Sync animator speeds based on active states
             UpdateAnimatorSpeeds();
+
+            // Smoothly align model back to forward road direction when running
+            if (_isRunning && _characterContainerTransform != null)
+            {
+                _characterContainerTransform.localRotation = Quaternion.Slerp(_characterContainerTransform.localRotation, Quaternion.identity, Time.deltaTime * 10f);
+            }
 
             // Toggle range debug visualization on simulator (runs in built games too)
             if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current[UnityEngine.InputSystem.Key.F3].wasPressedThisFrame)
@@ -464,6 +537,23 @@ namespace STG.CurveDash
                 {
                     _rightHandSlot = _modularView.RightHandSlot;
                     _leftHandSlot = _modularView.LeftHandSlot;
+
+                    // Khởi tạo các giáp đang trang bị từ UserData lên mô hình Modular
+                    if (_dataManager != null && _dataManager.UserData != null && _dataManager.UserData.EquippedItems != null && _assetManager != null)
+                    {
+                        foreach (var kvp in _dataManager.UserData.EquippedItems)
+                        {
+                            var item = _assetManager.GetItem(kvp.Value);
+                            if (item is ArmorItemData armor)
+                            {
+                                _modularView.SetPartByName(armor.Slot, armor.MeshPartName, armor.ModularPartIndex);
+                            }
+                            else if (item is EquippableData equippable)
+                            {
+                                Equip(equippable);
+                            }
+                        }
+                    }
                 }
                 
                 RefreshWeaponVisuals();
@@ -560,6 +650,17 @@ namespace STG.CurveDash
             _isRunning = isRunning;
             if (_characterAnimator != null) _characterAnimator.SetBool("IsRunning", isRunning);
             if (_mountAnimator != null) _mountAnimator.SetBool("IsRunning", isRunning);
+        }
+
+        public void RotateModelTowards(Vector3 targetPosition)
+        {
+            if (_characterContainerTransform == null) return;
+            Vector3 direction = targetPosition - transform.position;
+            direction.y = 0; // Lock Y axis
+            if (direction != Vector3.zero)
+            {
+                _characterContainerTransform.rotation = Quaternion.LookRotation(direction, Vector3.up);
+            }
         }
 
         private Action _onAttackImpactCallback;

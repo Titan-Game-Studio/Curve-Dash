@@ -175,21 +175,7 @@ namespace STG.CurveDash
                 // Process collisions and triggers only if the player is actively moving
                 if (playerComponent.Direction != Vector3.zero)
                 {
-                    if (CheckCollisionWithPickup(position, out int pickupEntity))
-                    {
-                        if (crystalPool.Has(pickupEntity) && !playerHitCrystalPool.Has(pickupEntity))
-                        {
-                            playerHitCrystalPool.Add(pickupEntity);
-                        }
-                        else if (shieldPool.Has(pickupEntity) && !playerHitShieldPool.Has(pickupEntity))
-                        {
-                            playerHitShieldPool.Add(pickupEntity);
-                        }
-                        else if (itemPickupPool.Has(pickupEntity) && !playerHitItemPool.Has(pickupEntity))
-                        {
-                            playerHitItemPool.Add(pickupEntity);
-                        }
-                    }
+                    ProcessPickups(position);
 
                     if (CheckCollisionWithObstacle(position, out int obstacle) && obstaclePool.Has(obstacle))
                     {
@@ -290,11 +276,10 @@ namespace STG.CurveDash
             return false;
         }
 
-        private bool CheckCollisionWithPickup(Vector3 position, out int hitEntity)
+        private void ProcessPickups(Vector3 position)
         {
             // Center the sphere at Y = 0.5f and expand radius to 1.2f to cover vertical offset.
-            // Use ~0 (All Layers) and QueryTriggerInteraction.Collide unconditionally to bypass any layer mask mismatches
-            // or disabled "Queries Hit Triggers" global settings in Unity Project settings.
+            // Use ~0 (All Layers) and QueryTriggerInteraction.Collide unconditionally
             int numHits = Physics.OverlapSphereNonAlloc(position + Vector3.up * 0.5f, 1.2f, hitColliders, ~0, QueryTriggerInteraction.Collide);
 
             for (int i = 0; i < numHits; i++)
@@ -304,23 +289,31 @@ namespace STG.CurveDash
 
                 if (linkView != null)
                 {
-                    if (linkView.Entity.Unpack(world, out hitEntity))
+                    if (linkView.Entity.Unpack(world, out int hitEntity))
                     {
-                        bool isCrystal = crystalPool.Has(hitEntity);
-                        bool isShield = shieldPool.Has(hitEntity);
-                        bool isItem = itemPickupPool.Has(hitEntity);
-
-                        // Filter out non-pickup entities to prevent player self-selection or duplicate checks
-                        if (isCrystal || isShield || isItem)
+                        if (crystalPool.Has(hitEntity) && !playerHitCrystalPool.Has(hitEntity))
                         {
-                            return true;
+                            playerHitCrystalPool.Add(hitEntity);
+                        }
+                        if (shieldPool.Has(hitEntity) && !playerHitShieldPool.Has(hitEntity))
+                        {
+                            playerHitShieldPool.Add(hitEntity);
+                        }
+                        if (itemPickupPool.Has(hitEntity))
+                        {
+                            var pickupView = linkView.GetComponent<ItemPickupView>();
+                            string itemName = pickupView != null && pickupView.ItemToGive != null ? pickupView.ItemToGive.ItemName : "Unknown Item";
+                            Debug.Log($"<color=cyan>[Player Collision] Touching pickup object: '{hitCollider.gameObject.name}', Entity: {hitEntity}, Item: {itemName}</color>");
+
+                            if (!playerHitItemPool.Has(hitEntity))
+                            {
+                                playerHitItemPool.Add(hitEntity);
+                                Debug.Log($"<color=lime>[Pickup Triggered] Added PlayerHitItemEvent for '{itemName}' (Entity {hitEntity})</color>");
+                            }
                         }
                     }
                 }
             }
-
-            hitEntity = -1;
-            return false;
         }
 
         private bool CheckCollisionWithEnemy(Vector3 position, out int hitEntity)

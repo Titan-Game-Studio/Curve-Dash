@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: Radiating soft blue mana glow.
   DevionAdapter: {fileID: 11400000, guid: 6dd4266039d541b409e29f7504af14a7, type: 2}
   Slot: 0
-  ModularPartIndex: 4
+  ModularPartIndex: 10
+  MeshPartName: Head Armor Type 4 Color 2
   Defense: 35
   HealthBonus: 25
   Abilities: []

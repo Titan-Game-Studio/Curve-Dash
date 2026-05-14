@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: Provides excellent elemental resistances for early levels.
   DevionAdapter: {fileID: 11400000, guid: 76b94f4dd834dfd4dbd4e36c00661705, type: 2}
   Slot: 0
-  ModularPartIndex: 6
+  ModularPartIndex: 17
+  MeshPartName: Head Armor Type 6 Color 3
   Defense: 50
   HealthBonus: 40
   Abilities: []

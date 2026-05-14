@@ -40,8 +40,8 @@ namespace STG.CurveDash
                     {
                         Vector3 deathPos = viewLink.View.transform.position;
                         
-                        // 40% chance of item dropping
-                        if (Random.value <= 0.40f)
+                        // 100% chance of item dropping for incredible rewarding gameplay feedback!
+                        if (Random.value <= 1.0f)
                         {
                             float roll = Random.value;
                             if (roll < 0.25f)

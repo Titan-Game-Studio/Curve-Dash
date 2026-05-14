@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -253,8 +253,12 @@ namespace DevionGames.InventorySystem
 
                             Add(mItem);
 
-                            this.m_Amounts[i] = 0;
-                            this.m_Modifiers[i].modifiers.Clear();
+                            int realIndex = this.m_Items.IndexOf(mItem);
+                            if (realIndex >= 0 && realIndex < this.m_Amounts.Count)
+                            {
+                                this.m_Amounts[realIndex] = 0;
+                                this.m_Modifiers[realIndex].modifiers.Clear();
+                            }
                         
                             if (itemData.ContainsKey("Slots") && container != null)
                             {

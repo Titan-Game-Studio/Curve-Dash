@@ -21,6 +21,7 @@ namespace STG.CurveDash
     {
         public EquipmentSlot Slot;
         public int ModularPartIndex; // Index for the modular mesh part
+        public string MeshPartName; // Exact child object name in GanzSe modular character
         
         [Header("Stats")]
         public int Defense;

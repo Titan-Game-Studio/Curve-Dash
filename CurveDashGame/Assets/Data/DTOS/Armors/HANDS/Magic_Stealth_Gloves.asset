@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: Magic gloves that blend with shadows.
   DevionAdapter: {fileID: 11400000, guid: 0e9fad8e4be0be0499cb5bc6a78a2549, type: 2}
   Slot: 2
-  ModularPartIndex: 3
+  ModularPartIndex: 7
+  MeshPartName: Arm Armor Type 3 Color 2
   Defense: 22
   HealthBonus: 15
   Abilities: []

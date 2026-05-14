@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: Prevents action speed from being slowed below base value.
   DevionAdapter: {fileID: 11400000, guid: 12d26d1ff8948b843858044e6dbe16ed, type: 2}
   Slot: 3
-  ModularPartIndex: 6
+  ModularPartIndex: 17
+  MeshPartName: Feet Armor Type 6 Color 3
   Defense: 100
   HealthBonus: 150
   Abilities: []

@@ -397,86 +397,101 @@ namespace STG.CurveDash
             return entity;
         }
 
-        public int SpawnItemPickup(Vector3 blockPosition)
+        public int RegisterDroppedItemEntity(ItemPickupView itemView)
         {
+            if (itemView == null || world == null) return -1;
+            var entity = CreateEntity<ItemPickupComponent>(itemView.gameObject);
+            return entity;
+        }
+
+        private List<T> GetAllItemsOfType<T>() where T : ItemData
+        {
+            List<T> result = new List<T>();
             if (assetCatalog != null && assetCatalog.MasterItemCatalog != null && assetCatalog.MasterItemCatalog.Items != null)
             {
-                var items = assetCatalog.MasterItemCatalog.Items;
-                if (items.Count > 0)
+                result.AddRange(assetCatalog.MasterItemCatalog.Items.OfType<T>());
+            }
+
+            if (result.Count == 0)
+            {
+#if UNITY_EDITOR
+                string[] guids = UnityEditor.AssetDatabase.FindAssets("t:" + typeof(T).Name);
+                foreach (var guid in guids)
                 {
-                    var randomItem = items[Random.Range(0, items.Count)];
-                    return SpawnItemPickup(blockPosition, randomItem);
+                    string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                    var item = UnityEditor.AssetDatabase.LoadAssetAtPath<T>(path);
+                    if (item != null) result.Add(item);
                 }
+#else
+                result.AddRange(Resources.LoadAll<T>(""));
+#endif
+            }
+
+            return result;
+        }
+
+        public int SpawnItemPickup(Vector3 blockPosition)
+        {
+            var items = GetAllItemsOfType<ItemData>();
+            if (items.Count > 0)
+            {
+                var randomItem = items[Random.Range(0, items.Count)];
+                return SpawnItemPickup(blockPosition, randomItem);
             }
             return -1;
         }
 
         public int SpawnWeaponPickup(Vector3 blockPosition)
         {
-            if (assetCatalog != null && assetCatalog.MasterItemCatalog != null)
+            var weapons = GetAllItemsOfType<WeaponData>();
+            if (weapons.Count > 0)
             {
-                var weapons = assetCatalog.MasterItemCatalog.Items.OfType<WeaponData>().ToList();
-                if (weapons.Count > 0)
-                {
-                    var randomWeapon = weapons[Random.Range(0, weapons.Count)];
-                    return SpawnItemPickup(blockPosition, randomWeapon);
-                }
+                var randomWeapon = weapons[Random.Range(0, weapons.Count)];
+                return SpawnItemPickup(blockPosition, randomWeapon);
             }
             return -1;
         }
 
         public int SpawnArmorPickup(Vector3 blockPosition)
         {
-            if (assetCatalog != null && assetCatalog.MasterItemCatalog != null)
+            var armors = GetAllItemsOfType<ArmorItemData>();
+            if (armors.Count > 0)
             {
-                var armors = assetCatalog.MasterItemCatalog.Items.OfType<ArmorItemData>().ToList();
-                if (armors.Count > 0)
-                {
-                    var randomArmor = armors[Random.Range(0, armors.Count)];
-                    return SpawnItemPickup(blockPosition, randomArmor);
-                }
+                var randomArmor = armors[Random.Range(0, armors.Count)];
+                return SpawnItemPickup(blockPosition, randomArmor);
             }
             return -1;
         }
 
         public int SpawnGemPickup(Vector3 blockPosition)
         {
-            if (assetCatalog != null && assetCatalog.MasterItemCatalog != null)
+            var gems = GetAllItemsOfType<GemItemData>();
+            if (gems.Count > 0)
             {
-                var gems = assetCatalog.MasterItemCatalog.Items.OfType<GemItemData>().ToList();
-                if (gems.Count > 0)
-                {
-                    var randomGem = gems[Random.Range(0, gems.Count)];
-                    return SpawnItemPickup(blockPosition, randomGem);
-                }
+                var randomGem = gems[Random.Range(0, gems.Count)];
+                return SpawnItemPickup(blockPosition, randomGem);
             }
             return -1;
         }
 
         public int SpawnFlaskPickup(Vector3 blockPosition)
         {
-            if (assetCatalog != null && assetCatalog.MasterItemCatalog != null)
+            var flasks = GetAllItemsOfType<FlaskItemData>();
+            if (flasks.Count > 0)
             {
-                var flasks = assetCatalog.MasterItemCatalog.Items.OfType<FlaskItemData>().ToList();
-                if (flasks.Count > 0)
-                {
-                    var randomFlask = flasks[Random.Range(0, flasks.Count)];
-                    return SpawnItemPickup(blockPosition, randomFlask);
-                }
+                var randomFlask = flasks[Random.Range(0, flasks.Count)];
+                return SpawnItemPickup(blockPosition, randomFlask);
             }
             return -1;
         }
 
         public int SpawnCurrencyPickup(Vector3 blockPosition)
         {
-            if (assetCatalog != null && assetCatalog.MasterItemCatalog != null)
+            var currencies = GetAllItemsOfType<CurrencyItemData>();
+            if (currencies.Count > 0)
             {
-                var currencies = assetCatalog.MasterItemCatalog.Items.OfType<CurrencyItemData>().ToList();
-                if (currencies.Count > 0)
-                {
-                    var randomCurrency = currencies[Random.Range(0, currencies.Count)];
-                    return SpawnItemPickup(blockPosition, randomCurrency);
-                }
+                var randomCurrency = currencies[Random.Range(0, currencies.Count)];
+                return SpawnItemPickup(blockPosition, randomCurrency);
             }
             return -1;
         }

@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: Rough iron mitts.
   DevionAdapter: {fileID: 11400000, guid: 853a784f5629edc4d848111632f35998, type: 2}
   Slot: 2
-  ModularPartIndex: 1
+  ModularPartIndex: 0
+  MeshPartName: Arm Armor Type 1 Color 1
   Defense: 10
   HealthBonus: 5
   Abilities: []

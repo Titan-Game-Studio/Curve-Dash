@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: Adds massive physical damage but increases damage taken.
   DevionAdapter: {fileID: 11400000, guid: 39ed5c071bab3974f9f13db333cfa12e, type: 2}
   Slot: 0
-  ModularPartIndex: 6
+  ModularPartIndex: 17
+  MeshPartName: Head Armor Type 6 Color 3
   Defense: 180
   HealthBonus: 0
   Abilities: []

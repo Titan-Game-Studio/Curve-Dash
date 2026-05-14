@@ -39,6 +39,12 @@ namespace STG.CurveDash
                 this.Name = m_OriginalItemData.ItemName;
 
 #if UNITY_EDITOR
+                var pickupPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Pickups/ItemPickup.prefab");
+                if (pickupPrefab != null)
+                {
+                    this.Prefab = pickupPrefab;
+                }
+
                 // Auto-healing for missing icons on the original item asset
                 if (m_OriginalItemData.Icon == null)
                 {

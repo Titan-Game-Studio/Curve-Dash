@@ -163,6 +163,12 @@ namespace STG.CurveDash
                         int capturedTargetEnemy = targetEnemy;
                         float capturedAttackRange = attackRange;
 
+                        ref var targetView = ref viewLinkPool.Get(targetEnemy);
+                        if (targetView.Transform != null)
+                        {
+                            playerViewComponent.RotateModelTowards(targetView.Transform.position);
+                        }
+
                         playerViewComponent.TriggerAttack(
                             onImpact: () =>
                             {

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -396,6 +396,64 @@ namespace DevionGames.InventorySystem
                 //Instantiate the prefab at position
                 GameObject go = InventoryManager.Instantiate(prefab, position + Vector3.up * 0.3f, Quaternion.identity);
                 go.name = go.name.Replace("(Clone)","");
+
+                // CẦU NỐI HOÀN HẢO VỚI HỆ THỐNG ECS BẰNG REFLECTION ĐỂ TRÁNH ASMDEF CONFLICT:
+                var pickupViewComponent = go.GetComponent("ItemPickupView");
+                if (pickupViewComponent == null)
+                {
+                    var viewType = System.Type.GetType("STG.CurveDash.ItemPickupView, Assembly-CSharp");
+                    if (viewType != null)
+                    {
+                        pickupViewComponent = go.AddComponent(viewType);
+                        var collider = go.AddComponent<SphereCollider>();
+                        collider.isTrigger = true;
+                        collider.radius = 1.0f;
+                    }
+                }
+
+                if (pickupViewComponent != null)
+                {
+                    ScriptableObject originalData = null;
+                    
+                    var origEquipProp = item.GetType().GetProperty("OriginalEquipmentData");
+                    if (origEquipProp != null)
+                    {
+                        originalData = origEquipProp.GetValue(item) as ScriptableObject;
+                    }
+                    else
+                    {
+                        var origItemProp = item.GetType().GetProperty("OriginalItemData");
+                        if (origItemProp != null)
+                        {
+                            originalData = origItemProp.GetValue(item) as ScriptableObject;
+                        }
+                    }
+
+                    if (originalData != null)
+                    {
+                        var setupMethod = pickupViewComponent.GetType().GetMethod("Setup");
+                        if (setupMethod != null)
+                        {
+                            setupMethod.Invoke(pickupViewComponent, new object[] { originalData });
+                        }
+
+                        // Tìm ObjectSpawner bằng Reflection
+                        var spawnerType = System.Type.GetType("STG.CurveDash.ObjectSpawner, Assembly-CSharp");
+                        if (spawnerType != null)
+                        {
+                            var spawnerObj = UnityEngine.Object.FindAnyObjectByType(spawnerType);
+                            if (spawnerObj != null)
+                            {
+                                var regMethod = spawnerObj.GetType().GetMethod("RegisterDroppedItemEntity");
+                                if (regMethod != null)
+                                {
+                                    regMethod.Invoke(spawnerObj, new object[] { pickupViewComponent });
+                                }
+                            }
+                        }
+                    }
+                }
+
                 //Reset the item collection of the prefab with this item
                 ItemCollection collection = go.GetComponent<ItemCollection>();
                 if (collection != null)

@@ -22,32 +22,27 @@ namespace STG.CurveDash.Editor
 
         public static void RefreshCatalog(bool showDialog)
         {
-            string[] catalogGuids = AssetDatabase.FindAssets("t:ItemCatalog");
-            if (catalogGuids == null || catalogGuids.Length == 0)
+            ItemCatalog catalog = null;
+            string[] gameCatalogGuids = AssetDatabase.FindAssets("t:GameAssetCatalog");
+            if (gameCatalogGuids.Length > 0)
             {
-                if (showDialog)
-                {
-                    EditorUtility.DisplayDialog("Catalog Refresh", "No ItemCatalog asset found in the project!", "OK");
-                }
-                else
-                {
-                    Debug.LogWarning("[CatalogRefresher] No ItemCatalog asset found in the project!");
-                }
-                return;
+                var gameCatalog = AssetDatabase.LoadAssetAtPath<GameAssetCatalog>(AssetDatabase.GUIDToAssetPath(gameCatalogGuids[0]));
+                if (gameCatalog != null) catalog = gameCatalog.MasterItemCatalog;
             }
 
-            string catalogPath = AssetDatabase.GUIDToAssetPath(catalogGuids[0]);
-            ItemCatalog catalog = AssetDatabase.LoadAssetAtPath<ItemCatalog>(catalogPath);
             if (catalog == null)
             {
-                if (showDialog)
+                string[] catalogGuids = AssetDatabase.FindAssets("t:ItemCatalog");
+                if (catalogGuids != null && catalogGuids.Length > 0)
                 {
-                    EditorUtility.DisplayDialog("Catalog Refresh", "Failed to load ItemCatalog from: " + catalogPath, "OK");
+                    catalog = AssetDatabase.LoadAssetAtPath<ItemCatalog>(AssetDatabase.GUIDToAssetPath(catalogGuids[0]));
                 }
-                else
-                {
-                    Debug.LogError("[CatalogRefresher] Failed to load ItemCatalog from: " + catalogPath);
-                }
+            }
+
+            if (catalog == null)
+            {
+                if (showDialog) EditorUtility.DisplayDialog("Catalog Refresh", "No ItemCatalog asset found in the project!", "OK");
+                else Debug.LogWarning("[CatalogRefresher] No ItemCatalog asset found in the project!");
                 return;
             }
 
@@ -56,16 +51,20 @@ namespace STG.CurveDash.Editor
                 catalog.Items = new List<ItemData>();
             }
 
-            string[] itemGuids = AssetDatabase.FindAssets("t:ItemData");
-            List<ItemData> foundItems = new List<ItemData>();
+            string[] queries = new string[] { "t:ItemData", "t:WeaponData", "t:ArmorItemData", "t:GemItemData", "t:FlaskItemData", "t:CurrencyItemData", "t:EquippableData" };
+            HashSet<ItemData> foundItems = new HashSet<ItemData>();
 
-            foreach (string guid in itemGuids)
+            foreach (var query in queries)
             {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                ItemData item = AssetDatabase.LoadAssetAtPath<ItemData>(path);
-                if (item != null)
+                string[] itemGuids = AssetDatabase.FindAssets(query);
+                foreach (string guid in itemGuids)
                 {
-                    foundItems.Add(item);
+                    string path = AssetDatabase.GUIDToAssetPath(guid);
+                    ItemData item = AssetDatabase.LoadAssetAtPath<ItemData>(path);
+                    if (item != null)
+                    {
+                        foundItems.Add(item);
+                    }
                 }
             }
 

@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: Has no sockets, but grants legendary life pool (+500 HP).
   DevionAdapter: {fileID: 11400000, guid: 10e769afc860daa4b9d2b757a596dfad, type: 2}
   Slot: 1
-  ModularPartIndex: 6
+  ModularPartIndex: 17
+  MeshPartName: Chest Armor Type 6 Color 3
   Defense: 0
   HealthBonus: 500
   Abilities: []

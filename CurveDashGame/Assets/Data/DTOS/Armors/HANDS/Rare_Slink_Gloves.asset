@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: Superbly balanced leather gloves used by masters.
   DevionAdapter: {fileID: 11400000, guid: 3dfe672abfde1574291e3b1974220d9f, type: 2}
   Slot: 2
-  ModularPartIndex: 5
+  ModularPartIndex: 14
+  MeshPartName: Arm Armor Type 5 Color 3
   Defense: 45
   HealthBonus: 30
   Abilities: []

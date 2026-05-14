@@ -25,7 +25,8 @@ MonoBehaviour:
   Description: Grants massive unarmed damage bonuses.
   DevionAdapter: {fileID: 11400000, guid: 911d7c487c884664b9883829b58d5dbc, type: 2}
   Slot: 2
-  ModularPartIndex: 6
+  ModularPartIndex: 17
+  MeshPartName: Arm Armor Type 6 Color 3
   Defense: 20
   HealthBonus: 10
   Abilities: []

@@ -17,7 +17,7 @@ MonoBehaviour:
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
   m_Icon: {fileID: 0}
-  m_Prefab: {fileID: 6524304573867782126, guid: ae0da4fd26885a44c8ea54ba6480df5d,
+  m_Prefab: {fileID: 2830056364503120991, guid: 182672a8f1b817f4aac75863c739d9e9,
     type: 3}
   m_Description: 
   m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,
@@ -74,7 +74,8 @@ MonoBehaviour:
   m_UseCategoryCooldown: 1
   m_Cooldown: 1
   actions: []
-  m_OverrideEquipPrefab: {fileID: 0}
+  m_OverrideEquipPrefab: {fileID: 6524304573867782126, guid: ae0da4fd26885a44c8ea54ba6480df5d,
+    type: 3}
   m_Region: []
   m_OriginalEquipmentData: {fileID: 11400000, guid: f39dfae7260c99b4e8d7967df48f5b22,
     type: 2}
