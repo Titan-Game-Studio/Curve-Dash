@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Asenath's Mark
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.OffHandData
   ItemName: Asenath's Mark
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: ea7a1a9e734d05346b3e0be00723277d, type: 3}
   Rarity: 3
   Type: 0
   Prefab:

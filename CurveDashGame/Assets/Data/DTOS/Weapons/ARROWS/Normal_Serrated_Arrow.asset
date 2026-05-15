@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Normal_Serrated_Arrow
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.OffHandData
   ItemName: Serrated Arrow
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 9e2793db716913d4b87ac0a9e084d008, type: 3}
   Rarity: 0
   Type: 0
   Prefab:

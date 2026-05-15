@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Unique_Sadimas_Touch
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Sadimas Touch
-  Icon: {fileID: 21300000, guid: cfea9c36036ca9e4591419c6c526d558, type: 3}
+  Icon: {fileID: 21300000, guid: 4f9662fdf84bdbb439e3c7f682300283, type: 3}
   Rarity: 3
   Type: 1
   Prefab:

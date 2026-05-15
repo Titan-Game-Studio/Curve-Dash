@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Aegis Aurora
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.OffHandData
   ItemName: Aegis Aurora
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: acd08bd159e5d084082fc50330badedd, type: 3}
   Rarity: 2
   Type: 0
   Prefab:

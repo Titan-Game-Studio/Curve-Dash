@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Elegant Sword
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.OneHandedWeaponData
   ItemName: Elegant Sword
-  Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  Icon: {fileID: 21300000, guid: 82101e30729c22a4bb09e993a56906a6, type: 3}
   Rarity: 1
   Type: 0
   Prefab:

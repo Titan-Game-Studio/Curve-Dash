@@ -37,43 +37,7 @@ namespace STG.CurveDash
                 this.Name = m_OriginalEquipmentData.ItemName;
 
 #if UNITY_EDITOR
-                // Auto-healing for missing icons on the original equipment asset
-                if (m_OriginalEquipmentData.Icon == null)
-                {
-                    string iconName = "";
-                    if (m_OriginalEquipmentData is WeaponData weapon)
-                    {
-                        iconName = weapon.ItemName.ToLower().Contains("shield") ? "Shield" : "Sword";
-                    }
-                    else if (m_OriginalEquipmentData is ArmorItemData armor)
-                    {
-                        switch (armor.Slot)
-                        {
-                            case EquipmentSlot.Head: iconName = "Head"; break;
-                            case EquipmentSlot.Body: iconName = "Torso"; break;
-                            case EquipmentSlot.Feet: iconName = "Feet"; break;
-                            case EquipmentSlot.Amulet: iconName = "Amulet"; break;
-                            case EquipmentSlot.Ring1:
-                            case EquipmentSlot.Ring2: iconName = "Soulcord"; break; // Awesome Soulcord ring/jewel icon
-                            case EquipmentSlot.Hands: iconName = "GlovesStrDex3"; break; // Awesome glove icon
-                            case EquipmentSlot.Belt: iconName = "InjectorBelt"; break; // Awesome belt icon
-                            case EquipmentSlot.OffHand: iconName = "Shield"; break;
-                            case EquipmentSlot.MainHand: iconName = "Sword"; break;
-                            default: iconName = "Torso"; break;
-                        }
-                    }
-
-                    if (!string.IsNullOrEmpty(iconName))
-                    {
-                        string iconPath = $"Assets/Textures/Icons/{iconName}.png";
-                        var sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
-                        if (sprite != null)
-                        {
-                            m_OriginalEquipmentData.Icon = sprite;
-                            UnityEditor.EditorUtility.SetDirty(m_OriginalEquipmentData);
-                        }
-                    }
-                }
+                // Removed hardcoded icon assignment logic as requested.
 #endif
 
                 this.Icon = m_OriginalEquipmentData.Icon;

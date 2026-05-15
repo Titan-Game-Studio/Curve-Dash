@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Physical_Cyclone
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.PoEAbility
   AbilityName: Cyclone
+  Icon: {fileID: 21300000, guid: c8fd118d124b72d47a96bb77a96e35ca, type: 3}
   Cooldown: 0
   ManaCost: 2
   AnimationTriggerName: 

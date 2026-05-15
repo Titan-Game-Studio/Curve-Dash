@@ -57,47 +57,7 @@ namespace STG.CurveDash
                     this.Prefab = null;
                 }
 
-                // Auto-healing for missing icons on the original item asset
-                if (m_OriginalItemData.Icon == null)
-                {
-                    string iconName = "";
-                    if (m_OriginalItemData is FlaskItemData flaskData)
-                    {
-                        string nameLower = flaskData.ItemName.ToLower();
-                        if (nameLower.Contains("life")) iconName = "lifeflask12";
-                        else if (nameLower.Contains("mana")) iconName = "Health Potion";
-                        else if (nameLower.Contains("quicksilver")) iconName = "sprint";
-                        else if (nameLower.Contains("granite")) iconName = "bismuth";
-                        else if (nameLower.Contains("diamond")) iconName = "silver";
-                        else iconName = "Health Potion";
-                    }
-                    else if (m_OriginalItemData is GemItemData gemData)
-                    {
-                        if (gemData.GemType == GemType.Support)
-                        {
-                            iconName = "FasterAttacks";
-                        }
-                        else
-                        {
-                            iconName = "PrismOfFear";
-                        }
-                    }
-                    else if (m_OriginalItemData is CurrencyItemData)
-                    {
-                        iconName = "Gold";
-                    }
-
-                    if (!string.IsNullOrEmpty(iconName))
-                    {
-                        string iconPath = $"Assets/Textures/Icons/{iconName}.png";
-                        var sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
-                        if (sprite != null)
-                        {
-                            m_OriginalItemData.Icon = sprite;
-                            UnityEditor.EditorUtility.SetDirty(m_OriginalItemData);
-                        }
-                    }
-                }
+                // Removed hardcoded icon assignment as requested.
 #endif
 
                 this.Icon = m_OriginalItemData.Icon;

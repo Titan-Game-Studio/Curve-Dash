@@ -142,11 +142,7 @@ namespace STG.CurveDash
 
         private void Update()
         {
-            if (spawnedVisual != null)
-            {
-                // Rotate to make it look active and premium
-                spawnedVisual.transform.Rotate(Vector3.up, 100f * Time.deltaTime, Space.World);
-            }
+            // Rotation disabled as requested
         }
     }
 

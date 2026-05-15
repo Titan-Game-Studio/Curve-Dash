@@ -38,6 +38,7 @@ namespace STG.CurveDash
                     ref var viewLink = ref viewLinkPool.Get(obstacle);
                     if (viewLink.View != null)
                     {
+                        Transform parentTransform = viewLink.View.transform.parent;
                         Vector3 deathPos = viewLink.View.transform.position;
                         
                         // 100% chance of item dropping for incredible rewarding gameplay feedback!
@@ -46,27 +47,27 @@ namespace STG.CurveDash
                             float roll = Random.value;
                             if (roll < 0.25f)
                             {
-                                spawner.SpawnWeaponPickup(deathPos);
+                                spawner.SpawnWeaponPickup(deathPos, parentTransform);
                                 Debug.Log("<color=yellow>[EnemyDrop] Enemy dropped a WEAPON!</color>");
                             }
                             else if (roll < 0.50f)
                             {
-                                spawner.SpawnArmorPickup(deathPos);
+                                spawner.SpawnArmorPickup(deathPos, parentTransform);
                                 Debug.Log("<color=yellow>[EnemyDrop] Enemy dropped an ARMOR piece!</color>");
                             }
                             else if (roll < 0.70f)
                             {
-                                spawner.SpawnGemPickup(deathPos);
+                                spawner.SpawnGemPickup(deathPos, parentTransform);
                                 Debug.Log("<color=yellow>[EnemyDrop] Enemy dropped a GEM!</color>");
                             }
                             else if (roll < 0.85f)
                             {
-                                spawner.SpawnFlaskPickup(deathPos);
+                                spawner.SpawnFlaskPickup(deathPos, parentTransform);
                                 Debug.Log("<color=yellow>[EnemyDrop] Enemy dropped a FLASK!</color>");
                             }
                             else
                             {
-                                spawner.SpawnCurrencyPickup(deathPos);
+                                spawner.SpawnCurrencyPickup(deathPos, parentTransform);
                                 Debug.Log("<color=yellow>[EnemyDrop] Enemy dropped CURRENCY!</color>");
                             }
                         }

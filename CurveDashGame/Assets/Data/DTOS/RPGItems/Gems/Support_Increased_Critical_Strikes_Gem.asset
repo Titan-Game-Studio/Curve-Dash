@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Support_Increased_Critical_Strikes_Gem
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.GemItemData
   ItemName: Increased Critical Strikes Gem
-  Icon: {fileID: 21300000, guid: eb8b5bdf933b3af48931884f54c9cebc, type: 3}
+  Icon: {fileID: 21300000, guid: ef90fdda492b4704b84bf09b1d94fd4d, type: 3}
   Rarity: 0
   Type: 2
   Prefab:

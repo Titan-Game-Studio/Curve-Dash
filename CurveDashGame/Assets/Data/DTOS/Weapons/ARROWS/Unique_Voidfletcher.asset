@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Unique_Voidfletcher
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.OffHandData
   ItemName: Voidfletcher
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: fdd5b2e02ad712045a6ac157105f9864, type: 3}
   Rarity: 3
   Type: 0
   Prefab:

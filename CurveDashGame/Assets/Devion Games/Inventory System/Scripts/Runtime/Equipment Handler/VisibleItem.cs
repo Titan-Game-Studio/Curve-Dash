@@ -1,4 +1,4 @@
-﻿using System.CodeDom;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -121,6 +121,7 @@ namespace DevionGames.InventorySystem
                 gameObject.transform.localPosition = position;
                 gameObject.transform.localEulerAngles = rotation;
                 gameObject.transform.localScale = scale;
+
                 return gameObject;
             }
         }

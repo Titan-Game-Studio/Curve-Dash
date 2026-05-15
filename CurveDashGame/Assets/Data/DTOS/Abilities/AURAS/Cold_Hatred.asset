@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Cold_Hatred
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.PoEAbility
   AbilityName: Hatred
+  Icon: {fileID: 21300000, guid: c32d5ca248efaa84695cad18d2890c3c, type: 3}
   Cooldown: 10
   ManaCost: 50
   AnimationTriggerName: 

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Physical_Split_Arrow
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.PoEAbility
   AbilityName: Split Arrow
+  Icon: {fileID: 21300000, guid: 7f247250db2f9684b8f49195063c1c71, type: 3}
   Cooldown: 0.5
   ManaCost: 6
   AnimationTriggerName: 

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Unique_Abyssus
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Abyssus
-  Icon: {fileID: 21300000, guid: 51bcd971274c82b4caa27af35a9cb3ac, type: 3}
+  Icon: {fileID: 21300000, guid: 1885f5c79eabf2a42a2a4fb615f8fa72, type: 3}
   Rarity: 3
   Type: 1
   Prefab:

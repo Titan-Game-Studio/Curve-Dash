@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Physical_Heavy_Strike
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.PoEAbility
   AbilityName: Heavy Strike
+  Icon: {fileID: 21300000, guid: 548f20b6feec5f94284b2c416a6d1d21, type: 3}
   Cooldown: 0.5
   ManaCost: 5
   AnimationTriggerName: 

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using DevionGames.UIWidgets;
 using UnityEngine;
@@ -132,6 +132,7 @@ namespace DevionGames.InventorySystem
             if (this.m_Ícon != null){
                 if (!IsEmpty){
                     //Updates the icon and enables it.
+                    this.m_Ícon.preserveAspect = true;
                     this.m_Ícon.overrideSprite = ObservedItem.Icon;
                     this.m_Ícon.enabled = true;
                 }else {

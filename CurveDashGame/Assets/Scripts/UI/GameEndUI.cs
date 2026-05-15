@@ -30,7 +30,7 @@ namespace STG.CurveDash
         
         public void OnTapToStartButtonClick()
         {
-            gameSystem.RestartGame();
+            gameSystem.GameStart(GameMode.Easy);
         }
         
         public void OnWatchAdButtonClick()

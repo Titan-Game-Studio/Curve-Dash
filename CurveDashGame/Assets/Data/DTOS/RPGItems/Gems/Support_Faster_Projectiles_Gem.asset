@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Support_Faster_Projectiles_Gem
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.GemItemData
   ItemName: Faster Projectiles Gem
-  Icon: {fileID: 21300000, guid: eb8b5bdf933b3af48931884f54c9cebc, type: 3}
+  Icon: {fileID: 21300000, guid: 7f89127cbaa79ac4c8cfdce60839cd71, type: 3}
   Rarity: 0
   Type: 2
   Prefab:

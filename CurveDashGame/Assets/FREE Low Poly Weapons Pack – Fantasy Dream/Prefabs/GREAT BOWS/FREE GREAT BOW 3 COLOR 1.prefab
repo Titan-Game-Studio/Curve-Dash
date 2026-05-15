@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2609203632309947030}
   - component: {fileID: 2788364132959389848}
   - component: {fileID: 614473211378712740}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: FREE GREAT BOW 3 COLOR 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}

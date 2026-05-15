@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Exquisite Blade
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.TwoHandedWeaponData
   ItemName: Exquisite Blade
-  Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  Icon: {fileID: 21300000, guid: 84f241a00c4b137478a0d2cfb8002b84, type: 3}
   Rarity: 2
   Type: 0
   Prefab:

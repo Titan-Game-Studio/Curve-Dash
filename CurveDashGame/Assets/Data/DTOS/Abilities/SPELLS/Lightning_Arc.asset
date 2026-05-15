@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Lightning_Arc
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.PoEAbility
   AbilityName: Arc
+  Icon: {fileID: 21300000, guid: 30183683e6f494e40aa125d71fd8dbfa, type: 3}
   Cooldown: 0.6
   ManaCost: 15
   AnimationTriggerName: 

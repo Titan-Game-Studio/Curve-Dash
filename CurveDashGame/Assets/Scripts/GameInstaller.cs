@@ -56,7 +56,6 @@ namespace STG.CurveDash
             Container.BindInterfacesAndSelfTo<ShieldSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<VfxSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<EnemyMovementSystem>().AsSingle();
-            Container.BindInterfacesAndSelfTo<MonsterSpawnSystem>().AsSingle();
 
 
 

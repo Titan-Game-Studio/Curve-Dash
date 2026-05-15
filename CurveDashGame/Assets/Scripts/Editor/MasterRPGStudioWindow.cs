@@ -525,13 +525,203 @@ namespace STG.CurveDash.Editor
             }
 
             EditorGUILayout.Space();
+            GUI.backgroundColor = new Color(0.8f, 0.2f, 0.5f);
+            if (GUILayout.Button("🖼️ Auto Assign Icons by Name", GUILayout.Height(40)))
+            {
+                AutoAssignIconsByName();
+            }
+
+            EditorGUILayout.Space();
             GUI.backgroundColor = new Color(1f, 0.5f, 0.1f);
-            if (GUILayout.Button("✨ Bulk Sync & Auto-Heal Icons and Prices for All Assets", GUILayout.Height(40)))
+            if (GUILayout.Button("✨ Bulk Sync & Auto-Heal Prices for All Assets", GUILayout.Height(40)))
             {
                 BulkSyncAndHealAllAdapters();
             }
             GUI.backgroundColor = Color.white;
             EditorGUILayout.EndVertical();
+        }
+
+        private List<string> m_AllIconPaths = new List<string>();
+
+        private void BuildIconCache()
+        {
+            m_AllIconPaths.Clear();
+            string[] guids = AssetDatabase.FindAssets("t:Texture2D", new string[] { "Assets/Textures/Icons" });
+            foreach (string guid in guids)
+            {
+                m_AllIconPaths.Add(AssetDatabase.GUIDToAssetPath(guid));
+            }
+            guids = AssetDatabase.FindAssets("t:Sprite", new string[] { "Assets/Textures/Icons" });
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (!m_AllIconPaths.Contains(path)) m_AllIconPaths.Add(path);
+            }
+        }
+
+        private void AutoAssignIconsByName()
+        {
+            BuildIconCache();
+            string[] itemDataGuids = AssetDatabase.FindAssets("t:ItemData");
+            List<string> missingList = new List<string>();
+            int assignedCount = 0;
+
+            foreach (string guid in itemDataGuids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var itemData = AssetDatabase.LoadAssetAtPath<ItemData>(path);
+                if (itemData == null) continue;
+
+                if (itemData is GemItemData gemData)
+                {
+                    // Gem Inventory Icon
+                    Sprite invSprite = FindIconFuzzy(itemData.ItemName, "inventory_icon", true);
+                    if (invSprite != null)
+                    {
+                        itemData.Icon = invSprite;
+                        EditorUtility.SetDirty(itemData);
+                        assignedCount++;
+                    }
+                    else
+                    {
+                        missingList.Add($"[Gem Inventory] {itemData.ItemName}");
+                    }
+
+                    // Active Skill Icon
+                    if (gemData.EmbeddedAbility != null)
+                    {
+                        Sprite skillSprite = FindIconFuzzy(gemData.EmbeddedAbility.AbilityName, "skill_icon", false);
+                        if (skillSprite == null) skillSprite = FindIconFuzzy(gemData.EmbeddedAbility.AbilityName, "inventory_icon", true); // Fallback
+
+                        if (skillSprite != null)
+                        {
+                            gemData.EmbeddedAbility.Icon = skillSprite;
+                            EditorUtility.SetDirty(gemData.EmbeddedAbility);
+                            assignedCount++;
+                        }
+                        else
+                        {
+                            missingList.Add($"[Gem Skill] {gemData.EmbeddedAbility.AbilityName}");
+                        }
+                    }
+                }
+                else
+                {
+                    // Other Items - apparently they also use _inventory_icon!
+                    Sprite sprite = FindIconFuzzy(itemData.ItemName, "inventory_icon", false);
+                    if (sprite != null)
+                    {
+                        itemData.Icon = sprite;
+                        EditorUtility.SetDirty(itemData);
+                        assignedCount++;
+                    }
+                    else
+                    {
+                        missingList.Add($"[Item] {itemData.ItemName}");
+                    }
+                }
+            }
+
+            // Additionally, assign icons to standalone AbilityData DTOs
+            string[] abilityDataGuids = AssetDatabase.FindAssets("t:AbilityData");
+            foreach (string guid in abilityDataGuids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var abilityData = AssetDatabase.LoadAssetAtPath<AbilityData>(path);
+                if (abilityData == null) continue;
+
+                Sprite sprite = FindIconFuzzy(abilityData.AbilityName, "skill_icon", false);
+                if (sprite == null) sprite = FindIconFuzzy(abilityData.AbilityName, "inventory_icon", true); // Fallback to inventory icon
+
+                if (sprite != null)
+                {
+                    abilityData.Icon = sprite;
+                    EditorUtility.SetDirty(abilityData);
+                    assignedCount++;
+                }
+                else
+                {
+                    // Only log missing standalone abilities if they haven't been logged yet
+                    string logMsg = $"[Ability DTO] {abilityData.AbilityName}";
+                    if (!missingList.Contains(logMsg) && !missingList.Contains($"[Gem Skill] {abilityData.AbilityName}"))
+                    {
+                        missingList.Add(logMsg);
+                    }
+                }
+            }
+
+            AssetDatabase.SaveAssets();
+
+            if (missingList.Count > 0)
+            {
+                Debug.LogWarning($"[MasterRPG] Auto-Assigned {assignedCount} icons. Missing {missingList.Count} icons:\n- " + string.Join("\n- ", missingList));
+                EditorUtility.DisplayDialog("Icon Assignment", $"Assigned {assignedCount} icons.\nMissing {missingList.Count} icons.\nCheck Console for the missing list.", "OK");
+            }
+            else
+            {
+                EditorUtility.DisplayDialog("Icon Assignment", $"Successfully assigned {assignedCount} icons with NO missing icons!", "OK");
+            }
+        }
+
+        private Sprite FindIconFuzzy(string itemName, string requiredSuffix, bool stripGemWord)
+        {
+            if (string.IsNullOrEmpty(itemName)) return null;
+
+            string baseName = itemName;
+            if (stripGemWord && baseName.EndsWith(" Gem", System.StringComparison.OrdinalIgnoreCase))
+            {
+                baseName = baseName.Substring(0, baseName.Length - 4);
+            }
+
+            string normalizedBase = DeepNormalize(baseName);
+            string normalizedSuffix = DeepNormalize(requiredSuffix);
+
+            string target1 = normalizedBase + normalizedSuffix; // e.g. astralplateinventoryicon
+            string target2 = normalizedBase;                    // e.g. astralplate
+
+            foreach (string path in m_AllIconPaths)
+            {
+                string fileName = System.IO.Path.GetFileNameWithoutExtension(path);
+                string normalizedFile = DeepNormalize(fileName);
+
+                if (normalizedFile == target1 || normalizedFile == target2)
+                {
+                    Sprite s = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+                    if (s != null) return s;
+                }
+            }
+
+            return null;
+        }
+
+        private string DeepNormalize(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return "";
+            input = input.ToLower();
+            input = input.Replace(" ", "");
+            input = input.Replace("_", "");
+            input = input.Replace("'", "");
+            input = input.Replace("-", "");
+            
+            // Advanced mappings to fix mismatches between Item names and File names
+            input = input.Replace("hat", "helmet");
+            input = input.Replace("circlet", "helmet");
+            input = input.Replace("armourers", "armourer");
+            input = input.Replace("blacksmiths", "blacksmith");
+            input = input.Replace("orbof", "orb");
+            input = input.Replace("scrollof", "scroll");
+            input = input.Replace("support", "");
+            input = input.Replace("quiver", "");
+            input = input.Replace("tower", "");
+            input = input.Replace("kite", "");
+            input = input.Replace("spirit", "");
+            input = input.Replace("round", "");
+            input = input.Replace("kondor", "kondo");
+            input = input.Replace("lessermultiple", "multiple");
+            input = input.Replace("lifeflasksmall", "eternallifeflask");
+            input = input.Replace("manaflasksmall", "eternalmanaflask");
+
+            return input;
         }
 
         private void GenerateAndOrganizeAdapters()

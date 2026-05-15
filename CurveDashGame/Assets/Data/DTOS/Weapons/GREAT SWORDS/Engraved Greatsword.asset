@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Engraved Greatsword
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.TwoHandedWeaponData
   ItemName: Engraved Greatsword
-  Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  Icon: {fileID: 21300000, guid: dd8db022a9ed2d7489643ec9edac12c7, type: 3}
   Rarity: 1
   Type: 0
   Prefab:

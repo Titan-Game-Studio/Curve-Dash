@@ -5,6 +5,7 @@ namespace STG.CurveDash
     public abstract class AbilityData : ScriptableObject
     {
         public string AbilityName;
+        public Sprite Icon;
         public float Cooldown;
         public float ManaCost; // If we add mana later
 

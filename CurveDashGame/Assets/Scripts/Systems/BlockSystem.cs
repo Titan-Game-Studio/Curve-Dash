@@ -187,7 +187,7 @@ namespace STG.CurveDash
             var child = viewLinkComponent.Transform.GetChild(Random.Range(0, BlockPartsCount - 1));
             if (child.gameObject.activeSelf)
             {
-                int item = spawner.SpawnItemPickup(child.position);
+                int item = spawner.SpawnItemPickup(child.position, child);
                 ref var blockComponent = ref blockPool.Get(block);
                 blockComponent.Crystal = world.PackEntity(item);
             }

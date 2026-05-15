@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5426990244906837994}
   - component: {fileID: 1598239118169944810}
   - component: {fileID: 1595135495330538786}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: FREE HAMMER 1 COLOR 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}

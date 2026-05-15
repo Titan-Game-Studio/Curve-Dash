@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Support_Lesser_Multiple_Projectiles
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.SupportAbilityData
   AbilityName: Lesser Multiple Projectiles
+  Icon: {fileID: 21300000, guid: eaa13c8f110e79e4f9596badc44a50d1, type: 3}
   Cooldown: 0
   ManaCost: 0
   AnimationTriggerName: 

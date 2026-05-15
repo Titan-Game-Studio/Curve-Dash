@@ -9,10 +9,6 @@ namespace STG.CurveDash
 {
     public class UIController : MonoBehaviour
     {
-        [SerializeField] GameObject titleUI;
-        [SerializeField] GameObject playingUI;
-        [SerializeField] GameObject gameEndUI;
-        
         [Inject]
         private GameSystem gameSystem;
         
@@ -25,20 +21,8 @@ namespace STG.CurveDash
         private GameState gameState;
         private Dictionary<GameState, GameObject> uiDictionary;
 
-        private void Awake()
-        {
-            uiDictionary = new Dictionary<GameState, GameObject>
-            {
-                { GameState.Title, titleUI }, { GameState.Playing, playingUI }, { GameState.GameEnd, gameEndUI }
-            };
-        }
-
         private void Start()
         {
-            if (titleUI != null) container.InjectGameObject(titleUI);
-            if (playingUI != null) container.InjectGameObject(playingUI);
-            if (gameEndUI != null) container.InjectGameObject(gameEndUI);
-
             adService.Initialize();
             adService.ShowBanner();
         }

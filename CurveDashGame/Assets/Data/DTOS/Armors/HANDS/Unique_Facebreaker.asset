@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Unique_Facebreaker
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Facebreaker
-  Icon: {fileID: 21300000, guid: cfea9c36036ca9e4591419c6c526d558, type: 3}
+  Icon: {fileID: 21300000, guid: a9eece3b9f5314e45a8535f9182da500, type: 3}
   Rarity: 3
   Type: 1
   Prefab:

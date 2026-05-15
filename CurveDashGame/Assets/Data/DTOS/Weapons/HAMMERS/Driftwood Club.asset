@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Driftwood Club
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.TwoHandedWeaponData
   ItemName: Driftwood Club
-  Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  Icon: {fileID: 21300000, guid: 5607e94e7da5f124b83e0069ba0312d5, type: 3}
   Rarity: 0
   Type: 0
   Prefab:

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Jewelled Foil
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.OneHandedWeaponData
   ItemName: Jewelled Foil
-  Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  Icon: {fileID: 21300000, guid: 37d8b11cd8a41794c9cd002d017fb79e, type: 3}
   Rarity: 2
   Type: 0
   Prefab:

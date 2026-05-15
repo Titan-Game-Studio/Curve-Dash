@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Support_Faster_Projectiles
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.SupportAbilityData
   AbilityName: Faster Projectiles
+  Icon: {fileID: 21300000, guid: 7f89127cbaa79ac4c8cfdce60839cd71, type: 3}
   Cooldown: 0
   ManaCost: 0
   AnimationTriggerName: 

@@ -170,6 +170,15 @@ namespace STG.CurveDash
 
             bool isEscapePressed = UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current[UnityEngine.InputSystem.Key.Escape].wasPressedThisFrame;
 
+            bool screenTapOrClick = false;
+            if (UnityEngine.InputSystem.Pointer.current != null && UnityEngine.InputSystem.Pointer.current.press.wasPressedThisFrame)
+            {
+                if (UnityEngine.EventSystems.EventSystem.current == null || !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+                {
+                    screenTapOrClick = true;
+                }
+            }
+
             switch (gameStateComponent.State)
             {
                 case GameState.Title:
@@ -177,6 +186,11 @@ namespace STG.CurveDash
                     {
                         if (isEscapePressed)
                             Application.Quit();
+                    }
+
+                    if (screenTapOrClick)
+                    {
+                        GameStart(GameMode.Easy);
                     }
 
                     break;
@@ -195,12 +209,6 @@ namespace STG.CurveDash
                     if (isEscapePressed)
                         ShowTitle();
 
-                    bool screenTapOrClick = false;
-                    if (UnityEngine.InputSystem.Pointer.current != null && UnityEngine.InputSystem.Pointer.current.press.wasPressedThisFrame)
-                    {
-                        screenTapOrClick = true;
-                    }
-
                     if (screenTapOrClick)
                         ballSystem.ChangeDirection(playerFilter.GetRawEntities()[0]);
 
@@ -217,6 +225,8 @@ namespace STG.CurveDash
                 {
                     if (isEscapePressed)
                         ShowTitle();
+                    else if (screenTapOrClick)
+                        GameStart(GameMode.Easy);
                 }
                     break;
                 default:

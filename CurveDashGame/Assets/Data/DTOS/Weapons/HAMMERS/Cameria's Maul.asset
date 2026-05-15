@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Cameria's Maul
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.TwoHandedWeaponData
   ItemName: Cameria's Maul
-  Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  Icon: {fileID: 21300000, guid: 40d15bdcf6bc1b74bb503a04f7bddbf6, type: 3}
   Rarity: 3
   Type: 0
   Prefab:

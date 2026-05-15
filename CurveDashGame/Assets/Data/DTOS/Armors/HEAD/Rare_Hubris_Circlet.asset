@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Rare_Hubris_Circlet
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Hubris Circlet
-  Icon: {fileID: 21300000, guid: 51bcd971274c82b4caa27af35a9cb3ac, type: 3}
+  Icon: {fileID: 21300000, guid: 2fee0f467f704024399ee873c0cec712, type: 3}
   Rarity: 2
   Type: 1
   Prefab:

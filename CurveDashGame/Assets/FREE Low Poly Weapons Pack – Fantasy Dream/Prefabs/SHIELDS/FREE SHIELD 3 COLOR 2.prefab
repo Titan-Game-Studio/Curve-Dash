@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3144464161326037163}
   - component: {fileID: 2021872540392946728}
   - component: {fileID: 6656089123275144926}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: FREE SHIELD 3 COLOR 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}

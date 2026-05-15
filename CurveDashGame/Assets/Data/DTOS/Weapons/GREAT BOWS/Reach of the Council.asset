@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Reach of the Council
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.BowData
   ItemName: Reach of the Council
-  Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  Icon: {fileID: 21300000, guid: d4c6570e9078d2b4bb105e605ac78999, type: 3}
   Rarity: 3
   Type: 0
   Prefab:
@@ -36,4 +36,4 @@ MonoBehaviour:
   UseAnimationEvent: 0
   AttackHitDelay: 0.1
   Abilities: []
-  DefaultArrow: {fileID: 11400000, guid: ad6d58cca00e5ce499eda5b8967123e9, type: 2}
+  DefaultArrow: {fileID: 0}

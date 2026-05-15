@@ -60,7 +60,9 @@ namespace STG.CurveDash
             _slotRoots[EquipmentSlot.Head] = armorPartsRoot.Find("HEADS") ?? armorPartsRoot.Find("Head") ?? armorPartsRoot.Find("HEAD");
             _slotRoots[EquipmentSlot.Body] = armorPartsRoot.Find("CHESTS") ?? armorPartsRoot.Find("Torso") ?? armorPartsRoot.Find("Chest") ?? armorPartsRoot.Find("BODY");
             _slotRoots[EquipmentSlot.Hands] = armorPartsRoot.Find("ARMS") ?? armorPartsRoot.Find("HANDS") ?? armorPartsRoot.Find("Arms");
-            _slotRoots[EquipmentSlot.Feet] = armorPartsRoot.Find("LEGS") ?? armorPartsRoot.Find("FEET") ?? armorPartsRoot.Find("Legs");
+            // Ưu tiên tìm FEET hoặc BOOTS trước. Nếu không có thì mới dùng LEGS.
+            _slotRoots[EquipmentSlot.Feet] = armorPartsRoot.Find("FEET") ?? armorPartsRoot.Find("Feet") ?? armorPartsRoot.Find("BOOTS") ?? armorPartsRoot.Find("LEGS");
+
             
             Debug.Log($"[ModularCharacterView] InitializeSlots complete. Head: {_slotRoots[EquipmentSlot.Head] != null}, Body: {_slotRoots[EquipmentSlot.Body] != null}");
         }
@@ -113,6 +115,44 @@ namespace STG.CurveDash
             if (slot == EquipmentSlot.Head)
             {
                 ToggleFaceVisibility(!found); // Show face if no helmet
+            }
+            
+            // --- XỬ LÝ ĐẶC BIỆT CHO GIÀY VÀ QUẦN ---
+            // Đồng bộ hóa bộ quần và giày theo tên (VD: Feet Armor Type 2 Color 2 -> Legs Armor Type 2 Color 2)
+            if (slot == EquipmentSlot.Feet)
+            {
+                Transform pantsRoot = armorPartsRoot.Find("LEGS") ?? armorPartsRoot.Find("Legs") ?? armorPartsRoot.Find("Pants");
+                if (pantsRoot != null)
+                {
+                    // Tắt sạch quần cũ
+                    foreach (Transform child in pantsRoot) child.gameObject.SetActive(false);
+
+                    bool pantsFound = false;
+                    if (!string.IsNullOrEmpty(partName))
+                    {
+                        // Chuyển "Feet" thành "Legs" để tìm quần tương ứng
+                        string targetPantsName = partName.Replace("Feet", "Legs", System.StringComparison.OrdinalIgnoreCase);
+                        
+                        foreach (Transform child in pantsRoot)
+                        {
+                            if (child.name.Equals(targetPantsName, System.StringComparison.OrdinalIgnoreCase) || 
+                                child.name.StartsWith(targetPantsName, System.StringComparison.OrdinalIgnoreCase))
+                            {
+                                child.gameObject.SetActive(true);
+                                pantsFound = true;
+                                Debug.Log($"<color=cyan>[ModularCharacterView] Synced Pants found: '{child.name}'</color>");
+                                break;
+                            }
+                        }
+                    }
+
+                    // Nếu không tìm thấy quần bộ theo tên, thì mới bật cái mặc định (index 0)
+                    if (!pantsFound && pantsRoot.childCount > 0)
+                    {
+                        pantsRoot.GetChild(0).gameObject.SetActive(true);
+                        Debug.Log("[ModularCharacterView] No matching pants found, using default index 0");
+                    }
+                }
             }
         }
 

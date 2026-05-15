@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Flask_Mana_Flask_Small
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.FlaskItemData
   ItemName: Mana Flask Small
-  Icon: {fileID: 21300000, guid: ea19c0346458c0f498898b9175de1cae, type: 3}
+  Icon: {fileID: 21300000, guid: 9484d127892a69c468ea86fc12986d2e, type: 3}
   Rarity: 0
   Type: 3
   Prefab:
@@ -24,6 +24,7 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   Description: Recovers 35 Mana over 4 seconds.
   DevionAdapter: {fileID: 11400000, guid: b01090fb3d842e2419f8e0dd2e297f47, type: 2}
+  AutoUseCondition: 0
   FlaskType: 1
   RecoveryAmount: 35
   Duration: 4

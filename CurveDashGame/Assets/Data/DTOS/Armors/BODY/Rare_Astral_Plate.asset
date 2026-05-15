@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Rare_Astral_Plate
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Astral Plate
-  Icon: {fileID: 21300000, guid: ea8d985057954d54da2d606524af8214, type: 3}
+  Icon: {fileID: 21300000, guid: e8fd97c792d9ce7449aa4cf2b84aa0af, type: 3}
   Rarity: 2
   Type: 1
   Prefab:

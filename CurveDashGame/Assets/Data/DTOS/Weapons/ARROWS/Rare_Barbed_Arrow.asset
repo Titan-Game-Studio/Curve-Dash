@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Rare_Barbed_Arrow
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.OffHandData
   ItemName: Barbed Arrow
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: c46f9ec4d8765c8419793d9eede67388, type: 3}
   Rarity: 2
   Type: 0
   Prefab:

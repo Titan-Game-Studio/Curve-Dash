@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Magic_Sharkskin_Tunic
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Sharkskin Tunic
-  Icon: {fileID: 21300000, guid: ea8d985057954d54da2d606524af8214, type: 3}
+  Icon: {fileID: 21300000, guid: 13a1d8e6fbd38834f96f18a97b8538d7, type: 3}
   Rarity: 1
   Type: 1
   Prefab:

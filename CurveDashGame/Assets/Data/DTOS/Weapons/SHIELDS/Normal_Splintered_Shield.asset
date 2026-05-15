@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Normal_Splintered_Shield
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.OffHandData
   ItemName: Splintered Shield
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 0b4addf3be1f70842abe7f26ebc4a61d, type: 3}
   Rarity: 0
   Type: 1
   Prefab:

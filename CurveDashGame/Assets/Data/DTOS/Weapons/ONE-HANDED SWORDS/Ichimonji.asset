@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Ichimonji
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.OneHandedWeaponData
   ItemName: Ichimonji
-  Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  Icon: {fileID: 21300000, guid: 8ad391ca0cff0544999152b42bb7a7b1, type: 3}
   Rarity: 3
   Type: 0
   Prefab:

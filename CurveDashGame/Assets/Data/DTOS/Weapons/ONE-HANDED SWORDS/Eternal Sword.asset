@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Eternal Sword
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.OneHandedWeaponData
   ItemName: Eternal Sword
-  Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  Icon: {fileID: 21300000, guid: 5ba736e4756f3ff489522287cce2523c, type: 3}
   Rarity: 0
   Type: 0
   Prefab:

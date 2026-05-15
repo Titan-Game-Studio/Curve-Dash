@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Support_Greater_Multiple_Projectiles
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.SupportAbilityData
   AbilityName: Greater Multiple Projectiles
+  Icon: {fileID: 21300000, guid: b7f6320a4bc2e9d439501ae7a75e0288, type: 3}
   Cooldown: 0
   ManaCost: 0
   AnimationTriggerName: 

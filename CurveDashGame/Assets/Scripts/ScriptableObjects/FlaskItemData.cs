@@ -9,9 +9,20 @@ namespace STG.CurveDash
         Utility
     }
 
+    public enum FlaskAutoUseCondition
+    {
+        None,
+        WhenFullCharges,
+        WhenHitRareOrUnique,
+        WhenInjured,        // Health drops below a threshold
+        WhenManaLow         // Mana drops below a threshold
+    }
+
     [CreateAssetMenu(fileName = "New Flask Item", menuName = "Curve-Dash/Items/Flask")]
     public class FlaskItemData : ItemData
     {
+        [Header("Auto-Use (POE Style)")]
+        public FlaskAutoUseCondition AutoUseCondition = FlaskAutoUseCondition.None;
         [Header("Flask Recoveries")]
         public FlaskType FlaskType;
         public float RecoveryAmount = 50f;

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Chaos_Flicker_Strike
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.PoEAbility
   AbilityName: Flicker Strike
+  Icon: {fileID: 21300000, guid: a1c3c870745b42e40ac268c80c75dd77, type: 3}
   Cooldown: 1.5
   ManaCost: 8
   AnimationTriggerName: 

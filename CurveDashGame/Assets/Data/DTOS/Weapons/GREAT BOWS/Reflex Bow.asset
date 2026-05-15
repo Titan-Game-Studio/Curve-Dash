@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Reflex Bow
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.BowData
   ItemName: Reflex Bow
-  Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  Icon: {fileID: 21300000, guid: f027724b29906624ab42e0c0393b3640, type: 3}
   Rarity: 2
   Type: 0
   Prefab:
@@ -36,4 +36,4 @@ MonoBehaviour:
   UseAnimationEvent: 0
   AttackHitDelay: 0.1
   Abilities: []
-  DefaultArrow: {fileID: 11400000, guid: f6f62ca062e00ee4db0b121016ac5242, type: 2}
+  DefaultArrow: {fileID: 0}

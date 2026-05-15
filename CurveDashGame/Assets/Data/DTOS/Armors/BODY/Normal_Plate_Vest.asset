@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Normal_Plate_Vest
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Plate Vest
-  Icon: {fileID: 21300000, guid: ea8d985057954d54da2d606524af8214, type: 3}
+  Icon: {fileID: 21300000, guid: c1f806a9d3260f445b67436c94594604, type: 3}
   Rarity: 0
   Type: 1
   Prefab:

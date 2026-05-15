@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Currency_Orb_Transmutation
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurrencyItemData
   ItemName: Orb Transmutation
-  Icon: {fileID: 21300000, guid: 824e0adae0b9f0541afbffa1f3f59995, type: 3}
+  Icon: {fileID: 21300000, guid: f9aaee4832701634b971679d3868fbfd, type: 3}
   Rarity: 0
   Type: 2
   Prefab:

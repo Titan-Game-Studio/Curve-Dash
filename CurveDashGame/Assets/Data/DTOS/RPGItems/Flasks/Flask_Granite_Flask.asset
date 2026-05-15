@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Flask_Granite_Flask
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.FlaskItemData
   ItemName: Granite Flask
-  Icon: {fileID: 21300000, guid: ea19c0346458c0f498898b9175de1cae, type: 3}
+  Icon: {fileID: 21300000, guid: c1fd910e186e2aa41a2d67651c5d776d, type: 3}
   Rarity: 0
   Type: 3
   Prefab:
@@ -24,6 +24,7 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   Description: Grants +1000 Armor during effect.
   DevionAdapter: {fileID: 11400000, guid: 4f2a9af021b2d57449018fb977079ec6, type: 2}
+  AutoUseCondition: 0
   FlaskType: 2
   RecoveryAmount: 0
   Duration: 4

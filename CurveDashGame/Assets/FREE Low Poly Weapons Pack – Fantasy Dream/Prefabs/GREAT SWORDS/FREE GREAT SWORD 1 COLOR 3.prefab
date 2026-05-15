@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7856420155909740664}
   - component: {fileID: 8784839953519140959}
   - component: {fileID: 8156239645450375079}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: FREE GREAT SWORD 1 COLOR 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}

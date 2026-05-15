@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Marohi Erqi
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.TwoHandedWeaponData
   ItemName: Marohi Erqi
-  Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  Icon: {fileID: 21300000, guid: 1a5ed67125ce64c4b8c5ce3aef2f8fc2, type: 3}
   Rarity: 3
   Type: 0
   Prefab:

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Support_Melee_Physical_Damage
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.SupportAbilityData
   AbilityName: Melee Physical Damage
+  Icon: {fileID: 21300000, guid: 17cb3d8eb93fc4a4bbb2b5f6c9f392d0, type: 3}
   Cooldown: 0
   ManaCost: 0
   AnimationTriggerName: 

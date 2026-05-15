@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Vaal Shield
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.OffHandData
   ItemName: Vaal Shield
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 7dddc1a9fc99dc74d9c9d7762759f663, type: 3}
   Rarity: 0
   Type: 0
   Prefab:

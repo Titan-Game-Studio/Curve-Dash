@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Rare_Titan_Greaves
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Titan Greaves
-  Icon: {fileID: 21300000, guid: 0111c36e0cdd38e48952c85e65e30dcb, type: 3}
+  Icon: {fileID: 21300000, guid: 1678fb6f1c8e8a44999d2d2154c39aac, type: 3}
   Rarity: 2
   Type: 1
   Prefab:

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2568373355889123951}
   - component: {fileID: 2556250220065985432}
   - component: {fileID: 4196687248785261516}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: FREE SHIELD 1 COLOR 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}

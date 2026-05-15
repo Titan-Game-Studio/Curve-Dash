@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Unique_Skyforth
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Skyforth
-  Icon: {fileID: 21300000, guid: 0111c36e0cdd38e48952c85e65e30dcb, type: 3}
+  Icon: {fileID: 21300000, guid: 2e6d323d994dce3408a0f8f1b5de7468, type: 3}
   Rarity: 3
   Type: 1
   Prefab:

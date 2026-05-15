@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 562573298971775488}
   - component: {fileID: 6152282868978191857}
   - component: {fileID: 109280492275634737}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: FREE ONE HANDED SWORD 3 COLOR 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Flask_Diamond_Flask
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.FlaskItemData
   ItemName: Diamond Flask
-  Icon: {fileID: 21300000, guid: ea19c0346458c0f498898b9175de1cae, type: 3}
+  Icon: {fileID: 21300000, guid: 73da92ac7af5da647943559e894e8e9c, type: 3}
   Rarity: 0
   Type: 3
   Prefab:
@@ -24,6 +24,7 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   Description: Your Critical Strike Chance is Lucky during effect.
   DevionAdapter: {fileID: 11400000, guid: 7689e58709f100241a38fbe21d5cdbe4, type: 2}
+  AutoUseCondition: 0
   FlaskType: 2
   RecoveryAmount: 0
   Duration: 4

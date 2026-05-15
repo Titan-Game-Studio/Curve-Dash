@@ -35,5 +35,10 @@ namespace STG.CurveDash
         {
             gameSystem.GameStart(GameMode.Holes);
         }
+
+        public void OnTapToStartButtonClick()
+        {
+            gameSystem.GameStart(GameMode.Easy);
+        }
     }
 }

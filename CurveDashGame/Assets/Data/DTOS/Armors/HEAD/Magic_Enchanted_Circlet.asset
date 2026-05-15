@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Magic_Enchanted_Circlet
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Enchanted Circlet
-  Icon: {fileID: 21300000, guid: 51bcd971274c82b4caa27af35a9cb3ac, type: 3}
+  Icon: {fileID: 21300000, guid: 8aba9159835c134449014a302fb0bfc1, type: 3}
   Rarity: 1
   Type: 1
   Prefab:

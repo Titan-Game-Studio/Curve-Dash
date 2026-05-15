@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Rare_Spiked_Club
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.TwoHandedWeaponData
   ItemName: Spiked Club
-  Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  Icon: {fileID: 21300000, guid: 952c385815e8b5743a3a29fc188639d5, type: 3}
   Rarity: 2
   Type: 0
   Prefab:

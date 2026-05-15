@@ -441,6 +441,9 @@ namespace STG.CurveDash
                 _leftWeaponObj.transform.localPosition = _leftHandItem.PositionOffset;
                 _leftWeaponObj.transform.localRotation = Quaternion.Euler(_leftHandItem.RotationOffset);
                 _leftWeaponObj.transform.localScale = Vector3.one;
+                
+                // Ép Layer về Default để không dính viền Outline
+                SetLayerRecursive(_leftWeaponObj, 0);
             }
 
             // Instantiate tay phải (One-Handed Sword, Arrows)
@@ -451,6 +454,18 @@ namespace STG.CurveDash
                 _rightWeaponObj.transform.localPosition = _rightHandItem.PositionOffset;
                 _rightWeaponObj.transform.localRotation = Quaternion.Euler(_rightHandItem.RotationOffset);
                 _rightWeaponObj.transform.localScale = Vector3.one;
+
+                // Ép Layer về Default để không dính viền Outline
+                SetLayerRecursive(_rightWeaponObj, 0);
+            }
+        }
+
+        private void SetLayerRecursive(GameObject obj, int layer)
+        {
+            obj.layer = layer;
+            foreach (Transform child in obj.transform)
+            {
+                SetLayerRecursive(child.gameObject, layer);
             }
         }
 

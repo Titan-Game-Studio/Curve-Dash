@@ -148,7 +148,8 @@ namespace STG.CurveDash
                 var weapons = assetCatalog.MasterItemCatalog.Items.OfType<WeaponData>().ToList();
                 if (weapons.Count > 0)
                 {
-                    var starterWeapon = weapons[0]; // Chọn vũ khí cơ bản đầu tiên
+                    var normalWeapons = weapons.Where(w => w.Rarity == ItemRarity.Normal).ToList();
+                    var starterWeapon = normalWeapons.Count > 0 ? normalWeapons[UnityEngine.Random.Range(0, normalWeapons.Count)] : weapons[0];
                     var instance = new WeaponInstance(starterWeapon, starterWeapon.Rarity);
                     
                     // Tìm một kỹ năng Active để gắn vào vũ khí
@@ -240,8 +241,15 @@ namespace STG.CurveDash
                 }
 
                 // Thêm Flask vào Inventory & Actionbar
-                var flasks = assetCatalog.MasterItemCatalog.Items.OfType<FlaskItemData>().ToList();
-                foreach (var flask in flasks)
+                var allFlasks = assetCatalog.MasterItemCatalog.Items.OfType<FlaskItemData>().ToList();
+                var lifeFlasks = allFlasks.Where(f => f.FlaskType == FlaskType.Life).ToList();
+                var manaFlasks = allFlasks.Where(f => f.FlaskType == FlaskType.Mana).ToList();
+                
+                var starterFlasks = new List<FlaskItemData>();
+                if (lifeFlasks.Count > 0) starterFlasks.Add(lifeFlasks[UnityEngine.Random.Range(0, lifeFlasks.Count)]);
+                if (manaFlasks.Count > 0) starterFlasks.Add(manaFlasks[UnityEngine.Random.Range(0, manaFlasks.Count)]);
+
+                foreach (var flask in starterFlasks)
                 {
                     var fAdapter = flask.DevionAdapter;
                     if (fAdapter == null)
@@ -404,7 +412,7 @@ namespace STG.CurveDash
             return entity;
         }
 
-        public int SpawnItemPickup(Vector3 blockPosition, ItemData item)
+        public int SpawnItemPickup(Vector3 blockPosition, ItemData item, Transform parent = null)
         {
             if (item == null) return -1;
             var itemView = itemPickupViewPool.Spawn();
@@ -412,7 +420,17 @@ namespace STG.CurveDash
 
             itemView.Setup(item);
 
-            itemView.transform.position = blockPosition + CrystalOffset;
+            if (parent != null)
+            {
+                itemView.transform.SetParent(parent);
+                // Tâm X,Z của block, Y ngang mặt đất (kèm offset nhỏ để không lún mesh)
+                itemView.transform.position = new Vector3(parent.position.x, parent.position.y + 1.25f, parent.position.z);
+            }
+            else
+            {
+                itemView.transform.position = blockPosition + new Vector3(0, 1.25f, 0);
+            }
+            
             var rb = itemView.GetComponent<Rigidbody>();
             if (rb != null)
             {
@@ -426,6 +444,7 @@ namespace STG.CurveDash
         public int RegisterDroppedItemEntity(ItemPickupView itemView)
         {
             if (itemView == null || world == null) return -1;
+
             var entity = CreateEntity<ItemPickupComponent>(itemView.gameObject);
             return entity;
         }
@@ -456,68 +475,68 @@ namespace STG.CurveDash
             return result;
         }
 
-        public int SpawnItemPickup(Vector3 blockPosition)
+        public int SpawnItemPickup(Vector3 blockPosition, Transform parent = null)
         {
             var items = GetAllItemsOfType<ItemData>();
             if (items.Count > 0)
             {
                 var randomItem = items[Random.Range(0, items.Count)];
-                return SpawnItemPickup(blockPosition, randomItem);
+                return SpawnItemPickup(blockPosition, randomItem, parent);
             }
             return -1;
         }
 
-        public int SpawnWeaponPickup(Vector3 blockPosition)
+        public int SpawnWeaponPickup(Vector3 blockPosition, Transform parent = null)
         {
             var weapons = GetAllItemsOfType<WeaponData>();
             if (weapons.Count > 0)
             {
                 var randomWeapon = weapons[Random.Range(0, weapons.Count)];
-                return SpawnItemPickup(blockPosition, randomWeapon);
+                return SpawnItemPickup(blockPosition, randomWeapon, parent);
             }
             return -1;
         }
 
-        public int SpawnArmorPickup(Vector3 blockPosition)
+        public int SpawnArmorPickup(Vector3 blockPosition, Transform parent = null)
         {
             var armors = GetAllItemsOfType<ArmorItemData>();
             if (armors.Count > 0)
             {
                 var randomArmor = armors[Random.Range(0, armors.Count)];
-                return SpawnItemPickup(blockPosition, randomArmor);
+                return SpawnItemPickup(blockPosition, randomArmor, parent);
             }
             return -1;
         }
 
-        public int SpawnGemPickup(Vector3 blockPosition)
+        public int SpawnGemPickup(Vector3 blockPosition, Transform parent = null)
         {
             var gems = GetAllItemsOfType<GemItemData>();
             if (gems.Count > 0)
             {
                 var randomGem = gems[Random.Range(0, gems.Count)];
-                return SpawnItemPickup(blockPosition, randomGem);
+                return SpawnItemPickup(blockPosition, randomGem, parent);
             }
             return -1;
         }
 
-        public int SpawnFlaskPickup(Vector3 blockPosition)
+        public int SpawnFlaskPickup(Vector3 blockPosition, Transform parent = null)
         {
             var flasks = GetAllItemsOfType<FlaskItemData>();
             if (flasks.Count > 0)
             {
                 var randomFlask = flasks[Random.Range(0, flasks.Count)];
-                return SpawnItemPickup(blockPosition, randomFlask);
+                return SpawnItemPickup(blockPosition, randomFlask, parent);
             }
             return -1;
         }
 
-        public int SpawnCurrencyPickup(Vector3 blockPosition)
+        public int SpawnCurrencyPickup(Vector3 blockPosition, Transform parent = null)
         {
             var currencies = GetAllItemsOfType<CurrencyItemData>();
             if (currencies.Count > 0)
             {
                 var randomCurrency = currencies[Random.Range(0, currencies.Count)];
-                return SpawnItemPickup(blockPosition, randomCurrency);
+                return SpawnItemPickup(blockPosition, randomCurrency, parent);
             }
             return -1;
         }
