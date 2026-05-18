@@ -240,6 +240,57 @@ namespace STG.CurveDash
                     }
                 }
 
+                // Thêm bộ full các item giáp (Head, Body, Hands, Feet) vào bộ trang bị khởi đầu
+                var allArmors = assetCatalog.MasterItemCatalog.Items.OfType<ArmorItemData>().ToList();
+                if (allArmors.Count > 0)
+                {
+                    var slotsToEquip = new List<EquipmentSlot> { EquipmentSlot.Head, EquipmentSlot.Body, EquipmentSlot.Hands, EquipmentSlot.Feet };
+                    foreach (var slotType in slotsToEquip)
+                    {
+                        var candidateArmors = allArmors.Where(a => a.Slot == slotType).ToList();
+                        if (candidateArmors.Count > 0)
+                        {
+                            // Ưu tiên giáp Normal hoặc chọn ngẫu nhiên
+                            var normalArmors = candidateArmors.Where(a => a.Rarity == ItemRarity.Normal).ToList();
+                            var starterArmor = normalArmors.Count > 0 
+                                ? normalArmors[UnityEngine.Random.Range(0, normalArmors.Count)] 
+                                : candidateArmors[UnityEngine.Random.Range(0, candidateArmors.Count)];
+                            
+                            var armorAdapter = starterArmor.DevionAdapter;
+                            if (armorAdapter == null)
+                            {
+                                string targetName = starterArmor.name + "_Adapter";
+                                foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
+                                {
+                                    if (dbItem != null && dbItem.name == targetName)
+                                    {
+                                        armorAdapter = dbItem;
+                                        starterArmor.DevionAdapter = dbItem;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (armorAdapter != null)
+                            {
+                                var armorInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(armorAdapter);
+                                if (armorInstance != null)
+                                {
+                                    // Cưỡng bức đồng bộ dữ liệu runtime để tên, icon, và prefab được cập nhật chuẩn xác
+                                    if (armorInstance is CurveDashEquipmentAdapter equipAdapter)
+                                    {
+                                        equipAdapter.SyncData();
+                                    }
+                                    
+                                    // Thêm trực tiếp vào Inventory theo yêu cầu (không tự động mặc sẵn)
+                                    bool added = DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", armorInstance);
+                                    UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Added starter armor '{starterArmor.name}' to Inventory bag. Result: {added}</color>");
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // Thêm Flask vào Inventory & Actionbar
                 var allFlasks = assetCatalog.MasterItemCatalog.Items.OfType<FlaskItemData>().ToList();
                 var lifeFlasks = allFlasks.Where(f => f.FlaskType == FlaskType.Life).ToList();
@@ -512,11 +563,11 @@ namespace STG.CurveDash
             {
                 itemView.transform.SetParent(parent);
                 // Tâm X,Z của block, Y ngang mặt đất (kèm offset nhỏ để không lún mesh)
-                itemView.transform.position = new Vector3(parent.position.x, parent.position.y + 1.25f, parent.position.z);
+                itemView.transform.position = new Vector3(parent.position.x, parent.position.y + 0.75f, parent.position.z);
             }
             else
             {
-                itemView.transform.position = blockPosition + new Vector3(0, 1.25f, 0);
+                itemView.transform.position = blockPosition + new Vector3(0, 0.75f, 0);
             }
             
             var rb = itemView.GetComponent<Rigidbody>();

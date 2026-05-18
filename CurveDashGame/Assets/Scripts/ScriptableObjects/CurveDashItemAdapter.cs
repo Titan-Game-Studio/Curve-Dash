@@ -24,12 +24,7 @@ namespace STG.CurveDash
         protected override void OnEnable()
         {
             base.OnEnable();
-#if UNITY_EDITOR
-            if (!Application.isPlaying)
-            {
-                SyncData();
-            }
-#endif
+            SyncData();
         }
 
         public void SyncData()
@@ -61,6 +56,8 @@ namespace STG.CurveDash
 #endif
 
                 this.Icon = m_OriginalItemData.Icon;
+                
+                Debug.Log($"<color=lime>[CurveDashItemAdapter] SyncData for '{this.Name}' (Original='{m_OriginalItemData.name}'): Icon='{(this.Icon != null ? this.Icon.name : "NULL")}', OriginalIcon='{(m_OriginalItemData.Icon != null ? m_OriginalItemData.Icon.name : "NULL")}'</color>");
 
                 // Sync Description field using Reflection because m_Description is private inside DevionGames.Item
                 var descField = typeof(DevionGames.InventorySystem.Item).GetField("m_Description", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -103,6 +100,10 @@ namespace STG.CurveDash
                 {
                     SetOrUpdateProperty("Currency Type", currency.CurrencyType.ToString(), new Color(1f, 0.6f, 0f));
                 }
+            }
+            else
+            {
+                Debug.LogWarning($"[CurveDashItemAdapter] SyncData skipped because m_OriginalItemData is null on '{this.name}'");
             }
         }
 

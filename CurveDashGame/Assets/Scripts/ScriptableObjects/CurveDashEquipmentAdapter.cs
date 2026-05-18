@@ -22,12 +22,7 @@ namespace STG.CurveDash
         protected override void OnEnable()
         {
             base.OnEnable();
-#if UNITY_EDITOR
-            if (!Application.isPlaying)
-            {
-                SyncData();
-            }
-#endif
+            SyncData();
         }
 
         public void SyncData()
@@ -41,6 +36,8 @@ namespace STG.CurveDash
 #endif
 
                 this.Icon = m_OriginalEquipmentData.Icon;
+                
+                Debug.Log($"<color=lime>[CurveDashEquipmentAdapter] SyncData for '{this.Name}' (Original='{m_OriginalEquipmentData.name}'): Icon='{(this.Icon != null ? this.Icon.name : "NULL")}', OriginalIcon='{(m_OriginalEquipmentData.Icon != null ? m_OriginalEquipmentData.Icon.name : "NULL")}'</color>");
 
                 // Sync Description field using Reflection because m_Description is private inside DevionGames.Item
                 var descField = typeof(DevionGames.InventorySystem.Item).GetField("m_Description", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -93,6 +90,10 @@ namespace STG.CurveDash
                     SetOrUpdateProperty("Health", armorItem.HealthBonus, Color.green);
                     SetOrUpdateProperty("Armor Slot", armorItem.Slot.ToString(), Color.white);
                 }
+            }
+            else
+            {
+                Debug.LogWarning($"[CurveDashEquipmentAdapter] SyncData skipped because m_OriginalEquipmentData is null on '{this.name}'");
             }
         }
 
@@ -244,35 +245,67 @@ namespace STG.CurveDash
                 // 4. Auto-assign correct EquipmentRegion to prevent Devion from overwriting MainHand weapon!
                 if (db.equipments != null && db.equipments.Count > 0)
                 {
-                    string targetRegionName = "Main Hand";
-                    if (m_OriginalEquipmentData is WeaponData) targetRegionName = "Main Hand";
-                    else if (m_OriginalEquipmentData is OffHandData) targetRegionName = "Off Hand";
+                    DevionGames.InventorySystem.EquipmentRegion matchingRegion = null;
+                    System.Collections.Generic.List<string> searchKeywords = new System.Collections.Generic.List<string>();
+
+                    if (m_OriginalEquipmentData is WeaponData || m_OriginalEquipmentData is OffHandData)
+                    {
+                        // Gán cho cả 2 vùng để bỏ qua kiểm tra cứng của Devion, giao toàn quyền điều khiển logic cho PlayerView!
+                        var rightRegion = db.equipments.Find(r => r.Name.IndexOf("Right", System.StringComparison.OrdinalIgnoreCase) >= 0);
+                        var leftRegion = db.equipments.Find(r => r.Name.IndexOf("Left", System.StringComparison.OrdinalIgnoreCase) >= 0);
+                        
+                        this.Region = new System.Collections.Generic.List<DevionGames.InventorySystem.EquipmentRegion>();
+                        if (rightRegion != null) this.Region.Add(rightRegion);
+                        if (leftRegion != null) this.Region.Add(leftRegion);
+                        
+                        UnityEngine.Debug.Log($"[CurveDashEquipmentAdapter] Weapon/Offhand '{this.Name}' successfully assigned to BOTH Left & Right Hand regions for dynamic logic.");
+                        return;
+                    }
                     else if (m_OriginalEquipmentData is ArmorItemData armorItem)
                     {
                         switch (armorItem.Slot)
                         {
-                            case EquipmentSlot.Head: targetRegionName = "Head"; break;
-                            case EquipmentSlot.Body: targetRegionName = "Torso"; break;
-                            case EquipmentSlot.Hands: targetRegionName = "Hands"; break;
-                            case EquipmentSlot.Feet: targetRegionName = "Feet"; break;
-                            case EquipmentSlot.Amulet: targetRegionName = "Amulet"; break;
+                            case EquipmentSlot.Head: 
+                                searchKeywords.Add("Head"); 
+                                break;
+                            case EquipmentSlot.Body: 
+                                searchKeywords.AddRange(new[] { "Torso", "Chest", "Body" }); 
+                                break;
+                            case EquipmentSlot.Hands: 
+                                searchKeywords.AddRange(new[] { "Hands", "Gloves" }); 
+                                break;
+                            case EquipmentSlot.Feet: 
+                                searchKeywords.AddRange(new[] { "Feet", "Boots", "Legs" }); 
+                                break;
+                            case EquipmentSlot.Amulet: 
+                                searchKeywords.Add("Amulet"); 
+                                break;
                             case EquipmentSlot.Ring1:
-                            case EquipmentSlot.Ring2: targetRegionName = "Ring"; break;
-                            case EquipmentSlot.Belt: targetRegionName = "Belt"; break;
-                            default: targetRegionName = "Torso"; break;
+                            case EquipmentSlot.Ring2: 
+                                searchKeywords.Add("Ring"); 
+                                break;
+                            case EquipmentSlot.Belt: 
+                                searchKeywords.Add("Belt"); 
+                                break;
                         }
                     }
 
-                    var matchingRegion = db.equipments.Find(r => r.Name.IndexOf(targetRegionName, System.StringComparison.OrdinalIgnoreCase) >= 0);
-                    if (matchingRegion == null)
+                    // Try to find the region matching any of our keywords (case-insensitive)
+                    foreach (var keyword in searchKeywords)
                     {
-                        if (targetRegionName == "Torso") matchingRegion = db.equipments.Find(r => r.Name.IndexOf("Body", System.StringComparison.OrdinalIgnoreCase) >= 0 || r.Name.IndexOf("Chest", System.StringComparison.OrdinalIgnoreCase) >= 0);
-                        else if (targetRegionName == "Feet") matchingRegion = db.equipments.Find(r => r.Name.IndexOf("Legs", System.StringComparison.OrdinalIgnoreCase) >= 0 || r.Name.IndexOf("Boots", System.StringComparison.OrdinalIgnoreCase) >= 0);
-                        else if (targetRegionName == "Hands") matchingRegion = db.equipments.Find(r => r.Name.IndexOf("Gloves", System.StringComparison.OrdinalIgnoreCase) >= 0);
+                        matchingRegion = db.equipments.Find(r => r.Name.IndexOf(keyword, System.StringComparison.OrdinalIgnoreCase) >= 0);
+                        if (matchingRegion != null) break;
                     }
+
+                    // Fallback to first if still not found
                     if (matchingRegion == null)
                     {
+                        UnityEngine.Debug.LogWarning($"[CurveDashEquipmentAdapter] Could not find matching region for target keywords: {string.Join(", ", searchKeywords)}. Falling back to {db.equipments[0].Name}");
                         matchingRegion = db.equipments[0];
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.Log($"[CurveDashEquipmentAdapter] Matched region '{matchingRegion.Name}' for item '{this.Name}' using keywords: {string.Join(", ", searchKeywords)}");
                     }
 
                     this.Region = new System.Collections.Generic.List<DevionGames.InventorySystem.EquipmentRegion> { matchingRegion };

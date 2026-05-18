@@ -158,10 +158,76 @@ namespace STG.CurveDash
             UpdateRangeVisualizer();
 
             SyncEquipmentContainerListeners();
+            StartCoroutine(SyncCharacterInfoStatsDelayed());
 
 #if UNITY_EDITOR
             StartCoroutine(ApplyDebugGemsDelayed());
 #endif
+        }
+
+        // Waits two frames so Devion's StatsHandler has fully initialized, then rebuilds
+        // EquippedItems from the Equipment container (Devion restores saved items silently
+        // without firing OnAddItem, so we must scan slots manually on startup).
+        private System.Collections.IEnumerator SyncCharacterInfoStatsDelayed()
+        {
+            yield return null;
+            yield return null;
+            // Re-fetch container reference in case it wasn't ready in Start().
+            SyncEquipmentContainerListeners();
+            RebuildEquippedItemsFromContainer();
+            SyncCharacterInfoStats();
+        }
+
+        // Devion places the item into its slot AFTER NotifyAddItem (OnAddItem) returns,
+        // so slot scans inside an OnAddItem callback always find the slot empty.
+        // Waiting one frame ensures the slot is populated before we read it.
+        private System.Collections.IEnumerator SyncCharacterInfoStatsNextFrame()
+        {
+            yield return null;
+            SyncCharacterInfoStats();
+        }
+
+        private void RebuildEquippedItemsFromContainer()
+        {
+            if (_equipmentContainer == null)
+            {
+                Debug.LogWarning("[PlayerView] RebuildEquippedItemsFromContainer: _equipmentContainer is null, skipping.");
+                return;
+            }
+
+            _dataManager?.UserData?.EquippedItems?.Clear();
+            CurrentWeaponInstance = null;
+
+            for (int i = 0; i < _equipmentContainer.Slots.Count; i++)
+            {
+                var s = _equipmentContainer.Slots[i];
+                if (s.IsEmpty || s.ObservedItem == null) continue;
+
+                if (s.ObservedItem is CurveDashEquipmentAdapter adapter && adapter.OriginalEquipmentData != null)
+                {
+                    if (adapter.OriginalEquipmentData is ArmorItemData armor)
+                    {
+                        if (_dataManager?.UserData?.EquippedItems != null)
+                            _dataManager.UserData.EquippedItems[armor.Slot] = armor.name;
+                        EnsureArmorSlotEntry(armor.Slot);
+                        Debug.Log($"<color=cyan>[PlayerView] Rebuild: found armor '{armor.name}' defense={armor.Defense} in slot {i}</color>");
+                    }
+                    else if (adapter.OriginalEquipmentData is WeaponData weaponBase && CurrentWeaponInstance == null)
+                    {
+                        var instance = new WeaponInstance(weaponBase, weaponBase.Rarity);
+                        ItemPickupSystem.AutoLinkTestingAbilities(instance, weaponBase, _assetManager?.MasterItemCatalog);
+                        CurrentWeaponInstance = instance;
+                        Debug.Log($"<color=cyan>[PlayerView] Rebuild: found weapon '{weaponBase.name}' minDmg={instance.FinalMinDamage} maxDmg={instance.FinalMaxDamage} in slot {i}</color>");
+                    }
+                    else
+                    {
+                        Debug.Log($"<color=cyan>[PlayerView] Rebuild: slot {i} has '{adapter.OriginalEquipmentData.GetType().Name}' (not armor/weapon, skipped)</color>");
+                    }
+                }
+            }
+
+            int armorCount = _dataManager?.UserData?.EquippedItems?.Count ?? 0;
+            Debug.Log($"<color=cyan>[PlayerView] RebuildEquippedItemsFromContainer done: {armorCount} armor piece(s), weapon={CurrentWeaponInstance?.BaseData?.name ?? "none"}</color>");
         }
 
 #if UNITY_EDITOR
@@ -180,6 +246,8 @@ namespace STG.CurveDash
 #endif
 
         private DevionGames.InventorySystem.ItemContainer _equipmentContainer;
+        private DevionGames.InventorySystem.ItemContainer _inventoryContainerRef;
+        private bool _isUpdatingEquipment = false;
 
         private void SyncEquipmentContainerListeners()
         {
@@ -208,44 +276,409 @@ namespace STG.CurveDash
                         Debug.Log("<color=green>[PlayerView] Successfully subscribed to Devion Equipment container events.</color>");
                     }
                 }
+
+                if (_inventoryContainerRef == null)
+                {
+                    _inventoryContainerRef = DevionGames.UIWidgets.WidgetUtility.Find<DevionGames.InventorySystem.ItemContainer>("Inventory");
+                    if (_inventoryContainerRef != null)
+                    {
+                        Debug.Log("<color=green>[PlayerView] Successfully located Devion Inventory container.</color>");
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Debug.LogWarning($"[PlayerView] Could not subscribe to Devion Equipment container: {ex.Message}");
+                Debug.LogWarning($"[PlayerView] Could not subscribe to Devion container events: {ex.Message}");
             }
+        }
+
+        // Waits one frame, then returns the item to Inventory only if Devion didn't already handle it.
+        // Devion's ItemSlot.Use() calls Container.AddItem(oldItem) BEFORE firing Equipment.OnRemoveItem,
+        // so by the time this coroutine runs (next frame), Devion's swap is already complete.
+        // We check the Inventory slots directly to avoid creating a duplicate.
+        private System.Collections.IEnumerator ReturnItemToInventoryIfNeeded(DevionGames.InventorySystem.Item item)
+        {
+            yield return null; // let Devion complete its swap in the same frame
+
+            if (item == null || this == null || !gameObject.activeInHierarchy) yield break;
+
+            try
+            {
+                // If Devion already returned the item to Inventory (swap path), skip to avoid duplicate.
+                if (_inventoryContainerRef != null)
+                {
+                    for (int i = 0; i < _inventoryContainerRef.Slots.Count; i++)
+                    {
+                        var s = _inventoryContainerRef.Slots[i];
+                        if (!s.IsEmpty && s.ObservedItem != null && s.ObservedItem.name == item.name)
+                        {
+                            Debug.Log($"[PlayerView] '{item.Name}' already in Inventory (Devion swap) – no duplicate created.");
+                            yield break;
+                        }
+                    }
+                }
+
+                // Item not in Inventory — find database template and add it back.
+                DevionGames.InventorySystem.Item template = null;
+                if (DevionGames.InventorySystem.InventoryManager.Database != null)
+                {
+                    foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
+                    {
+                        if (dbItem != null && dbItem.name == item.name)
+                        {
+                            template = dbItem;
+                            break;
+                        }
+                    }
+                }
+                if (template == null) template = item;
+
+                var instance = DevionGames.InventorySystem.InventoryManager.CreateInstance(template);
+                if (instance != null)
+                {
+                    bool added = DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", instance);
+                    Debug.Log($"<color=cyan>[PlayerView] Returned '{item.Name}' to Inventory (added={added}).</color>");
+                }
+                else
+                {
+                    Debug.LogWarning($"[PlayerView] CreateInstance returned null for '{item.Name}' – item may be lost.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[PlayerView] Failed to return '{item?.Name}': {ex.Message}");
+            }
+        }
+
+        private DevionGames.InventorySystem.Slot GetSlotByRegionName(string regionName)
+        {
+            if (_equipmentContainer == null) return null;
+            foreach (var slot in _equipmentContainer.Slots)
+            {
+                var restrictions = slot.GetComponents<DevionGames.InventorySystem.Restrictions.EquipmentRegion>();
+                foreach (var rest in restrictions)
+                {
+                    if (rest.region != null && rest.region.Name.IndexOf(regionName, System.StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        return slot;
+                    }
+                }
+            }
+            return null;
         }
 
         private void OnDevionEquipmentAdded(DevionGames.InventorySystem.Item item, DevionGames.InventorySystem.Slot slot)
         {
             if (this == null || gameObject == null || !gameObject.activeInHierarchy) return;
+            if (_isUpdatingEquipment) return;
 
-            if (item is CurveDashEquipmentAdapter adapter && adapter.OriginalEquipmentData != null)
+            _isUpdatingEquipment = true;
+            try
             {
-                if (adapter.OriginalEquipmentData is ArmorItemData armor)
+                Debug.Log($"<color=yellow>[PlayerView] OnDevionEquipmentAdded FIRED: item='{item?.Name}' type={item?.GetType().Name} slot={slot?.Index}</color>");
+
+                // Deep debug for slot icon before sync
+                if (slot != null)
                 {
-                    // Update equipped items mapping
-                    if (_dataManager != null && _dataManager.UserData != null && _dataManager.UserData.EquippedItems != null)
+                    var iconField = typeof(DevionGames.InventorySystem.Slot).GetField("m_Ícon", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    UnityEngine.UI.Image iconImage = null;
+                    if (iconField != null)
                     {
-                        _dataManager.UserData.EquippedItems[armor.Slot] = armor.name;
+                        iconImage = iconField.GetValue(slot) as UnityEngine.UI.Image;
                     }
-                    // Ensure runtime socket entry exists for this armor slot
-                    EnsureArmorSlotEntry(armor.Slot);
-                    if (_modularView != null)
-                    {
-                        _modularView.SetPartByName(armor.Slot, armor.MeshPartName, armor.ModularPartIndex);
-                        Debug.Log($"<color=cyan>[PlayerView] Modular mesh updated for slot {armor.Slot} to name {armor.MeshPartName}</color>");
-                    }
+                    Debug.Log($"<color=orange>[PlayerView] BEFORE SYNC Slot {slot.Index} Check: slotIconComponent={iconImage != null}, slotIconEnabled={iconImage?.enabled}, slotIconOverrideSprite={iconImage?.overrideSprite?.name ?? "NULL"}, itemIcon={item?.Icon?.name ?? "NULL"}</color>");
                 }
-                else if (adapter.OriginalEquipmentData is EquippableData equippable)
+
+                if (item is CurveDashEquipmentAdapter adapter && adapter.OriginalEquipmentData != null)
                 {
-                    if (equippable is WeaponData weaponBase)
+                    // Force sync right now at runtime to ensure name, icon, prefab, categories are up-to-date!
+                    adapter.SyncData();
+                    Debug.Log($"<color=yellow>[PlayerView] Adapter SyncData complete. Name={adapter.Name}, Icon={adapter.Icon?.name ?? "NULL"}</color>");
+
+                    // Force slot repaint so the UI displays the synchronized icon immediately
+                    if (slot != null)
                     {
-                        var instance = new WeaponInstance(weaponBase, weaponBase.Rarity);
-                        ItemPickupSystem.AutoLinkTestingAbilities(instance, weaponBase, _assetManager?.MasterItemCatalog != null ? _assetManager.MasterItemCatalog : null);
-                        this.CurrentWeaponInstance = instance;
+                        slot.Repaint();
+                        var iconField = typeof(DevionGames.InventorySystem.Slot).GetField("m_Ícon", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                        UnityEngine.UI.Image iconImage = null;
+                        if (iconField != null)
+                        {
+                            iconImage = iconField.GetValue(slot) as UnityEngine.UI.Image;
+                        }
+                        Debug.Log($"<color=lime>[PlayerView] AFTER SYNC Slot {slot.Index} Check: slotIconComponent={iconImage != null}, slotIconEnabled={iconImage?.enabled}, slotIconOverrideSprite={iconImage?.overrideSprite?.name ?? "NULL"}, itemIcon={item?.Icon?.name ?? "NULL"}</color>");
                     }
-                    Equip(equippable);
+
+                    var rightSlot = GetSlotByRegionName("Right");
+                    var leftSlot = GetSlotByRegionName("Left");
+                    var itemData = adapter.OriginalEquipmentData;
+
+                    // --- ENFORCE RPG MULTI-WEAPON RESTRICTIONS ---
+                    if (slot == rightSlot)
+                    {
+                        // 1. Shields & Arrows cannot be equipped in the Right Hand (Main Weapon Slot)
+                        if (itemData is OffHandData offhand)
+                        {
+                            slot.ObservedItem = null;
+                            slot.Repaint();
+                            StartCoroutine(ReturnItemToInventoryIfNeeded(item));
+                            Debug.LogWarning("[PlayerView] Shields and Arrows can only be equipped in the Left Hand (offhand)!");
+                            
+                            // Smart Move: If Left Hand is empty, automatically equip it there!
+                            if (leftSlot != null && leftSlot.IsEmpty)
+                            {
+                                leftSlot.ObservedItem = item;
+                                leftSlot.Repaint();
+                                // Trigger Added logic manually for the left slot
+                                _isUpdatingEquipment = false; // Temporarily unblock guard for recursion
+                                OnDevionEquipmentAdded(item, leftSlot);
+                                _isUpdatingEquipment = true;  // Re-enable guard
+                            }
+                            return;
+                        }
+
+                        // 2. HAMMERS & GREAT SWORDS (Two-Handed Weapons)
+                        if (itemData is TwoHandedWeaponData)
+                        {
+                            // Clear Left Hand slot and mirror
+                            if (leftSlot != null)
+                            {
+                                if (!leftSlot.IsEmpty && leftSlot.ObservedItem != item)
+                                {
+                                    var old = leftSlot.ObservedItem;
+                                    leftSlot.ObservedItem = null;
+                                    leftSlot.Repaint();
+                                    StartCoroutine(ReturnItemToInventoryIfNeeded(old));
+                                }
+                                leftSlot.ObservedItem = item;
+                                leftSlot.Repaint();
+                                Debug.Log("<color=lime>[PlayerView] Two-handed weapon equipped in Right Hand. Mirrored virtual weapon to Left Hand.</color>");
+                            }
+                        }
+
+                        // 3. GREAT BOWS (Must have ARROWS in Left Hand!)
+                        if (itemData is BowData)
+                        {
+                            bool hasArrow = false;
+                            if (leftSlot != null && !leftSlot.IsEmpty && leftSlot.ObservedItem is CurveDashEquipmentAdapter leftAdapter && leftAdapter.OriginalEquipmentData is OffHandData leftOffhand)
+                            {
+                                if (leftOffhand.SubType == OffHandType.Arrow)
+                                {
+                                    hasArrow = true;
+                                }
+                            }
+
+                            if (!hasArrow)
+                            {
+                                // Look for Arrows in Inventory
+                                DevionGames.InventorySystem.Item arrowItem = null;
+                                if (_inventoryContainerRef != null)
+                                {
+                                    foreach (var invSlot in _inventoryContainerRef.Slots)
+                                    {
+                                        if (!invSlot.IsEmpty && invSlot.ObservedItem is CurveDashEquipmentAdapter invAdapter && invAdapter.OriginalEquipmentData is OffHandData invOffhand)
+                                        {
+                                            if (invOffhand.SubType == OffHandType.Arrow)
+                                            {
+                                                arrowItem = invSlot.ObservedItem;
+                                                invSlot.ObservedItem = null;
+                                                invSlot.Repaint();
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (arrowItem != null)
+                                {
+                                    if (leftSlot != null)
+                                    {
+                                        if (!leftSlot.IsEmpty)
+                                        {
+                                            var old = leftSlot.ObservedItem;
+                                            leftSlot.ObservedItem = null;
+                                            leftSlot.Repaint();
+                                            StartCoroutine(ReturnItemToInventoryIfNeeded(old));
+                                        }
+                                        leftSlot.ObservedItem = arrowItem;
+                                        leftSlot.Repaint();
+                                        Debug.Log("<color=lime>[PlayerView] Great Bow equipped. Automatically equipped Arrows from Inventory in Left Hand.</color>");
+                                    }
+                                }
+                                else
+                                {
+                                    // Mandatory Ejection!
+                                    slot.ObservedItem = null;
+                                    slot.Repaint();
+                                    StartCoroutine(ReturnItemToInventoryIfNeeded(item));
+                                    Debug.LogWarning("[PlayerView] Great Bows mandatorily require Arrows in the Left Hand! Bow unequipped.");
+                                    return;
+                                }
+                            }
+                        }
+
+                        // 4. ONE-HANDED SWORDS (Left Hand can only have another One-Handed Sword or a Shield!)
+                        if (itemData is OneHandedWeaponData)
+                        {
+                            if (leftSlot != null && !leftSlot.IsEmpty)
+                            {
+                                bool allowed = false;
+                                if (leftSlot.ObservedItem is CurveDashEquipmentAdapter leftAdapter && leftAdapter.OriginalEquipmentData != null)
+                                {
+                                    var leftData = leftAdapter.OriginalEquipmentData;
+                                    if (leftData is OneHandedWeaponData || (leftData is OffHandData off && off.SubType == OffHandType.Shield))
+                                    {
+                                        allowed = true;
+                                    }
+                                }
+
+                                if (!allowed)
+                                {
+                                    var old = leftSlot.ObservedItem;
+                                    leftSlot.ObservedItem = null;
+                                    leftSlot.Repaint();
+                                    StartCoroutine(ReturnItemToInventoryIfNeeded(old));
+                                    Debug.Log("<color=yellow>[PlayerView] One-Handed Sword equipped in Right Hand. Cleared invalid Left Hand item.</color>");
+                                }
+                            }
+                        }
+                    }
+                    else if (slot == leftSlot)
+                    {
+                        // 1. Two-Handed Weapons (Hammers/Great Swords) or Great Bows in Left Hand -> Move to Right Hand!
+                        if (itemData is TwoHandedWeaponData || itemData is BowData)
+                        {
+                            slot.ObservedItem = null;
+                            slot.Repaint();
+                            
+                            if (rightSlot != null)
+                            {
+                                if (!rightSlot.IsEmpty)
+                                {
+                                    var old = rightSlot.ObservedItem;
+                                    rightSlot.ObservedItem = null;
+                                    rightSlot.Repaint();
+                                    StartCoroutine(ReturnItemToInventoryIfNeeded(old));
+                                }
+                                rightSlot.ObservedItem = item;
+                                rightSlot.Repaint();
+                                
+                                _isUpdatingEquipment = false;
+                                OnDevionEquipmentAdded(item, rightSlot);
+                                _isUpdatingEquipment = true;
+                            }
+                            else
+                            {
+                                StartCoroutine(ReturnItemToInventoryIfNeeded(item));
+                            }
+                            return;
+                        }
+
+                        // 2. ARROWS in Left Hand -> Bow is MANDATORY in Right Hand!
+                        if (itemData is OffHandData off && off.SubType == OffHandType.Arrow)
+                        {
+                            bool hasBow = false;
+                            if (rightSlot != null && !rightSlot.IsEmpty && rightSlot.ObservedItem is CurveDashEquipmentAdapter rightAdapter && rightAdapter.OriginalEquipmentData is BowData)
+                            {
+                                hasBow = true;
+                            }
+
+                            if (!hasBow)
+                            {
+                                slot.ObservedItem = null;
+                                slot.Repaint();
+                                StartCoroutine(ReturnItemToInventoryIfNeeded(item));
+                                Debug.LogWarning("[PlayerView] Arrows cannot be equipped without a Great Bow in Right Hand!");
+                                return;
+                            }
+                        }
+
+                        // 3. SHIELDS in Left Hand -> Allowed if Right Hand is empty or holds a One-Handed Sword!
+                        if (itemData is OffHandData sh && sh.SubType == OffHandType.Shield)
+                        {
+                            if (rightSlot != null && !rightSlot.IsEmpty)
+                            {
+                                bool allowed = false;
+                                if (rightSlot.ObservedItem is CurveDashEquipmentAdapter rightAdapter && rightAdapter.OriginalEquipmentData is OneHandedWeaponData)
+                                {
+                                    allowed = true;
+                                }
+
+                                if (!allowed)
+                                {
+                                    var old = rightSlot.ObservedItem;
+                                    rightSlot.ObservedItem = null;
+                                    rightSlot.Repaint();
+                                    StartCoroutine(ReturnItemToInventoryIfNeeded(old));
+                                    Debug.Log("<color=yellow>[PlayerView] Shield equipped. Unequipped incompatible Right Hand weapon.</color>");
+                                }
+                            }
+                        }
+
+                        // 4. ONE-HANDED SWORD in Left Hand -> ONLY allowed if Right Hand has a One-Handed Sword!
+                        if (itemData is OneHandedWeaponData)
+                        {
+                            bool hasOneHandedSword = false;
+                            if (rightSlot != null && !rightSlot.IsEmpty && rightSlot.ObservedItem is CurveDashEquipmentAdapter rightAdapter && rightAdapter.OriginalEquipmentData is OneHandedWeaponData)
+                            {
+                                hasOneHandedSword = true;
+                            }
+
+                            if (!hasOneHandedSword)
+                            {
+                                slot.ObservedItem = null;
+                                slot.Repaint();
+                                StartCoroutine(ReturnItemToInventoryIfNeeded(item));
+                                Debug.LogWarning("[PlayerView] One-Handed Sword in Left Hand requires another One-Handed Sword in Right Hand!");
+                                return;
+                            }
+                        }
+                    }
+
+                    if (adapter.OriginalEquipmentData is ArmorItemData armor)
+                    {
+                        Debug.Log($"<color=yellow>[PlayerView] ArmorItemData: name={armor.name} slot={armor.Slot} defense={armor.Defense}</color>");
+
+                        // Update equipped items mapping
+                        if (_dataManager != null && _dataManager.UserData != null && _dataManager.UserData.EquippedItems != null)
+                        {
+                            _dataManager.UserData.EquippedItems[armor.Slot] = armor.name;
+                            Debug.Log($"<color=yellow>[PlayerView] EquippedItems updated: [{armor.Slot}] = '{armor.name}'. Total entries: {_dataManager.UserData.EquippedItems.Count}</color>");
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"[PlayerView] CANNOT update EquippedItems: _dataManager={_dataManager != null}, UserData={_dataManager?.UserData != null}, EquippedItems={_dataManager?.UserData?.EquippedItems != null}");
+                        }
+                        // Ensure runtime socket entry exists for this armor slot
+                        EnsureArmorSlotEntry(armor.Slot);
+                        if (_modularView != null)
+                        {
+                            _modularView.SetPartByName(armor.Slot, armor.MeshPartName, armor.ModularPartIndex);
+                            Debug.Log($"<color=cyan>[PlayerView] Modular mesh updated for slot {armor.Slot} to name {armor.MeshPartName}</color>");
+                        }
+                    }
+                    else if (adapter.OriginalEquipmentData is EquippableData equippable)
+                    {
+                        if (equippable is WeaponData weaponBase)
+                        {
+                            var instance = new WeaponInstance(weaponBase, weaponBase.Rarity);
+                            ItemPickupSystem.AutoLinkTestingAbilities(instance, weaponBase, _assetManager?.MasterItemCatalog != null ? _assetManager.MasterItemCatalog : null);
+                            this.CurrentWeaponInstance = instance;
+                            Debug.Log($"<color=yellow>[PlayerView] WeaponInstance set: {weaponBase.name} MinDmg={instance.FinalMinDamage} MaxDmg={instance.FinalMaxDamage}</color>");
+                        }
+                        Equip(equippable);
+                    }
+
+                    // Delay 1 frame
+                    StartCoroutine(SyncCharacterInfoStatsNextFrame());
                 }
+                else
+                {
+                    Debug.LogWarning($"[PlayerView] OnDevionEquipmentAdded: item is NOT a CurveDashEquipmentAdapter (type={item?.GetType().Name}) — SyncCharacterInfoStats SKIPPED");
+                }
+            }
+            finally
+            {
+                _isUpdatingEquipment = false;
             }
         }
 
@@ -272,12 +705,59 @@ namespace STG.CurveDash
                 }
                 else if (adapter.OriginalEquipmentData is EquippableData equippable)
                 {
-                    if (equippable is WeaponData)
+                    if (equippable is WeaponData weaponBase)
                     {
                         this.CurrentWeaponInstance = null;
+
+                        var rightSlot = GetSlotByRegionName("Right");
+                        var leftSlot = GetSlotByRegionName("Left");
+
+                        if (slot == rightSlot)
+                        {
+                            // 1. If Great Bow is unequipped -> Unequip Arrows in Left Hand automatically!
+                            if (weaponBase is BowData)
+                            {
+                                if (leftSlot != null && !leftSlot.IsEmpty && leftSlot.ObservedItem is CurveDashEquipmentAdapter leftAdapter && leftAdapter.OriginalEquipmentData is OffHandData leftOffhand && leftOffhand.SubType == OffHandType.Arrow)
+                                {
+                                    var arrows = leftSlot.ObservedItem;
+                                    leftSlot.ObservedItem = null;
+                                    leftSlot.Repaint();
+                                    StartCoroutine(ReturnItemToInventoryIfNeeded(arrows));
+                                    Debug.Log("<color=yellow>[PlayerView] Great Bow unequipped. Unequipped Arrows in Left Hand.</color>");
+                                }
+                            }
+                            // 2. If Two-Handed weapon is unequipped -> Clear virtual weapon mirror in Left Hand
+                            else if (weaponBase is TwoHandedWeaponData)
+                            {
+                                if (leftSlot != null && leftSlot.ObservedItem == item)
+                                {
+                                    leftSlot.ObservedItem = null;
+                                    leftSlot.Repaint();
+                                    Debug.Log("<color=yellow>[PlayerView] Two-handed weapon removed from Right Hand. Cleared Left Hand mirror.</color>");
+                                }
+                            }
+                        }
+                        else if (slot == leftSlot)
+                        {
+                            // If virtual weapon is unequipped from Left Hand -> Clear Right Hand
+                            if (weaponBase is TwoHandedWeaponData)
+                            {
+                                if (rightSlot != null && rightSlot.ObservedItem == item)
+                                {
+                                    rightSlot.ObservedItem = null;
+                                    rightSlot.Repaint();
+                                    Debug.Log("<color=yellow>[PlayerView] Left Hand virtual weapon unequipped. Cleared Right Hand.</color>");
+                                }
+                            }
+                        }
                     }
                     Unequip(equippable);
                 }
+
+                StartCoroutine(ReturnItemToInventoryIfNeeded(item));
+                // After remove, the replacement item (if any) will be placed in the slot
+                // during the same frame. Delay 1 frame so the slot reflects final state.
+                StartCoroutine(SyncCharacterInfoStatsNextFrame());
             }
         }
 
@@ -303,7 +783,7 @@ namespace STG.CurveDash
 
         private void Update()
         {
-            if (_equipmentContainer == null)
+            if (_equipmentContainer == null || _inventoryContainerRef == null)
             {
                 SyncEquipmentContainerListeners();
             }
@@ -363,11 +843,11 @@ namespace STG.CurveDash
                 _equipmentContainer.OnRemoveItem -= OnDevionEquipmentRemoved;
             }
 
-            _skinCts?.Cancel(); 
+            _skinCts?.Cancel();
             _skinCts?.Dispose();
-            _auraCts?.Cancel(); 
+            _auraCts?.Cancel();
             _auraCts?.Dispose();
-            _characterCts?.Cancel(); 
+            _characterCts?.Cancel();
             _characterCts?.Dispose();
 
             if (_modularView != null)
@@ -918,6 +1398,99 @@ namespace STG.CurveDash
                 }
             }
 
+        }
+
+        #endregion
+
+        #region CHARACTER INFO STATS SYNC
+
+        /// <summary>
+        /// Pushes live game stats into Devion's "Player Stats" handler so Character Info UI reflects
+        /// actual gameplay values. Sets the LEAF stats that formula stats (Melee/Ranged Attack) derive from.
+        /// Called after any equip/unequip event and on startup.
+        /// </summary>
+        public void SyncCharacterInfoStats()
+        {
+            try
+            {
+                var handler = DevionGames.StatSystem.StatsManager.GetStatsHandler("Player Stats");
+                if (handler == null)
+                {
+                    Debug.LogWarning("[PlayerView] SyncCharacterInfoStats: 'Player Stats' handler is NULL — aborting.");
+                    return;
+                }
+
+                // Scan Equipment container slots directly — the source of truth.
+                // Do NOT rely on _dataManager.UserData.EquippedItems or CurrentWeaponInstance:
+                // Devion can fire OnAddItem for previously-saved items at unpredictable times,
+                // which corrupts both caches. Reading slots gives the actual equipped state.
+                int totalArmor = 0;
+                WeaponInstance weaponInSlot = null;
+
+                if (_equipmentContainer != null)
+                {
+                    for (int i = 0; i < _equipmentContainer.Slots.Count; i++)
+                    {
+                        var s = _equipmentContainer.Slots[i];
+                        if (s.IsEmpty || s.ObservedItem == null) continue;
+                        if (s.ObservedItem is CurveDashEquipmentAdapter adapter && adapter.OriginalEquipmentData != null)
+                        {
+                            if (adapter.OriginalEquipmentData is ArmorItemData armor)
+                            {
+                                totalArmor += armor.Defense;
+                                Debug.Log($"<color=lime>[PlayerView] Sync: slot[{i}] armor '{armor.name}' +{armor.Defense} (total={totalArmor})</color>");
+                            }
+                            else if (adapter.OriginalEquipmentData is WeaponData weaponBase && weaponInSlot == null)
+                            {
+                                // Prefer CurrentWeaponInstance when it matches (preserves gem modifiers).
+                                weaponInSlot = (CurrentWeaponInstance?.BaseData == weaponBase)
+                                    ? CurrentWeaponInstance
+                                    : new WeaponInstance(weaponBase, weaponBase.Rarity);
+                                Debug.Log($"<color=lime>[PlayerView] Sync: slot[{i}] weapon '{weaponBase.name}' min={weaponInSlot.FinalMinDamage} max={weaponInSlot.FinalMaxDamage}</color>");
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("[PlayerView] SyncCharacterInfoStats: _equipmentContainer is null, stats will be zero.");
+                }
+
+                Debug.Log($"<color=lime>[PlayerView] SyncCharacterInfoStats → Armor={totalArmor}, Weapon={weaponInSlot?.BaseData?.name ?? "none"}</color>");
+                TrySetStatBase(handler, "Armor", totalArmor);
+
+                if (weaponInSlot?.BaseData != null)
+                {
+                    TrySetStatBase(handler, "Min Damage", weaponInSlot.FinalMinDamage);
+                    TrySetStatBase(handler, "Max Damage", weaponInSlot.FinalMaxDamage);
+                }
+                else
+                {
+                    TrySetStatBase(handler, "Min Damage", 0f);
+                    TrySetStatBase(handler, "Max Damage", 0f);
+                }
+
+                handler.onUpdate?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[PlayerView] SyncCharacterInfoStats failed: {ex.Message}\n{ex.StackTrace}");
+            }
+        }
+
+        private void TrySetStatBase(DevionGames.StatSystem.StatsHandler handler, string statName, float value)
+        {
+            var stat = handler.GetStat(statName);
+            if (stat != null)
+            {
+                float before = stat.BaseValue;
+                stat.BaseValue = value;
+                Debug.Log($"<color=lime>[PlayerView] TrySetStatBase: '{statName}' {before} → {value} (Value after={stat.Value})</color>");
+            }
+            else
+            {
+                Debug.LogWarning($"[PlayerView] TrySetStatBase: stat '{statName}' NOT FOUND in 'Player Stats'. Available: {string.Join(", ", System.Linq.Enumerable.Select(handler.m_Stats, s => s != null ? s.Name : "null"))}");
+            }
         }
 
         #endregion

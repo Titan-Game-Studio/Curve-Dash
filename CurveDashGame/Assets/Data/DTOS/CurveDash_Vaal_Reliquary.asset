@@ -225,7 +225,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
-  m_Name: Torso
+  m_Name: Body
   m_EditorClassIdentifier: 
   name: Body
 --- !u!114 &-8057506047932969836
@@ -601,7 +601,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
-  m_Name: 
+  m_Name: 'Belt '
   m_EditorClassIdentifier: DevionGames.InventorySystem::DevionGames.InventorySystem.EquipmentRegion
   name: 'Belt '
 --- !u!114 &-4474190543486091594
@@ -1011,7 +1011,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
-  m_Name: 
+  m_Name: Ring Left
   m_EditorClassIdentifier: DevionGames.InventorySystem::DevionGames.InventorySystem.EquipmentRegion
   name: Ring Left
 --- !u!114 &-447126039411374142
@@ -1274,7 +1274,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
-  m_Name: Right Hand
+  m_Name: MainHand
   m_EditorClassIdentifier: 
   name: MainHand
 --- !u!114 &480903752669161454
@@ -1972,7 +1972,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
-  m_Name: Placeholder
+  m_Name: Hands
   m_EditorClassIdentifier: 
   name: Hands
 --- !u!114 &4182141048897891092
@@ -2094,7 +2094,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
-  m_Name: Left Hand
+  m_Name: OffHand
   m_EditorClassIdentifier: 
   name: OffHand
 --- !u!114 &5786703032187707280
@@ -2472,7 +2472,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
-  m_Name: 
+  m_Name: Ring Right
   m_EditorClassIdentifier: DevionGames.InventorySystem::DevionGames.InventorySystem.EquipmentRegion
   name: Ring Right
 --- !u!114 &8429455951140046941

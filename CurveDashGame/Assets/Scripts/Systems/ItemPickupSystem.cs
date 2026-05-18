@@ -69,13 +69,25 @@ namespace STG.CurveDash
 
                                     if (devionAdapter != null)
                                     {
-                                        Debug.Log($"[ItemPickupSystem] Creating Devion instance for: {devionAdapter.name}");
+                                        Debug.Log($"[ItemPickupSystem] Creating Devion instance for: {devionAdapter.name} (Template Icon: {(devionAdapter.Icon != null ? devionAdapter.Icon.name : "NULL")})");
                                         var devionInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(devionAdapter);
                                         if (devionInstance != null)
                                         {
-                                            Debug.Log($"[ItemPickupSystem] Attempting to AddItem to Container 'Inventory'...");
-                                            DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", devionInstance);
-                                            Debug.Log($"[ItemPickupSystem] AddItem successful!");
+                                            // Force explicit synchronization of properties (including Icon) on the newly cloned instance
+                                            if (devionInstance is CurveDashEquipmentAdapter equipAdapter)
+                                            {
+                                                equipAdapter.SyncData();
+                                                Debug.Log($"[ItemPickupSystem] Forced SyncData on equipment instance. Name: {equipAdapter.Name}, Icon: {(equipAdapter.Icon != null ? equipAdapter.Icon.name : "NULL")}");
+                                            }
+                                            else if (devionInstance is CurveDashItemAdapter itemAdapter)
+                                            {
+                                                itemAdapter.SyncData();
+                                                Debug.Log($"[ItemPickupSystem] Forced SyncData on item instance. Name: {itemAdapter.Name}, Icon: {(itemAdapter.Icon != null ? itemAdapter.Icon.name : "NULL")}");
+                                            }
+
+                                            Debug.Log($"[ItemPickupSystem] Attempting to AddItem to Container 'Inventory' with Icon: {(devionInstance.Icon != null ? devionInstance.Icon.name : "NULL")}...");
+                                            bool added = DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", devionInstance);
+                                            Debug.Log($"[ItemPickupSystem] AddItem successful? {added}");
                                         }
                                     }
                                     else
