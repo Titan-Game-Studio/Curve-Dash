@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 namespace STG.CurveDash
 {
     [RequireComponent(typeof(Rigidbody))]
-    public class PlayerView : MonoBehaviour
+    public class PlayerView : MonoBehaviour, IEquippedLoadout
     {
         [Inject] private AssetManager _assetManager;
         [Inject] private DataManager _dataManager;
@@ -34,6 +34,37 @@ namespace STG.CurveDash
         private readonly Dictionary<int, GameObject> _cachedAuras = new Dictionary<int, GameObject>();
         private readonly Dictionary<string, GameObject> _cachedCharacters = new Dictionary<string, GameObject>();
 
+        public WeaponInstance GetWeapon() { return CurrentWeaponInstance; }
+
+        public List<AbilityData> GetArmorRuntimeSockets(EquipmentSlot slot) { return _armorRuntimeSockets.ContainsKey(slot) ? _armorRuntimeSockets[slot] : new List<AbilityData>(); }
+        public int GetArmorMaxSockets(EquipmentSlot slot)
+        {
+            if (_dataManager?.UserData?.EquippedItems != null && _assetManager != null)
+            {
+                if (_dataManager.UserData.EquippedItems.TryGetValue(slot, out string itemId))
+                {
+                    var item = _assetManager.GetItem(itemId);
+                    if (item is ArmorItemData armor)
+                        return armor.MaxSockets;
+                }
+            }
+            return 0; // fallback if not equipped or data missing
+        }
+        public void AddArmorAbility(EquipmentSlot slot, AbilityData ability) { if (!_armorRuntimeSockets.ContainsKey(slot)) _armorRuntimeSockets[slot] = new List<AbilityData>(); _armorRuntimeSockets[slot].Add(ability); }
+        public void RemoveArmorAbility(EquipmentSlot slot, AbilityData ability) { if (_armorRuntimeSockets.ContainsKey(slot)) _armorRuntimeSockets[slot].Remove(ability); }
+
+        public string GetEquippedItemName(EquipmentSlot slot) { return _dataManager.UserData.EquippedItems.ContainsKey(slot) ? _dataManager.UserData.EquippedItems[slot] : "None"; }
+
+        // Runtime armor socket storage (slot -> list of abilities)
+        private readonly Dictionary<EquipmentSlot, List<AbilityData>> _armorRuntimeSockets = new Dictionary<EquipmentSlot, List<AbilityData>>();
+
+        // Ensure armor runtime socket entry exists
+        private void EnsureArmorSlotEntry(EquipmentSlot slot)
+        {
+            if (!_armorRuntimeSockets.ContainsKey(slot))
+                _armorRuntimeSockets[slot] = new List<AbilityData>();
+        }
+
         private bool _isInvincible;
         private float _blinkTimer;
         private bool _isWhite;
@@ -57,6 +88,8 @@ namespace STG.CurveDash
 
         public EquippableData LeftHandItem => _leftHandItem;
         public EquippableData RightHandItem => _rightHandItem;
+        public EquippableData GetLeftHandItem() => _leftHandItem;
+        public EquippableData GetRightHandItem() => _rightHandItem;
         public WeaponInstance CurrentWeaponInstance { get; set; }
 
         /// <summary>
@@ -66,12 +99,13 @@ namespace STG.CurveDash
         public List<AbilityData> GetEquippedArmorAbilities()
         {
             var list = new List<AbilityData>();
-            if (_dataManager == null || _assetManager == null || _dataManager.UserData == null || _dataManager.UserData.EquippedItems == null) 
+            if (_dataManager == null || _assetManager == null || _dataManager.UserData == null || _dataManager.UserData.EquippedItems == null)
                 return list;
 
             var slotsToCheck = new List<EquipmentSlot> { EquipmentSlot.Head, EquipmentSlot.Body, EquipmentSlot.Hands, EquipmentSlot.Feet };
             foreach (var slot in slotsToCheck)
             {
+                // Static abilities from ScriptableObject armor
                 if (_dataManager.UserData.EquippedItems.TryGetValue(slot, out string itemId))
                 {
                     var item = _assetManager.GetItem(itemId);
@@ -80,10 +114,17 @@ namespace STG.CurveDash
                         foreach (var ab in armor.Abilities)
                         {
                             if (ab != null && !list.Contains(ab))
-                            {
                                 list.Add(ab);
-                            }
                         }
+                    }
+                }
+                // Runtime socketed abilities
+                if (_armorRuntimeSockets.TryGetValue(slot, out var runtimeList))
+                {
+                    foreach (var ab in runtimeList)
+                    {
+                        if (ab != null && !list.Contains(ab))
+                            list.Add(ab);
                     }
                 }
             }
@@ -93,8 +134,19 @@ namespace STG.CurveDash
         public float MovementSpeed { get; set; } = 5f;
         public float AttackSpeed { get; set; } = 1f;
 
+        private SmartEquipService _smartEquipService;
+
+        private void EnsureSmartEquipService()
+        {
+            if (_smartEquipService == null)
+            {
+                _smartEquipService = new SmartEquipService(new EquipmentResolver(), new PlayerInventoryScanner(_assetManager));
+            }
+        }
+
         private void Start()
         {
+            EnsureSmartEquipService();
             Init();
             
             // Create simulator/game-view range visualizer for player
@@ -106,7 +158,26 @@ namespace STG.CurveDash
             UpdateRangeVisualizer();
 
             SyncEquipmentContainerListeners();
+
+#if UNITY_EDITOR
+            StartCoroutine(ApplyDebugGemsDelayed());
+#endif
         }
+
+#if UNITY_EDITOR
+        // Waits one frame for Devion to finish loading saved equipment, then auto-sockets
+        // debug gems into any weapon that has empty DynamicAbilities. Editor-only.
+        private System.Collections.IEnumerator ApplyDebugGemsDelayed()
+        {
+            yield return null;
+            if (CurrentWeaponInstance != null && CurrentWeaponInstance.DynamicAbilities.Count == 0)
+            {
+                var catalog = _assetManager?.MasterItemCatalog;
+                ItemPickupSystem.AutoLinkTestingAbilities(CurrentWeaponInstance, CurrentWeaponInstance.BaseData, catalog);
+                Debug.Log("<color=yellow>[PlayerView] DEBUG: Applied startup gems to pre-equipped weapon.</color>");
+            }
+        }
+#endif
 
         private DevionGames.InventorySystem.ItemContainer _equipmentContainer;
 
@@ -152,10 +223,13 @@ namespace STG.CurveDash
             {
                 if (adapter.OriginalEquipmentData is ArmorItemData armor)
                 {
+                    // Update equipped items mapping
                     if (_dataManager != null && _dataManager.UserData != null && _dataManager.UserData.EquippedItems != null)
                     {
                         _dataManager.UserData.EquippedItems[armor.Slot] = armor.name;
                     }
+                    // Ensure runtime socket entry exists for this armor slot
+                    EnsureArmorSlotEntry(armor.Slot);
                     if (_modularView != null)
                     {
                         _modularView.SetPartByName(armor.Slot, armor.MeshPartName, armor.ModularPartIndex);
@@ -183,10 +257,13 @@ namespace STG.CurveDash
             {
                 if (adapter.OriginalEquipmentData is ArmorItemData armor)
                 {
+                    // Remove from equipped items
                     if (_dataManager != null && _dataManager.UserData != null && _dataManager.UserData.EquippedItems != null)
                     {
                         _dataManager.UserData.EquippedItems.Remove(armor.Slot);
                     }
+                    // Remove runtime socket entry
+                    _armorRuntimeSockets.Remove(armor.Slot);
                     if (_modularView != null)
                     {
                         _modularView.SetPart(armor.Slot, -1);
@@ -350,54 +427,16 @@ namespace STG.CurveDash
         {
             if (item == null) return;
 
-            // QUY TẮC 1: VŨ KHÍ 2 TAY (GreatSword, Hammer)
-            if (item is TwoHandedWeaponData twoHanded)
+            EnsureSmartEquipService();
+            var assignment = _smartEquipService.SmartEquip(_leftHandItem, _rightHandItem, item);
+            if (!assignment.IsValid)
             {
-                _leftHandItem = twoHanded;
-                _rightHandItem = null; // Khóa/Xóa tay phải
+                UnityEngine.Debug.LogWarning($"[SmartEquipService] Equip rejected: {assignment.InvalidReason}");
+                return;
             }
-            // QUY TẮC 2: CUNG (Great Bow)
-            else if (item is BowData bow)
-            {
-                _leftHandItem = bow;
-                _rightHandItem = bow.DefaultArrow; // Tự động đeo tên
-            }
-            // QUY TẮC 3: KIẾM 1 TAY (Sword)
-            else if (item is OneHandedWeaponData sword)
-            {
-                // Nếu tay phải đang cầm Cung hoặc 2 tay, thì xóa đi để cầm kiếm
-                if (_leftHandItem is TwoHandedWeaponData || _leftHandItem is BowData)
-                {
-                    _leftHandItem = null;
-                }
 
-                // Nếu tay phải chưa có kiếm, hoặc đang cầm thứ khác (như Arrow lẻ)
-                if (!(_rightHandItem is OneHandedWeaponData))
-                {
-                    _rightHandItem = sword;
-                }
-                else
-                {
-                    // Nếu tay phải đã có kiếm, thì lắp vào tay trái (Song kiếm)
-                    _leftHandItem = sword;
-                }
-            }
-            // QUY TẮC 4: ĐỒ PHỤ (Shield, Arrow)
-            else if (item is OffHandData offHand)
-            {
-                if (offHand.SubType == OffHandType.Shield)
-                {
-                    // Khiên luôn vào tay trái
-                    _leftHandItem = offHand;
-                    // Nếu đang cầm vũ khí 2 tay thì phải bỏ đi
-                    if (_leftHandItem is TwoHandedWeaponData || _leftHandItem is BowData) _rightHandItem = null;
-                }
-                else if (offHand.SubType == OffHandType.Arrow)
-                {
-                    // Tên luôn vào tay phải
-                    _rightHandItem = offHand;
-                }
-            }
+            _leftHandItem = assignment.LeftHand;
+            _rightHandItem = assignment.RightHand;
 
             RefreshWeaponVisuals();
             RefreshAnimator();
@@ -407,8 +446,14 @@ namespace STG.CurveDash
         public void Unequip(EquippableData item)
         {
             if (item == null) return;
-            if (_leftHandItem == item) _leftHandItem = null;
-            if (_rightHandItem == item) _rightHandItem = null;
+
+            EnsureSmartEquipService();
+            var assignment = _smartEquipService.SmartUnequip(_leftHandItem, _rightHandItem, item);
+            if (assignment.IsValid)
+            {
+                _leftHandItem = assignment.LeftHand;
+                _rightHandItem = assignment.RightHand;
+            }
 
             RefreshWeaponVisuals();
             RefreshAnimator();

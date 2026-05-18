@@ -60,12 +60,18 @@ namespace STG.CurveDash
             System.Collections.Generic.List<GameObject> extraCastVFXs = new System.Collections.Generic.List<GameObject>();
             System.Collections.Generic.List<GameObject> extraImpactVFXs = new System.Collections.Generic.List<GameObject>();
 
-            // Query socketed support gems from the PlayerView's CurrentWeaponInstance
+            // Query socketed support gems from the PlayerView's CurrentWeaponInstance and equipped armor
             var playerView = user.GetComponent<PlayerView>();
-            if (playerView != null && playerView.CurrentWeaponInstance != null)
+            if (playerView != null)
             {
-                var weaponAbilities = playerView.CurrentWeaponInstance.GetAbilities();
-                foreach (var ab in weaponAbilities)
+                var allAbilities = new System.Collections.Generic.List<AbilityData>();
+                if (playerView.CurrentWeaponInstance != null)
+                {
+                    allAbilities.AddRange(playerView.CurrentWeaponInstance.GetAbilities());
+                }
+                allAbilities.AddRange(playerView.GetEquippedArmorAbilities());
+
+                foreach (var ab in allAbilities)
                 {
                     if (ab is SupportAbilityData support && support.IsCompatible(this))
                     {

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"D:\\\\UNITY_PROJECTS\\\\Curve-Dash\\\\CurveDashGame\\\\Assets\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "PowerShell(head -30)",
+      "Bash(xargs grep -l \"socket\\\\|gem\\\\|ability\")",
+      "Bash(PowerShell -Command 'Get-ChildItem '\\\\''D:\\\\UNITY_PROJECTS\\\\Curve-Dash\\\\CurveDashGame\\\\Assets\\\\Scripts'\\\\'' -Recurse -Filter '\\\\''*.cs'\\\\'' | Where-Object { \\(Get-Content $_.FullName -Raw\\) -match '\\\\''ability|Ability'\\\\'' } | Select-Object -ExpandProperty FullName | Sort-Object | head -30')",
+      "Bash(PowerShell -Command \"Get-Content 'D:\\\\UNITY_PROJECTS\\\\Curve-Dash\\\\CurveDashGame\\\\Assets\\\\Scripts\\\\ScriptableObjects\\\\ItemData.cs' | Select-String 'namespace' | Select-Object -First 1\")",
+      "Bash(printf '\\\\n' >> \"D:/UNITY_PROJECTS/Curve-Dash/CurveDashGame/obsidian-unity/02_Active_Tasks/Task_SmartEquipmentResolver.md\")"
+    ],
+    "additionalDirectories": [
+      "D:\\UNITY_PROJECTS\\Curve-Dash\\CurveDashGame\\obsidian-unity\\02_Active_Tasks"
+    ]
+  }
+}

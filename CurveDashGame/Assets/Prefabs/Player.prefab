@@ -47,6 +47,7 @@ GameObject:
   - component: {fileID: -3712885705625042849}
   - component: {fileID: 8828299803205538048}
   - component: {fileID: 8953021972013718498}
+  - component: {fileID: -3426722084204318863}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -147,6 +148,18 @@ MonoBehaviour:
   _skinContainerTransform: {fileID: 2815700735701509711}
   _auraContainerTransform: {fileID: 7684388545365602992}
   _characterContainerTransform: {fileID: 5011309638155907887}
+--- !u!114 &-3426722084204318863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2022366318159508469}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09ea46b71c4e5dd4888e986e5cbbc35c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.GemUseHandler
 --- !u!1 &3355222177412968317
 GameObject:
   m_ObjectHideFlags: 0

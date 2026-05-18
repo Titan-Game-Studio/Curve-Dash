@@ -128,6 +128,16 @@ namespace STG.CurveDash
 
                 if (targetEnemy != -1)
                 {
+                    // Bow combat validation: skip attack if no arrow equipped
+                    if (combat.CurrentWeapon != null && combat.CurrentWeapon.BaseData is BowData)
+                    {
+                        if (playerViewComponent == null || !(playerViewComponent.RightHandItem is OffHandData offHand && offHand.SubType == OffHandType.Arrow))
+                        {
+                            Debug.LogWarning("[CombatSystem] Bow requires Arrow equipped. Attack skipped.");
+                            return;
+                        }
+                    }
+
                     // Set cooldown: Cooldown = 1 / attackSpeed
                     combat.CooldownTimer = 1f / attackSpeed;
 
@@ -145,16 +155,23 @@ namespace STG.CurveDash
                             attackHitDelay = combat.CurrentWeapon.BaseData.AttackHitDelay;
 
                             // Scan socketed abilities to see if any has a custom animation trigger override
-                            var abilities = combat.CurrentWeapon.GetAbilities();
-                            if (abilities != null)
+                            var allAbilities = new System.Collections.Generic.List<AbilityData>();
+                            if (combat.CurrentWeapon != null)
                             {
-                                foreach (var ab in abilities)
+                                var weaponAbilities = combat.CurrentWeapon.GetAbilities();
+                                if (weaponAbilities != null) allAbilities.AddRange(weaponAbilities);
+                            }
+                            if (playerViewComponent != null)
+                            {
+                                allAbilities.AddRange(playerViewComponent.GetEquippedArmorAbilities());
+                            }
+                            
+                            foreach (var ab in allAbilities)
+                            {
+                                if (ab != null && !string.IsNullOrEmpty(ab.AnimationTriggerName))
                                 {
-                                    if (ab != null && !string.IsNullOrEmpty(ab.AnimationTriggerName))
-                                    {
-                                        animationTrigger = ab.AnimationTriggerName;
-                                        break; // prioritize the first specified animation override
-                                    }
+                                    animationTrigger = ab.AnimationTriggerName;
+                                    break; // prioritize the first specified animation override
                                 }
                             }
                         }
@@ -231,26 +248,33 @@ namespace STG.CurveDash
                                  if (combatPool.Has(capturedPlayerEntity))
                                  {
                                      ref var combatInside = ref combatPool.Get(capturedPlayerEntity);
+                                     var allHitAbilities = new System.Collections.Generic.List<AbilityData>();
                                      if (combatInside.CurrentWeapon != null)
                                      {
                                          var weaponAbilities = combatInside.CurrentWeapon.GetAbilities();
-                                         foreach (var ab in weaponAbilities)
-                                         {
-                                             if (ab is PoEAbility poeAb)
-                                             {
-                                                 activeSkill = poeAb;
-                                                 finalProjectileCount = poeAb.ProjectileCount;
+                                         if (weaponAbilities != null) allHitAbilities.AddRange(weaponAbilities);
+                                     }
+                                     if (playerViewComponent != null)
+                                     {
+                                         allHitAbilities.AddRange(playerViewComponent.GetEquippedArmorAbilities());
+                                     }
 
-                                                 // Read support gems socketed in the same weapon to scale projectile counts
-                                                 foreach (var subAb in weaponAbilities)
+                                     foreach (var ab in allHitAbilities)
+                                     {
+                                         if (ab is PoEAbility poeAb)
+                                         {
+                                             activeSkill = poeAb;
+                                             finalProjectileCount = poeAb.ProjectileCount;
+
+                                             // Read support gems socketed to scale projectile counts
+                                             foreach (var subAb in allHitAbilities)
+                                             {
+                                                 if (subAb is SupportAbilityData support && support.IsCompatible(poeAb))
                                                  {
-                                                     if (subAb is SupportAbilityData support && support.IsCompatible(poeAb))
-                                                     {
-                                                         finalProjectileCount += support.ExtraProjectiles;
-                                                     }
+                                                     finalProjectileCount += support.ExtraProjectiles;
                                                  }
-                                                 break;
                                              }
+                                             break;
                                          }
                                      }
                                  }

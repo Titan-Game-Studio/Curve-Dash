@@ -292,6 +292,94 @@ namespace STG.CurveDash
                         }
                     }
                 }
+
+                // 2. Thêm 1 active gem và 1 support gem phù hợp vào Inventory khởi đầu
+                var allGems = GetAllItemsOfType<GemItemData>();
+                if (allGems != null && allGems.Count > 0)
+                {
+                    GemItemData starterActiveGem = null;
+                    GemItemData starterSupportGem = null;
+                    bool isRanged = (starterWeapon is BowData);
+
+                    var skillGems = allGems.Where(g => g.GemType == GemType.Skill).ToList();
+                    var supportGems = allGems.Where(g => g.GemType == GemType.Support).ToList();
+
+                    if (skillGems.Count > 0)
+                    {
+                        var matchedActiveGems = skillGems.Where(g => {
+                            if (g.EmbeddedAbility is PoEAbility poeAb)
+                            {
+                                if (isRanged) return poeAb.SkillType == PoEAbilityType.Ranged || poeAb.SkillType == PoEAbilityType.Spell;
+                                else return poeAb.SkillType == PoEAbilityType.Melee || poeAb.SkillType == PoEAbilityType.Spell;
+                            }
+                            return true;
+                        }).ToList();
+
+                        if (matchedActiveGems.Count > 0)
+                            starterActiveGem = matchedActiveGems[UnityEngine.Random.Range(0, matchedActiveGems.Count)];
+                        else
+                            starterActiveGem = skillGems[UnityEngine.Random.Range(0, skillGems.Count)];
+                    }
+
+                    if (supportGems.Count > 0)
+                    {
+                        starterSupportGem = supportGems[UnityEngine.Random.Range(0, supportGems.Count)];
+                    }
+
+                    if (starterActiveGem != null)
+                    {
+                        var gemAdapter = starterActiveGem.DevionAdapter;
+                        if (gemAdapter == null)
+                        {
+                            string targetName = starterActiveGem.name + "_Adapter";
+                            foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
+                            {
+                                if (dbItem != null && dbItem.name == targetName)
+                                {
+                                    gemAdapter = dbItem;
+                                    starterActiveGem.DevionAdapter = dbItem;
+                                    break;
+                                }
+                            }
+                        }
+                        if (gemAdapter != null)
+                        {
+                            var devionInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(gemAdapter);
+                            if (devionInstance != null)
+                            {
+                                DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", devionInstance);
+                                UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Active gem '{starterActiveGem.name}' added to Inventory!</color>");
+                            }
+                        }
+                    }
+
+                    if (starterSupportGem != null)
+                    {
+                        var gemAdapter = starterSupportGem.DevionAdapter;
+                        if (gemAdapter == null)
+                        {
+                            string targetName = starterSupportGem.name + "_Adapter";
+                            foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
+                            {
+                                if (dbItem != null && dbItem.name == targetName)
+                                {
+                                    gemAdapter = dbItem;
+                                    starterSupportGem.DevionAdapter = dbItem;
+                                    break;
+                                }
+                            }
+                        }
+                        if (gemAdapter != null)
+                        {
+                            var devionInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(gemAdapter);
+                            if (devionInstance != null)
+                            {
+                                DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", devionInstance);
+                                UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Support gem '{starterSupportGem.name}' added to Inventory!</color>");
+                            }
+                        }
+                    }
+                }
             }
 
             UnityEngine.Debug.Log("<color=green>[StarterEquipment] All starter items successfully populated! Ready for gameplay.</color>");

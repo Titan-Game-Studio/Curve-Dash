@@ -2,6 +2,8 @@ using Zenject;
 using Leopotam.EcsLite;
 using STG.CurveDash.Views;
 using TGS.Ads;
+using DevionGames.InventorySystem;
+using DevionGames.UIWidgets;
 
 namespace STG.CurveDash
 {
@@ -25,7 +27,17 @@ namespace STG.CurveDash
 
             Container.BindInstance(Prefabs);
 
+            // Bind named Devion containers for GemUseHandler (Equipment + Inventory)
+            Container.Bind<ItemContainer>().WithId("Equipment")
+                .FromMethod(ctx => WidgetUtility.Find<ItemContainer>("Equipment"))
+                .WhenInjectedInto<GemUseHandler>();
+            Container.Bind<ItemContainer>().WithId("Inventory")
+                .FromMethod(ctx => WidgetUtility.Find<ItemContainer>("Inventory"))
+                .WhenInjectedInto<GemUseHandler>();
+
             // systems
+            Container.BindInterfacesAndSelfTo<GemSocketService>().AsSingle();
+
 
             Container.BindInstance(Prefabs.GameAssetCatalog).AsSingle();
             Container.BindInstance(Prefabs.MonsterCatalog).AsSingle();

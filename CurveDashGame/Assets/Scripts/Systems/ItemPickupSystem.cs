@@ -17,6 +17,10 @@ namespace STG.CurveDash
         
         private static List<AbilityData> _cachedAbilities;
 
+        // Reset static state when entering Play mode so newly added abilities are picked up
+        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticState() => _cachedAbilities = null;
+
         public ItemPickupSystem(EcsWorld world, ObjectSpawner spawner, GameAssetCatalog assetCatalog)
         {
             this.spawner = spawner;
