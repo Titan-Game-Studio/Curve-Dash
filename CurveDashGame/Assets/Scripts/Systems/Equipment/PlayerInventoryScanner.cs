@@ -23,6 +23,17 @@ namespace STG.CurveDash
             return _inventoryContainer;
         }
 
+        private ItemContainer _equipmentContainer;
+
+        private ItemContainer GetEquipment()
+        {
+            if (_equipmentContainer == null)
+            {
+                _equipmentContainer = WidgetUtility.Find<ItemContainer>("Equipment");
+            }
+            return _equipmentContainer;
+        }
+
         public OffHandData FindFirstArrow()
         {
             return FindFirst<OffHandData>(data => data.SubType == OffHandType.Arrow);
@@ -46,18 +57,35 @@ namespace STG.CurveDash
         private T FindFirst<T>(System.Func<T, bool> predicate) where T : EquippableData
         {
             var inv = GetInventory();
-            if (inv == null) return null;
-
-            var items = inv.GetItems<DevionGames.InventorySystem.Item>();
-            foreach (var item in items)
+            if (inv != null)
             {
-                if (item == null || string.IsNullOrEmpty(item.Name)) continue;
-                var data = _assetManager.GetItem(item.Name);
-                if (data is T typedData && predicate(typedData))
+                var items = inv.GetItems<DevionGames.InventorySystem.Item>();
+                foreach (var item in items)
                 {
-                    return typedData;
+                    if (item == null || string.IsNullOrEmpty(item.Name)) continue;
+                    var data = _assetManager.GetItem(item.Name);
+                    if (data is T typedData && predicate(typedData))
+                    {
+                        return typedData;
+                    }
                 }
             }
+
+            var eq = GetEquipment();
+            if (eq != null)
+            {
+                var items = eq.GetItems<DevionGames.InventorySystem.Item>();
+                foreach (var item in items)
+                {
+                    if (item == null || string.IsNullOrEmpty(item.Name)) continue;
+                    var data = _assetManager.GetItem(item.Name);
+                    if (data is T typedData && predicate(typedData))
+                    {
+                        return typedData;
+                    }
+                }
+            }
+
             return null;
         }
     }

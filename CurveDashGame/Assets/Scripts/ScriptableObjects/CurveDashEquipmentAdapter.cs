@@ -37,7 +37,10 @@ namespace STG.CurveDash
 
                 try
                 {
-                    this.Icon = m_OriginalEquipmentData.Icon;
+                    if (m_OriginalEquipmentData.Icon != null)
+                    {
+                        this.Icon = m_OriginalEquipmentData.Icon;
+                    }
                 }
                 catch (System.Exception ex)
                 {
@@ -152,27 +155,27 @@ namespace STG.CurveDash
                     try
                     {
                         db = DevionGames.InventorySystem.InventoryManager.Database;
-                        Debug.Log($"<color=cyan>[DB-DIAG] '{this.name}' | Runtime DB='{db?.name ?? "NULL"}' | equipments={db?.equipments?.Count ?? 0} regions={string.Join(", ", db?.equipments?.ConvertAll(e => e.Name) ?? new System.Collections.Generic.List<string>())}</color>");
+                        // Debug.Log($"<color=cyan>[DB-DIAG] '{this.name}' | Runtime DB='{db?.name ?? "NULL"}' | equipments={db?.equipments?.Count ?? 0} regions={string.Join(", ", db?.equipments?.ConvertAll(e => e.Name) ?? new System.Collections.Generic.List<string>())}</color>");
                     }
                     catch (System.Exception ex)
                     {
-                        Debug.LogWarning($"[DB-DIAG] Failed to get runtime database: {ex.Message}");
+                        // Debug.LogWarning($"[DB-DIAG] Failed to get runtime database: {ex.Message}");
                     }
                 }
                 else
                 {
-                    Debug.LogWarning($"[DB-DIAG] '{this.name}' | InventoryManager NOT FOUND in scene! Cannot get database.");
+                    // Debug.LogWarning($"[DB-DIAG] '{this.name}' | InventoryManager NOT FOUND in scene! Cannot get database.");
                 }
             }
             else
             {
                 #if UNITY_EDITOR
                 string[] guids = UnityEditor.AssetDatabase.FindAssets("t:ItemDatabase");
-                Debug.Log($"<color=cyan>[DB-DIAG][Editor] '{this.name}' | Found {guids.Length} ItemDatabase asset(s) in project:</color>");
+                // Debug.Log($"<color=cyan>[DB-DIAG][Editor] '{this.name}' | Found {guids.Length} ItemDatabase asset(s) in project:</color>");
                 for (int i = 0; i < guids.Length; i++)
                 {
                     string p = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[i]);
-                    Debug.Log($"<color=cyan>[DB-DIAG][Editor]   [{i}] {p}{(i == 0 ? " ← USING THIS ONE" : "")}</color>");
+                    // Debug.Log($"<color=cyan>[DB-DIAG][Editor]   [{i}] {p}{(i == 0 ? " ← USING THIS ONE" : "")}</color>");
                 }
                 if (guids.Length > 0)
                 {
@@ -269,7 +272,7 @@ namespace STG.CurveDash
                 // 4. Auto-assign correct EquipmentRegion to prevent Devion from overwriting MainHand weapon!
                 if (db.equipments != null && db.equipments.Count > 0)
                 {
-                    Debug.Log($"<color=orange>[REGION-DIAG] '{this.name}' | DB has {db.equipments.Count} regions: [{string.Join(", ", db.equipments.ConvertAll(r => r.Name))}]</color>");
+                    // Debug.Log($"<color=orange>[REGION-DIAG] '{this.name}' | DB has {db.equipments.Count} regions: [{string.Join(", ", db.equipments.ConvertAll(r => r.Name))}]</color>");
                     DevionGames.InventorySystem.EquipmentRegion matchingRegion = null;
                     System.Collections.Generic.List<string> searchKeywords = new System.Collections.Generic.List<string>();
 
@@ -289,7 +292,7 @@ namespace STG.CurveDash
                         if (rightRegion != null) this.Region.Add(rightRegion);
                         if (leftRegion != null) this.Region.Add(leftRegion);
                         
-                        UnityEngine.Debug.Log($"[CurveDashEquipmentAdapter] Weapon/Offhand '{this.Name}' assigned regions → Right='{rightRegion?.Name ?? "NULL"}' Left='{leftRegion?.Name ?? "NULL"}' (total={this.Region.Count}).");
+                        // UnityEngine.Debug.Log($"[CurveDashEquipmentAdapter] Weapon/Offhand '{this.Name}' assigned regions → Right='{rightRegion?.Name ?? "NULL"}' Left='{leftRegion?.Name ?? "NULL"}' (total={this.Region.Count}).");
                         return;
                     }
                     else if (m_OriginalEquipmentData is ArmorItemData armorItem)

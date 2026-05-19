@@ -134,6 +134,7 @@ namespace DevionGames.InventorySystem
                     //Updates the icon and enables it.
                     this.m_Ícon.preserveAspect = true;
                     this.m_Ícon.overrideSprite = ObservedItem.Icon;
+                    this.m_Ícon.gameObject.SetActive(true);
                     this.m_Ícon.enabled = true;
                 }else {
                     //If there is no item in this slot, disable icon

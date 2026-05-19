@@ -439,34 +439,33 @@ namespace STG.CurveDash
             if (this == null || gameObject == null || !gameObject.activeInHierarchy) return;
             if (_isUpdatingEquipment)
             {
-                Debug.LogWarning($"<color=red>[DIAG][F{Time.frameCount}] OnDevionEquipmentAdded BLOCKED by _isUpdatingEquipment guard: item='{item?.Name}' slot={slot?.Index}</color>");
+                // Debug.LogWarning($"<color=red>[DIAG][F{Time.frameCount}] OnDevionEquipmentAdded BLOCKED by _isUpdatingEquipment guard: item='{item?.Name}' slot={slot?.Index}</color>");
                 return;
             }
 
             _isUpdatingEquipment = true;
             try
             {
-                Debug.Log($"<color=yellow>[DIAG][F{Time.frameCount}] ▶ OnDevionEquipmentAdded: item='{item?.Name}' type={item?.GetType().Name} slot={slot?.Index} | _left='{_leftHandItem?.name ?? "null"}' _right='{_rightHandItem?.name ?? "null"}'</color>");
+                // Debug.Log($"<color=yellow>[DIAG][F{Time.frameCount}] ▶ OnDevionEquipmentAdded: item='{item?.Name}' type={item?.GetType().Name} slot={slot?.Index} | _left='{_leftHandItem?.name ?? "null"}' _right='{_rightHandItem?.name ?? "null"}'</color>");
 
                 if (item is CurveDashEquipmentAdapter adapter && adapter.OriginalEquipmentData != null)
                 {
                     // Force sync right now at runtime to ensure name, icon, prefab, categories are up-to-date!
                     adapter.SyncData();
-                    Debug.Log($"<color=yellow>[DIAG][F{Time.frameCount}] SyncData done: Name={adapter.Name}, Icon={(adapter.Icon != null ? "OK" : "NULL")}, OrigData={adapter.OriginalEquipmentData.GetType().Name}</color>");
+                    // Debug.Log($"<color=yellow>[DIAG][F{Time.frameCount}] SyncData done: Name={adapter.Name}, Icon={(adapter.Icon != null ? "OK" : "NULL")}, OrigData={adapter.OriginalEquipmentData.GetType().Name}</color>");
 
                     // Force slot repaint so the UI displays the synchronized icon immediately
                     if (slot != null)
                     {
                         slot.Repaint();
-                        Debug.Log($"<color=yellow>[DIAG][F{Time.frameCount}] Slot {slot.Index} Repaint called.</color>");
+                        // Debug.Log($"<color=yellow>[DIAG][F{Time.frameCount}] Slot {slot.Index} Repaint called.</color>");
                     }
 
                     var rightSlot = GetSlotByRegionName("Right");
                     var leftSlot  = GetSlotByRegionName("Left");
                     var itemData  = adapter.OriginalEquipmentData;
-                    EquippableData pendingAutoEquippedPartner = null; // set when bow auto-equips arrows
 
-                    Debug.Log($"<color=cyan>[DIAG][F{Time.frameCount}] Slot lookup → rightSlot={rightSlot?.Index.ToString() ?? "NULL"}, leftSlot={leftSlot?.Index.ToString() ?? "NULL"}, currentSlot={slot?.Index} | slotIsRight={slot==rightSlot}, slotIsLeft={slot==leftSlot}</color>");
+                    // Debug.Log($"<color=cyan>[DIAG][F{Time.frameCount}] Slot lookup → rightSlot={rightSlot?.Index.ToString() ?? "NULL"}, leftSlot={leftSlot?.Index.ToString() ?? "NULL"}, currentSlot={slot?.Index} | slotIsRight={slot==rightSlot}, slotIsLeft={slot==leftSlot}</color>");
 
                     // --- ENFORCE RPG MULTI-WEAPON RESTRICTIONS ---
                     if (slot == rightSlot)
@@ -507,64 +506,26 @@ namespace STG.CurveDash
                             }
                         }
 
-                        // 3. GREAT BOWS (Must have ARROWS in Left Hand!)
+                        // 3. GREAT BOWS (Must have ARROWS in Left Hand, but we allow manual equipping)
                         if (itemData is BowData)
                         {
-                            bool hasArrow = false;
-                            if (leftSlot != null && !leftSlot.IsEmpty && leftSlot.ObservedItem is CurveDashEquipmentAdapter leftAdapter && leftAdapter.OriginalEquipmentData is OffHandData leftOffhand)
+                            // If they equip a Bow, we just let them. They must manually equip Arrows.
+                            // If the left slot has something that is NOT Arrows, we clear it.
+                            if (leftSlot != null && !leftSlot.IsEmpty)
                             {
-                                if (leftOffhand.SubType == OffHandType.Arrow)
+                                if (leftSlot.ObservedItem == item)
                                 {
-                                    hasArrow = true;
+                                    _equipmentContainer.RemoveItem(leftSlot.Index);
                                 }
-                            }
-
-                            if (!hasArrow)
-                            {
-                                // Look for Arrows in Inventory
-                                DevionGames.InventorySystem.Item arrowItem = null;
-                                if (_inventoryContainerRef != null)
+                                else if (leftSlot.ObservedItem is CurveDashEquipmentAdapter leftAdapter && leftAdapter.OriginalEquipmentData != null)
                                 {
-                                    foreach (var invSlot in _inventoryContainerRef.Slots)
+                                    var leftData = leftAdapter.OriginalEquipmentData;
+                                    if (leftData is not OffHandData leftOffhand || leftOffhand.SubType != OffHandType.Arrow)
                                     {
-                                        if (!invSlot.IsEmpty && invSlot.ObservedItem is CurveDashEquipmentAdapter invAdapter && invAdapter.OriginalEquipmentData is OffHandData invOffhand)
-                                        {
-                                            if (invOffhand.SubType == OffHandType.Arrow)
-                                            {
-                                                arrowItem = invSlot.ObservedItem;
-                                                _inventoryContainerRef.RemoveItem(invSlot.Index);
-                                                break;
-                                            }
-                                        }
+                                        var old = leftSlot.ObservedItem;
+                                        _equipmentContainer.RemoveItem(leftSlot.Index);
+                                        StartCoroutine(ReturnItemToInventoryIfNeeded(old));
                                     }
-                                }
-
-                                if (arrowItem != null)
-                                {
-                                    if (leftSlot != null)
-                                    {
-                                        if (!leftSlot.IsEmpty)
-                                        {
-                                            var old = leftSlot.ObservedItem;
-                                            _equipmentContainer.RemoveItem(leftSlot.Index);
-                                            // Don't return to inventory if Devion auto-filled same bow instance into Left Hand
-                                            if (old != item)
-                                                StartCoroutine(ReturnItemToInventoryIfNeeded(old));
-                                        }
-                                        _equipmentContainer.ReplaceItem(leftSlot.Index, arrowItem);
-                                        Debug.Log("<color=lime>[PlayerView] Great Bow equipped. Automatically equipped Arrows from Inventory in Left Hand.</color>");
-                                        // Arrow event was blocked by guard — schedule Equip(arrow) after Equip(bow)
-                                        if (arrowItem is CurveDashEquipmentAdapter arrowAdapterRef && arrowAdapterRef.OriginalEquipmentData is EquippableData arrowEquip)
-                                            pendingAutoEquippedPartner = arrowEquip;
-                                    }
-                                }
-                                else
-                                {
-                                    // Mandatory Ejection!
-                                    _equipmentContainer.RemoveItem(slot.Index);
-                                    StartCoroutine(ReturnItemToInventoryIfNeeded(item));
-                                    Debug.LogWarning("[PlayerView] Great Bows mandatorily require Arrows in the Left Hand! Bow unequipped.");
-                                    return;
                                 }
                             }
                         }
@@ -726,7 +687,7 @@ namespace STG.CurveDash
                             var instance = new WeaponInstance(weaponBase, weaponBase.Rarity);
                             ItemPickupSystem.AutoLinkTestingAbilities(instance, weaponBase, _assetManager?.MasterItemCatalog != null ? _assetManager.MasterItemCatalog : null);
                             this.CurrentWeaponInstance = instance;
-                            Debug.Log($"<color=yellow>[DIAG][F{Time.frameCount}] WeaponInstance set: {weaponBase.name} Min={instance.FinalMinDamage} Max={instance.FinalMaxDamage}</color>");
+                            // Debug.Log($"<color=yellow>[DIAG][F{Time.frameCount}] WeaponInstance set: {weaponBase.name} Min={instance.FinalMinDamage} Max={instance.FinalMaxDamage}</color>");
 
                             if (_dataManager != null && _dataManager.UserData != null && _dataManager.UserData.EquippedItems != null)
                             {
@@ -740,16 +701,9 @@ namespace STG.CurveDash
                                 _dataManager.UserData.EquippedItems[EquipmentSlot.OffHand] = offhand.name;
                             }
                         }
-                        Debug.Log($"<color=cyan>[DIAG][F{Time.frameCount}] ▶ Calling Equip('{equippable.name}') | before: _left='{_leftHandItem?.name ?? "null"}' _right='{_rightHandItem?.name ?? "null"}'</color>");
+                        // Debug.Log($"<color=cyan>[DIAG][F{Time.frameCount}] ▶ Calling Equip('{equippable.name}') | before: _left='{_leftHandItem?.name ?? "null"}' _right='{_rightHandItem?.name ?? "null"}'</color>");
                         Equip(equippable);
-                        Debug.Log($"<color=cyan>[DIAG][F{Time.frameCount}] ◀ After Equip: _left='{_leftHandItem?.name ?? "null"}' _right='{_rightHandItem?.name ?? "null"}'</color>");
-                        // If bow auto-equipped arrows (event was blocked by guard), sync game state now
-                        if (pendingAutoEquippedPartner != null)
-                        {
-                            Debug.Log($"<color=lime>[PlayerView] Bow auto-arrow partner: calling Equip('{pendingAutoEquippedPartner.name}') to set _rightHandItem</color>");
-                            Equip(pendingAutoEquippedPartner);
-                            Debug.Log($"<color=lime>[PlayerView] After partner Equip: _left='{_leftHandItem?.name ?? "null"}' _right='{_rightHandItem?.name ?? "null"}'</color>");
-                        }
+                        // Debug.Log($"<color=cyan>[DIAG][F{Time.frameCount}] ◀ After Equip: _left='{_leftHandItem?.name ?? "null"}' _right='{_rightHandItem?.name ?? "null"}'</color>");
                     }
 
                     StartCoroutine(SyncEquipmentNextFrame());
@@ -770,14 +724,14 @@ namespace STG.CurveDash
             if (this == null || gameObject == null || !gameObject.activeInHierarchy) return;
             if (_isUpdatingEquipment)
             {
-                Debug.LogWarning($"<color=red>[DIAG][F{Time.frameCount}] OnDevionEquipmentRemoved BLOCKED by guard: item='{item?.Name}' slot={slot?.Index}</color>");
+                // Debug.LogWarning($"<color=red>[DIAG][F{Time.frameCount}] OnDevionEquipmentRemoved BLOCKED by guard: item='{item?.Name}' slot={slot?.Index}</color>");
                 return;
             }
 
             _isUpdatingEquipment = true;
             try
             {
-                Debug.Log($"<color=orange>[DIAG][F{Time.frameCount}] ▶ OnDevionEquipmentRemoved: item='{item?.Name}' type={item?.GetType().Name} slot={slot?.Index} | _left='{_leftHandItem?.name ?? "null"}' _right='{_rightHandItem?.name ?? "null"}'</color>");
+                // Debug.Log($"<color=orange>[DIAG][F{Time.frameCount}] ▶ OnDevionEquipmentRemoved: item='{item?.Name}' type={item?.GetType().Name} slot={slot?.Index} | _left='{_leftHandItem?.name ?? "null"}' _right='{_rightHandItem?.name ?? "null"}'</color>");
 
                 if (item is CurveDashEquipmentAdapter adapter && adapter.OriginalEquipmentData != null)
                 {
