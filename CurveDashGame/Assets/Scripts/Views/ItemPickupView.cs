@@ -17,6 +17,7 @@ namespace STG.CurveDash
             if (spawnedVisual != null)
             {
                 Destroy(spawnedVisual);
+                spawnedVisual = null;
             }
 
             if (data != null)
@@ -26,118 +27,156 @@ namespace STG.CurveDash
                 gameObject.name = displayName;
 
                 GameObject modelPrefab = null;
-                if (data is EquippableData equippable)
+
+#if UNITY_EDITOR
+                if (data.Prefab != null && data.Prefab.editorAsset != null)
+                {
+                    modelPrefab = (GameObject)data.Prefab.editorAsset;
+                }
+                
+                // Fallback to VisualModel for weapons if Prefab is not assigned in the editor yet
+                if (modelPrefab == null && data is EquippableData equippable)
                 {
                     modelPrefab = equippable.VisualModel;
                 }
-
-                if (modelPrefab == null && data.DevionAdapter != null)
-                {
-                    modelPrefab = data.DevionAdapter.Prefab;
-                }
+#endif
 
                 if (modelPrefab != null)
                 {
+                    // Instant synchronous instantiation in Editor for flawless workflow
                     spawnedVisual = Instantiate(modelPrefab, transform);
-                    
-                    // Set scale to 1.0f for 3D prefabs as requested
-                    spawnedVisual.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-
-                    // Remove all child colliders from instantiated 3D models so they don't block player movement
-                    var childColliders = spawnedVisual.GetComponentsInChildren<Collider>();
-                    foreach (var cCollider in childColliders)
-                    {
-                        if (cCollider != null) Destroy(cCollider);
-                    }
-
-                    var renderers = spawnedVisual.GetComponentsInChildren<Renderer>();
-                    if (renderers.Length > 0)
-                    {
-                        var bounds = renderers[0].bounds;
-                        for (int i = 1; i < renderers.Length; i++)
-                        {
-                            bounds.Encapsulate(renderers[i].bounds);
-                        }
-                        Vector3 localCenter = spawnedVisual.transform.InverseTransformPoint(bounds.center);
-                        spawnedVisual.transform.localPosition = -localCenter;
-                    }
-                    else
-                    {
-                        spawnedVisual.transform.localPosition = Vector3.zero;
-                    }
+                    ConfigureSpawnedVisual(spawnedVisual);
                 }
-                else
+                else if (data.Prefab != null && data.Prefab.RuntimeKeyIsValid())
                 {
-                    // Choose distinctive primitive shape based on item category with size 1.0
-                    PrimitiveType shapeType = PrimitiveType.Cube;
-                    Vector3 shapeScale = new Vector3(1.0f, 1.0f, 1.0f);
-                    Quaternion customRotation = Quaternion.identity;
-                    Color customColor = Color.white;
-                    bool hasCustomColor = false;
-
-                    if (data is GemItemData)
-                    {
-                        shapeType = PrimitiveType.Sphere;
-                        shapeScale = new Vector3(1.0f, 1.0f, 1.0f); // Sphere
-                        customColor = new Color(0.1f, 0.9f, 0.4f); // Beautiful Emerald Green
-                        hasCustomColor = true;
-                    }
-                    else if (data is FlaskItemData)
-                    {
-                        shapeType = PrimitiveType.Capsule; // Capsule pill shape
-                        shapeScale = new Vector3(0.7f, 0.7f, 0.7f);
-                        customColor = new Color(0.9f, 0.1f, 0.2f); // Healing red potion
-                        hasCustomColor = true;
-                    }
-                    else if (data is CurrencyItemData)
-                    {
-                        shapeType = PrimitiveType.Cube; // Cube standing on vertex (diamond)
-                        shapeScale = new Vector3(1.0f, 1.0f, 1.0f);
-                        customRotation = Quaternion.Euler(45f, 45f, 0f); // Rotate X and Y to point a corner straight down
-                        customColor = new Color(1.0f, 0.75f, 0.0f); // Bright Gold
-                        hasCustomColor = true;
-                    }
-
-                    GameObject placeholder = GameObject.CreatePrimitive(shapeType);
-                    placeholder.transform.localScale = shapeScale;
-                    placeholder.transform.localRotation = customRotation;
-
-                    // Remove collider from the spawned visual to prevent physics overlap issues
-                    var placeholderCollider = placeholder.GetComponent<Collider>();
-                    if (placeholderCollider != null) Destroy(placeholderCollider);
-
-                    var renderer = placeholder.GetComponent<Renderer>();
-                    if (renderer != null)
-                    {
-                        Color finalColor = Color.white;
-                        if (hasCustomColor)
+                    // Asynchronous instantiation in built player / runtime
+                    data.Prefab.InstantiateAsync(transform).Completed += handle => {
+                        if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
                         {
-                            finalColor = customColor;
+                            // In case ItemPickupView was destroyed or Setup was called again before loading finished
+                            if (this == null || ItemToGive != data)
+                            {
+                                if (handle.Result != null) Destroy(handle.Result);
+                                return;
+                            }
+
+                            if (spawnedVisual != null) Destroy(spawnedVisual);
+                            spawnedVisual = handle.Result;
+                            ConfigureSpawnedVisual(spawnedVisual);
                         }
                         else
                         {
-                            switch (data.Rarity)
-                            {
-                                case ItemRarity.Magic: finalColor = new Color(0.2f, 0.6f, 1.0f); break; // Beautiful Blue
-                                case ItemRarity.Rare: finalColor = new Color(1.0f, 0.85f, 0.0f); break; // Glorious Yellow/Gold
-                                case ItemRarity.Unique: finalColor = new Color(1.0f, 0.4f, 0.0f); break; // Epic Orange
-                            }
+                            SpawnPlaceholder(data);
                         }
-                        
-                        renderer.material.color = finalColor;
-                    }
-                    
-                    spawnedVisual = placeholder;
-                    placeholder.transform.SetParent(transform, false);
-                    placeholder.transform.localPosition = Vector3.zero;
+                    };
+                }
+                else
+                {
+                    SpawnPlaceholder(data);
                 }
 
-                // Guaranteed Trigger SphereCollider on root object for flawless pickup detection by OverlapSphereNonAlloc!
+                // Guaranteed Trigger SphereCollider on root object for flawless pickup detection
                 var triggerCollider = gameObject.GetComponent<SphereCollider>();
                 if (triggerCollider == null) triggerCollider = gameObject.AddComponent<SphereCollider>();
                 triggerCollider.isTrigger = true;
                 triggerCollider.radius = 1.0f;
             }
+        }
+
+        private void ConfigureSpawnedVisual(GameObject visual)
+        {
+            if (visual == null) return;
+
+            visual.transform.localScale = Vector3.one;
+
+            // Remove all child colliders from instantiated 3D models so they don't block player movement
+            var childColliders = visual.GetComponentsInChildren<Collider>();
+            foreach (var cCollider in childColliders)
+            {
+                if (cCollider != null) Destroy(cCollider);
+            }
+
+            var renderers = visual.GetComponentsInChildren<Renderer>();
+            if (renderers.Length > 0)
+            {
+                var bounds = renderers[0].bounds;
+                for (int i = 1; i < renderers.Length; i++)
+                {
+                    bounds.Encapsulate(renderers[i].bounds);
+                }
+                Vector3 localCenter = visual.transform.InverseTransformPoint(bounds.center);
+                visual.transform.localPosition = -localCenter;
+            }
+            else
+            {
+                visual.transform.localPosition = Vector3.zero;
+            }
+        }
+
+        private void SpawnPlaceholder(ItemData data)
+        {
+            if (spawnedVisual != null) return;
+
+            // Choose distinctive primitive shape based on item category with size 1.0
+            PrimitiveType shapeType = PrimitiveType.Cube;
+            Vector3 shapeScale = Vector3.one;
+            Quaternion customRotation = Quaternion.identity;
+            Color customColor = Color.white;
+            bool hasCustomColor = false;
+
+            if (data is GemItemData)
+            {
+                shapeType = PrimitiveType.Sphere;
+                shapeScale = Vector3.one; // Sphere
+                customColor = new Color(0.1f, 0.9f, 0.4f); // Emerald Green
+                hasCustomColor = true;
+            }
+            else if (data is FlaskItemData)
+            {
+                shapeType = PrimitiveType.Capsule; // Capsule pill shape
+                shapeScale = new Vector3(0.7f, 0.7f, 0.7f);
+                customColor = new Color(0.9f, 0.1f, 0.2f); // Healing red
+                hasCustomColor = true;
+            }
+            else if (data is CurrencyItemData)
+            {
+                shapeType = PrimitiveType.Cube; // Diamond
+                shapeScale = Vector3.one;
+                customRotation = Quaternion.Euler(45f, 45f, 0f);
+                customColor = new Color(1.0f, 0.75f, 0.0f); // Gold
+                hasCustomColor = true;
+            }
+
+            GameObject placeholder = GameObject.CreatePrimitive(shapeType);
+            placeholder.transform.localScale = shapeScale;
+            placeholder.transform.localRotation = customRotation;
+
+            var placeholderCollider = placeholder.GetComponent<Collider>();
+            if (placeholderCollider != null) Destroy(placeholderCollider);
+
+            var renderer = placeholder.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                Color finalColor = Color.white;
+                if (hasCustomColor)
+                {
+                    finalColor = customColor;
+                }
+                else
+                {
+                    switch (data.Rarity)
+                    {
+                        case ItemRarity.Magic: finalColor = new Color(0.2f, 0.6f, 1.0f); break;
+                        case ItemRarity.Rare: finalColor = new Color(1.0f, 0.85f, 0.0f); break;
+                        case ItemRarity.Unique: finalColor = new Color(1.0f, 0.4f, 0.0f); break;
+                    }
+                }
+                renderer.material.color = finalColor;
+            }
+            
+            spawnedVisual = placeholder;
+            placeholder.transform.SetParent(transform, false);
+            placeholder.transform.localPosition = Vector3.zero;
         }
 
         private void Update()

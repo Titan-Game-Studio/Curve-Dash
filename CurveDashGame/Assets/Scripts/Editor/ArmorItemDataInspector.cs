@@ -48,6 +48,9 @@ namespace STG.CurveDash.Editor
             serializedObject.ApplyModifiedProperties();
 
             EditorGUILayout.Space();
+            ItemDataInspector.DrawPrefabValidation(armor);
+
+            EditorGUILayout.Space();
             EditorGUILayout.LabelField("Inventory System Integration", EditorStyles.boldLabel);
             GUI.backgroundColor = new Color(0.24f, 0.44f, 0.94f, 1f); 
             if (GUILayout.Button("🛡️ Create/Update Inventory Adapter", GUILayout.Height(32)))

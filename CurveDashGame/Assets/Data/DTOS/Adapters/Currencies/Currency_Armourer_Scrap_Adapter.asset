@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Armourer Scrap
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 824e0adae0b9f0541afbffa1f3f59995, type: 3}
+  m_Icon: {fileID: 21300000, guid: 6fba3796b94b531498624de03c500044, type: 3}
   m_Prefab: {fileID: 2830056364503120991, guid: ccf4d01790c12fe4990e21adeb8f11f5,
     type: 3}
   m_Description: Improves the quality of an armor piece.

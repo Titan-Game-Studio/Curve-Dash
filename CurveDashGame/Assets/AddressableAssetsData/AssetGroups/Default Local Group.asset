@@ -216,6 +216,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2e99512e3f5417c43bd46ea971aaeed6
+    m_Address: FlaskDefault
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2efe504fa39206949862a2ee9a2d5ec5
     m_Address: FREE SHIELD 2 COLOR 2
     m_ReadOnly: 0
@@ -223,6 +228,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 33918cdf161d1224ba679bded61b21ce
     m_Address: Fish
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 34e2c432db7052045b7914b974f6a1a3
+    m_Address: GemDefault
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -733,6 +743,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cc7ba3620ad40724bbd0dda3cd3ba953
     m_Address: FREE GREAT BOW 3 COLOR 3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ccf4d01790c12fe4990e21adeb8f11f5
+    m_Address: CurencyDefault
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

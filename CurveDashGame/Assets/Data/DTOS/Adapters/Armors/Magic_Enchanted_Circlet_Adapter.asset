@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Enchanted Circlet
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 51bcd971274c82b4caa27af35a9cb3ac, type: 3}
+  m_Icon: {fileID: 21300000, guid: 8aba9159835c134449014a302fb0bfc1, type: 3}
   m_Prefab: {fileID: 4089317230495592276, guid: 4e8148f0393e7fe4aa7b4a30f643fb1c,
     type: 3}
   m_Description: Radiating soft blue mana glow.

@@ -417,7 +417,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_StatsHandler: Player Stats
-  m_Stat: {fileID: 4191169994067471883, guid: 294a0f3c3623873439762c5f55d6af2a, type: 2}
+  m_Stat: {fileID: 4191169994067471883, guid: bf775f72e1ae0e040bd94b251618cd04, type: 2}
   m_FreePoints: {fileID: 0}
   m_StatName: {fileID: 0}
   m_StatBar: {fileID: 0}
@@ -3431,7 +3431,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_StatsHandler: Player Stats
-  m_Stat: {fileID: 780142526111815381, guid: 294a0f3c3623873439762c5f55d6af2a, type: 2}
+  m_Stat: {fileID: 780142526111815381, guid: bf775f72e1ae0e040bd94b251618cd04, type: 2}
   m_FreePoints: {fileID: 0}
   m_StatName: {fileID: 0}
   m_StatBar: {fileID: 0}
@@ -14250,6 +14250,16 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1037745987022758204, guid: 73000691bb97ca545a8d09fd0c6f5865,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1037745987022758204, guid: 73000691bb97ca545a8d09fd0c6f5865,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2315701974272839871, guid: 73000691bb97ca545a8d09fd0c6f5865,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -14671,6 +14681,16 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4066013427586899445, guid: 73000691bb97ca545a8d09fd0c6f5865,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4066013427586899445, guid: 73000691bb97ca545a8d09fd0c6f5865,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4210649231683496902, guid: 73000691bb97ca545a8d09fd0c6f5865,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -14819,6 +14839,16 @@ PrefabInstance:
     - target: {fileID: 4971019342052986066, guid: 73000691bb97ca545a8d09fd0c6f5865,
         type: 3}
       propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5005835137310942936, guid: 73000691bb97ca545a8d09fd0c6f5865,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5005835137310942936, guid: 73000691bb97ca545a8d09fd0c6f5865,
+        type: 3}
+      propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5148339567537405877, guid: 73000691bb97ca545a8d09fd0c6f5865,
@@ -15001,6 +15031,26 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6848697654617456365, guid: 73000691bb97ca545a8d09fd0c6f5865,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6848697654617456365, guid: 73000691bb97ca545a8d09fd0c6f5865,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6848697654617456365, guid: 73000691bb97ca545a8d09fd0c6f5865,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6848697654617456365, guid: 73000691bb97ca545a8d09fd0c6f5865,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6912756509357508000, guid: 73000691bb97ca545a8d09fd0c6f5865,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -15089,6 +15139,21 @@ PrefabInstance:
     - target: {fileID: 7569855473768569343, guid: 73000691bb97ca545a8d09fd0c6f5865,
         type: 3}
       propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8360366609672266792, guid: 73000691bb97ca545a8d09fd0c6f5865,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8360366609672266792, guid: 73000691bb97ca545a8d09fd0c6f5865,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8360366609672266792, guid: 73000691bb97ca545a8d09fd0c6f5865,
+        type: 3}
+      propertyPath: m_AnchorMin.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8411875623497037741, guid: 73000691bb97ca545a8d09fd0c6f5865,
@@ -33978,7 +34043,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_StatsHandler: Player Stats
-  m_Stat: {fileID: -4885797470720747453, guid: 294a0f3c3623873439762c5f55d6af2a, type: 2}
+  m_Stat: {fileID: -4885797470720747453, guid: bf775f72e1ae0e040bd94b251618cd04, type: 2}
   m_FreePoints: {fileID: -433383825001297444, guid: 294a0f3c3623873439762c5f55d6af2a,
     type: 2}
   m_StatName: {fileID: 0}
@@ -36179,7 +36244,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_StatsHandler: Player Stats
-  m_Stat: {fileID: -7160182056493623654, guid: 294a0f3c3623873439762c5f55d6af2a, type: 2}
+  m_Stat: {fileID: -7160182056493623654, guid: bf775f72e1ae0e040bd94b251618cd04, type: 2}
   m_FreePoints: {fileID: 0}
   m_StatName: {fileID: 0}
   m_StatBar: {fileID: 0}
@@ -37319,7 +37384,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_StatsHandler: Player Stats
-  m_Stat: {fileID: -2558327947788714437, guid: 294a0f3c3623873439762c5f55d6af2a, type: 2}
+  m_Stat: {fileID: -2558327947788714437, guid: bf775f72e1ae0e040bd94b251618cd04, type: 2}
   m_FreePoints: {fileID: 0}
   m_StatName: {fileID: 0}
   m_StatBar: {fileID: 0}
@@ -46459,7 +46524,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_StatsHandler: Player Stats
-  m_Stat: {fileID: 8019179891300680543, guid: 294a0f3c3623873439762c5f55d6af2a, type: 2}
+  m_Stat: {fileID: 8019179891300680543, guid: bf775f72e1ae0e040bd94b251618cd04, type: 2}
   m_FreePoints: {fileID: 0}
   m_StatName: {fileID: 0}
   m_StatBar: {fileID: 0}
@@ -54023,7 +54088,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_StatsHandler: Player Stats
-  m_Stat: {fileID: -4240061784426487929, guid: 294a0f3c3623873439762c5f55d6af2a, type: 2}
+  m_Stat: {fileID: -4240061784426487929, guid: bf775f72e1ae0e040bd94b251618cd04, type: 2}
   m_FreePoints: {fileID: -433383825001297444, guid: 294a0f3c3623873439762c5f55d6af2a,
     type: 2}
   m_StatName: {fileID: 0}
@@ -59937,7 +60002,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_StatsHandler: Player Stats
-  m_Stat: {fileID: 840039421740592421, guid: 294a0f3c3623873439762c5f55d6af2a, type: 2}
+  m_Stat: {fileID: 840039421740592421, guid: bf775f72e1ae0e040bd94b251618cd04, type: 2}
   m_FreePoints: {fileID: -433383825001297444, guid: 294a0f3c3623873439762c5f55d6af2a,
     type: 2}
   m_StatName: {fileID: 0}
@@ -72094,7 +72159,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_StatsHandler: Player Stats
-  m_Stat: {fileID: -3727109656883785614, guid: 294a0f3c3623873439762c5f55d6af2a, type: 2}
+  m_Stat: {fileID: -3727109656883785614, guid: bf775f72e1ae0e040bd94b251618cd04, type: 2}
   m_FreePoints: {fileID: -433383825001297444, guid: 294a0f3c3623873439762c5f55d6af2a,
     type: 2}
   m_StatName: {fileID: 0}
@@ -73189,7 +73254,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_StatsHandler: Player Stats
-  m_Stat: {fileID: 1770301744684594855, guid: 294a0f3c3623873439762c5f55d6af2a, type: 2}
+  m_Stat: {fileID: 1770301744684594855, guid: bf775f72e1ae0e040bd94b251618cd04, type: 2}
   m_FreePoints: {fileID: 0}
   m_StatName: {fileID: 0}
   m_StatBar: {fileID: 0}
@@ -98596,7 +98661,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2027122293}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 961f6c97c1d04404c96edf1505444555, type: 3}
   m_Name: 
@@ -108261,6 +108326,11 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6284391211764949312, guid: 7711700c499322241ad0a6161fccb38f,
+        type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7109842170359884496, guid: 7711700c499322241ad0a6161fccb38f,
         type: 3}
       propertyPath: m_PresetInfoIsWorld
       value: 0

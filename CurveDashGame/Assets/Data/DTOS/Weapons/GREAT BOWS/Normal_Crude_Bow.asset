@@ -17,16 +17,17 @@ MonoBehaviour:
   Rarity: 0
   Type: 0
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: 8bc53569de53b3144a7db7ca5aa2231d
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Flimsy basic hunting bow.
   DevionAdapter: {fileID: 11400000, guid: c370d707d5821da49b7f36b19ef18eaa, type: 2}
-  VisualModel: {fileID: 0}
-  PositionOffset: {x: 0, y: 0, z: 0}
-  RotationOffset: {x: 0, y: 0, z: 0}
+  VisualModel: {fileID: 4272939240103433196, guid: 8bc53569de53b3144a7db7ca5aa2231d,
+    type: 3}
+  PositionOffset: {x: -0.033, y: 0.061, z: 0.014}
+  RotationOffset: {x: 15.308332, y: 355.27133, z: 116.77159}
   MainAnimator: {fileID: 9100000, guid: 0a18ab27e14fa1a40b9106b93b50207e, type: 2}
   BaseMinDamage: 10
   BaseMaxDamage: 15

@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Stealth Gloves
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: cfea9c36036ca9e4591419c6c526d558, type: 3}
+  m_Icon: {fileID: 21300000, guid: 0065b75c465281c4984c3e346892cdc9, type: 3}
   m_Prefab: {fileID: 119710972481333545, guid: 8cbf3f77089ba1b4f9ca78dd727d6d28, type: 3}
   m_Description: Magic gloves that blend with shadows.
   m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,

@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Rusted Sword
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: 77db979aea871104ab625715b58de66d, type: 3}
   m_Prefab: {fileID: 6654403910166112854, guid: c1f779f2e34d39041bfff6c9cfcd5d0b,
     type: 3}
   m_Description: 

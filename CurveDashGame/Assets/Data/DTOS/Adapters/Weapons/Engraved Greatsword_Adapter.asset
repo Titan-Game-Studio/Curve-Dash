@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Engraved Greatsword
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: dd8db022a9ed2d7489643ec9edac12c7, type: 3}
   m_Prefab: {fileID: 1121285751338703635, guid: 150e31000c24a7b47aae9f04278cb0f5,
     type: 3}
   m_Description: 

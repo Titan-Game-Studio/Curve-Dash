@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Thicket Bow
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: f5b5468199fad7a4890a370fa7b53bc3, type: 3}
   m_Prefab: {fileID: 2773260159954929202, guid: 0b843529f2663db4aa40ec3d45b2519f,
     type: 3}
   m_Description: 

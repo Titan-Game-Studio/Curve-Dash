@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Vaal Blade
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: 48b0a783ae8c1744fbec6caf64c31b0a, type: 3}
   m_Prefab: {fileID: 4909334217645422199, guid: 2b98d3d32acd00c46aa13e6ff6ad538d,
     type: 3}
   m_Description: 

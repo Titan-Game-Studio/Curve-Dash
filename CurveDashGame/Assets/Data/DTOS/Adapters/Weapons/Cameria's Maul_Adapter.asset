@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Cameria's Maul
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: 40d15bdcf6bc1b74bb503a04f7bddbf6, type: 3}
   m_Prefab: {fileID: 6818966812300095013, guid: 890e652c0a86e2044b9b3cd919398ac4,
     type: 3}
   m_Description: 

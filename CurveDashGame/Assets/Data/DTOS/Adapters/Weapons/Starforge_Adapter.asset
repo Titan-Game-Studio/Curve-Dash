@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Starforge
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: d4e64b2bf716dd748b1e48007c02c58b, type: 3}
   m_Prefab: {fileID: 4040911424271386890, guid: 8305d74f2e457034a944f92e4768f38c,
     type: 3}
   m_Description: 

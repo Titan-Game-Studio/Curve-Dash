@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using DevionGames.UIWidgets;
 using System.Linq;
@@ -244,6 +244,19 @@ namespace DevionGames.InventorySystem
         }
 
         protected ItemCollection m_Collection;
+
+        protected void EnsureCollection()
+        {
+            if (this.m_Collection == null)
+            {
+                this.m_Collection = GetComponent<ItemCollection>();
+                if (this.m_Collection == null)
+                {
+                    this.m_Collection = gameObject.AddComponent<ItemCollection>();
+                    this.m_Collection.Initialize();
+                }
+            }
+        }
         /// <summary>
         /// Set the collection for this container.
         /// </summary>
@@ -533,6 +546,7 @@ namespace DevionGames.InventorySystem
         /// <returns>True if item was added.</returns>
         public virtual bool AddItem(Item item)
         {
+            EnsureCollection();
             Slot slot = null;
             if (CanAddItem(item, out slot, true))
             {
@@ -548,6 +562,7 @@ namespace DevionGames.InventorySystem
         /// </summary>
         public bool StackItem(Item item)
         {
+            EnsureCollection();
             //Check if item or collection is null
             if (item == null || this.m_Collection == null)
             {
@@ -754,7 +769,7 @@ namespace DevionGames.InventorySystem
         /// <returns></returns>
         public virtual Item[] ReplaceItem(int index, Item item)
         {
-           
+            EnsureCollection();
             List<Item> list = new List<Item>();
             if (index < this.m_Slots.Count)
             {
@@ -909,7 +924,7 @@ namespace DevionGames.InventorySystem
         public virtual bool RemoveItem(Item item)
         {
             if (item == null) { return false; }
-
+            EnsureCollection();
             if (!UseReferences && this.m_Collection.Contains(item))
             {
                 //Remove item from the collection

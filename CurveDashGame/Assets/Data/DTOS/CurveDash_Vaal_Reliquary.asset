@@ -52,14 +52,13 @@ MonoBehaviour:
   m_CraftingDuration: 5
   m_UseCraftingSkill: 1
   m_SkillWindow: Skills
-  m_CraftingSkill: {fileID: 4594666206616667452, guid: e1f045c49e197e3439b99da9edbc5ba3,
-    type: 2}
+  m_CraftingSkill: {fileID: 0}
   m_RemoveIngredientsWhenFailed: 1
   m_MinCraftingSkillValue: 4
   m_CraftingAnimatorState: Blacksmithy
   m_CraftingModifier:
     modifiers:
-    - {fileID: 11400000, guid: af5120ca8702be44fb59b6eadcd27cd0, type: 2}
+    - {fileID: 0}
   ingredients:
   - item: {fileID: -5663772737389988193}
     amount: 4
@@ -165,8 +164,7 @@ MonoBehaviour:
         m_Type: DevionGames.InventorySystem.CheckSkill
         m_Enabled: 1
         m_WindowName: Skills
-        m_Skill: {fileID: 7032449652308580212, guid: e1f045c49e197e3439b99da9edbc5ba3,
-          type: 2}
+        m_Skill: {fileID: 0}
         m_SuccessNotification:
           title: 
           text: 
@@ -640,8 +638,7 @@ MonoBehaviour:
   m_CraftingDuration: 3
   m_UseCraftingSkill: 1
   m_SkillWindow: Skills
-  m_CraftingSkill: {fileID: 4594666206616667452, guid: e1f045c49e197e3439b99da9edbc5ba3,
-    type: 2}
+  m_CraftingSkill: {fileID: 0}
   m_RemoveIngredientsWhenFailed: 1
   m_MinCraftingSkillValue: 0
   m_CraftingAnimatorState: Blacksmithy
@@ -836,14 +833,13 @@ MonoBehaviour:
   m_CraftingDuration: 5
   m_UseCraftingSkill: 1
   m_SkillWindow: Skills
-  m_CraftingSkill: {fileID: 4594666206616667452, guid: e1f045c49e197e3439b99da9edbc5ba3,
-    type: 2}
+  m_CraftingSkill: {fileID: 0}
   m_RemoveIngredientsWhenFailed: 1
   m_MinCraftingSkillValue: 7.7
   m_CraftingAnimatorState: Blacksmithy
   m_CraftingModifier:
     modifiers:
-    - {fileID: 11400000, guid: af5120ca8702be44fb59b6eadcd27cd0, type: 2}
+    - {fileID: 0}
   ingredients:
   - item: {fileID: -5663772737389988193}
     amount: 3
@@ -933,8 +929,7 @@ MonoBehaviour:
   m_CraftingDuration: 2
   m_UseCraftingSkill: 1
   m_SkillWindow: Skills
-  m_CraftingSkill: {fileID: 4594666206616667452, guid: e1f045c49e197e3439b99da9edbc5ba3,
-    type: 2}
+  m_CraftingSkill: {fileID: 0}
   m_RemoveIngredientsWhenFailed: 1
   m_MinCraftingSkillValue: 0
   m_CraftingAnimatorState: Blacksmithy
@@ -1050,8 +1045,7 @@ MonoBehaviour:
   m_CraftingDuration: 3
   m_UseCraftingSkill: 1
   m_SkillWindow: Skills
-  m_CraftingSkill: {fileID: 4594666206616667452, guid: e1f045c49e197e3439b99da9edbc5ba3,
-    type: 2}
+  m_CraftingSkill: {fileID: 0}
   m_RemoveIngredientsWhenFailed: 1
   m_MinCraftingSkillValue: 0
   m_CraftingAnimatorState: Blacksmithy
@@ -1357,8 +1351,7 @@ MonoBehaviour:
   m_CraftingDuration: 2
   m_UseCraftingSkill: 1
   m_SkillWindow: Skills
-  m_CraftingSkill: {fileID: 4594666206616667452, guid: e1f045c49e197e3439b99da9edbc5ba3,
-    type: 2}
+  m_CraftingSkill: {fileID: 0}
   m_RemoveIngredientsWhenFailed: 1
   m_MinCraftingSkillValue: 4
   m_CraftingAnimatorState: Blacksmithy
@@ -1472,14 +1465,13 @@ MonoBehaviour:
   m_CraftingDuration: 3
   m_UseCraftingSkill: 1
   m_SkillWindow: Skills
-  m_CraftingSkill: {fileID: 4594666206616667452, guid: e1f045c49e197e3439b99da9edbc5ba3,
-    type: 2}
+  m_CraftingSkill: {fileID: 0}
   m_RemoveIngredientsWhenFailed: 1
   m_MinCraftingSkillValue: 1
   m_CraftingAnimatorState: Blacksmithy
   m_CraftingModifier:
     modifiers:
-    - {fileID: 11400000, guid: af5120ca8702be44fb59b6eadcd27cd0, type: 2}
+    - {fileID: 0}
   ingredients:
   - item: {fileID: 8763039942855579107}
     amount: 3
@@ -1584,8 +1576,7 @@ MonoBehaviour:
         m_Type: DevionGames.InventorySystem.CheckSkill
         m_Enabled: 1
         m_WindowName: Skills
-        m_Skill: {fileID: -1079133913141893833, guid: e1f045c49e197e3439b99da9edbc5ba3,
-          type: 2}
+        m_Skill: {fileID: 0}
         m_SuccessNotification:
           title: 
           text: 
@@ -1638,8 +1629,7 @@ MonoBehaviour:
   m_CraftingDuration: 3
   m_UseCraftingSkill: 1
   m_SkillWindow: Skills
-  m_CraftingSkill: {fileID: 4594666206616667452, guid: e1f045c49e197e3439b99da9edbc5ba3,
-    type: 2}
+  m_CraftingSkill: {fileID: 0}
   m_RemoveIngredientsWhenFailed: 0
   m_MinCraftingSkillValue: 0
   m_CraftingAnimatorState: Blacksmithy
@@ -1807,8 +1797,7 @@ MonoBehaviour:
   m_CraftingDuration: 5
   m_UseCraftingSkill: 1
   m_SkillWindow: Skills
-  m_CraftingSkill: {fileID: 4594666206616667452, guid: e1f045c49e197e3439b99da9edbc5ba3,
-    type: 2}
+  m_CraftingSkill: {fileID: 0}
   m_RemoveIngredientsWhenFailed: 1
   m_MinCraftingSkillValue: 0
   m_CraftingAnimatorState: Blacksmithy
@@ -2511,8 +2500,7 @@ MonoBehaviour:
   m_CraftingDuration: 2
   m_UseCraftingSkill: 1
   m_SkillWindow: Skills
-  m_CraftingSkill: {fileID: -2308325603847997442, guid: e1f045c49e197e3439b99da9edbc5ba3,
-    type: 2}
+  m_CraftingSkill: {fileID: 0}
   m_RemoveIngredientsWhenFailed: 1
   m_MinCraftingSkillValue: 0
   m_CraftingAnimatorState: Cooking

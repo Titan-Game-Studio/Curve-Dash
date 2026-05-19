@@ -17,16 +17,17 @@ MonoBehaviour:
   Rarity: 1
   Type: 1
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: 1dde42102c14aa64bb027d3fffb802f9
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Solid round buckler.
   DevionAdapter: {fileID: 11400000, guid: b09070ec4fffccb4cbbe5c5cce88b920, type: 2}
-  VisualModel: {fileID: 0}
-  PositionOffset: {x: 0, y: 0, z: 0}
-  RotationOffset: {x: 0, y: 0, z: 0}
+  VisualModel: {fileID: 3242491964970547677, guid: 1dde42102c14aa64bb027d3fffb802f9,
+    type: 3}
+  PositionOffset: {x: -0.016, y: 0.041, z: 0.023}
+  RotationOffset: {x: 28.759998, y: -0.0000019478257, z: 256.06}
   MainAnimator: {fileID: 0}
   SubType: 0
   BlockChance: 35

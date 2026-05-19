@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Steel Shield
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 21300000, guid: 5b35a021794fa7c41bddea591e2c75c0, type: 3}
   m_Prefab: {fileID: 682866122035965355, guid: 2efe504fa39206949862a2ee9a2d5ec5, type: 3}
   m_Description: 
   m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,

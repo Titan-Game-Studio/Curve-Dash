@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Iron Gauntlets
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: cfea9c36036ca9e4591419c6c526d558, type: 3}
+  m_Icon: {fileID: 21300000, guid: 58c8161a22085394595d69eabd2c534b, type: 3}
   m_Prefab: {fileID: 6998656735705837913, guid: b8803a039141fdd489fc78c854ca251f,
     type: 3}
   m_Description: Rough iron mitts.

@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Exquisite Blade
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: 84f241a00c4b137478a0d2cfb8002b84, type: 3}
   m_Prefab: {fileID: 876109413226584067, guid: 0d862e01906c82b4681a6efdcc2da5d4, type: 3}
   m_Description: 
   m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,

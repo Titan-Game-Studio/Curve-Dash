@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Vaal Shield
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 21300000, guid: 7dddc1a9fc99dc74d9c9d7762759f663, type: 3}
   m_Prefab: {fileID: 2305301801612078037, guid: c6d97471ca620344a803efe63d109acb,
     type: 3}
   m_Description: 

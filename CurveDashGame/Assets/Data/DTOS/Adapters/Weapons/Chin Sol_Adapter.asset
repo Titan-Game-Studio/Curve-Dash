@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Chin Sol
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: 3776dce9a0f47da419fa804c15a013be, type: 3}
   m_Prefab: {fileID: 6175759876251615887, guid: 2af81e53d3092b840b143fdb902b343d,
     type: 3}
   m_Description: 

@@ -17,16 +17,17 @@ MonoBehaviour:
   Rarity: 1
   Type: 0
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: 209da9585717a0e41a91f811ed43ce7d
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Compact and quick to draw.
   DevionAdapter: {fileID: 11400000, guid: 0b6443443ee397f4c907199c5d057eab, type: 2}
-  VisualModel: {fileID: 0}
-  PositionOffset: {x: 0, y: 0, z: 0}
-  RotationOffset: {x: 0, y: 0, z: 0}
+  VisualModel: {fileID: 4597557650954906393, guid: 209da9585717a0e41a91f811ed43ce7d,
+    type: 3}
+  PositionOffset: {x: -0.033, y: 0.061, z: 0.014}
+  RotationOffset: {x: 15.308332, y: 355.27133, z: 116.77159}
   MainAnimator: {fileID: 9100000, guid: 0a18ab27e14fa1a40b9106b93b50207e, type: 2}
   BaseMinDamage: 16
   BaseMaxDamage: 24

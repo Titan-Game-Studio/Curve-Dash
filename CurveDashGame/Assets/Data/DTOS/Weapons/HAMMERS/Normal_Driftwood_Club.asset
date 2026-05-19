@@ -17,16 +17,17 @@ MonoBehaviour:
   Rarity: 0
   Type: 0
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: 75ebd8b9d99750c47bfa7aea82b92699
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: A heavy sea-soaked wood club.
   DevionAdapter: {fileID: 11400000, guid: 8797c8357b25eed499b69da0b9b8147c, type: 2}
-  VisualModel: {fileID: 0}
-  PositionOffset: {x: 0, y: 0, z: 0}
-  RotationOffset: {x: 0, y: 0, z: 0}
+  VisualModel: {fileID: 8731081623862341801, guid: 75ebd8b9d99750c47bfa7aea82b92699,
+    type: 3}
+  PositionOffset: {x: -0.031999882, y: 0.018999977, z: 0.5320003}
+  RotationOffset: {x: 3.3501818, y: 0, z: 0}
   MainAnimator: {fileID: 9100000, guid: c15afe06600cf2940a2d0bdf6ce630d5, type: 2}
   BaseMinDamage: 24
   BaseMaxDamage: 36

@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Elegant Sword
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: 82101e30729c22a4bb09e993a56906a6, type: 3}
   m_Prefab: {fileID: 8262741654824883518, guid: fcefe9c5763cedb4b8e77fa9b897dc92,
     type: 3}
   m_Description: 

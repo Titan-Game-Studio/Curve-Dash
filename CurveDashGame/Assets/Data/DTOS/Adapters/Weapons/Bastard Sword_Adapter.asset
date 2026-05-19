@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Bastard Sword
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: 11975f4a962524c449794ffa98c01047, type: 3}
   m_Prefab: {fileID: 3552393975715444642, guid: 97e762946194d054da2ce0ce3f048462,
     type: 3}
   m_Description: 

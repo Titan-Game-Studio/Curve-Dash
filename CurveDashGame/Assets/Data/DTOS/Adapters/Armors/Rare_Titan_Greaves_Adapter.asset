@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Titan Greaves
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 0111c36e0cdd38e48952c85e65e30dcb, type: 3}
+  m_Icon: {fileID: 21300000, guid: 1678fb6f1c8e8a44999d2d2154c39aac, type: 3}
   m_Prefab: {fileID: 5108552686938839387, guid: 6f9a038ba15103f4b96efafca860306c,
     type: 3}
   m_Description: Unshakable metal sabatons.

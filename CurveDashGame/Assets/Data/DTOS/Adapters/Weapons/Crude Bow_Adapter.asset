@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Crude Bow
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: 8dd8372f414de4744ba1bb6dd9f7f4e3, type: 3}
   m_Prefab: {fileID: 4272939240103433196, guid: 8bc53569de53b3144a7db7ca5aa2231d,
     type: 3}
   m_Description: 

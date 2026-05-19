@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Heavy Strike Gem
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: eb8b5bdf933b3af48931884f54c9cebc, type: 3}
+  m_Icon: {fileID: 21300000, guid: d09f1712c8aa18e4882bd5d7945ef2c0, type: 3}
   m_Prefab: {fileID: 2830056364503120991, guid: 34e2c432db7052045b7914b974f6a1a3,
     type: 3}
   m_Description: 'Grants active ability ''Heavy Strike Gem'' when socketed. Cooldown:

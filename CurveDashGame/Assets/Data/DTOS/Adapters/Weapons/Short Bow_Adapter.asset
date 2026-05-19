@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Short Bow
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: 800d4e31094922846ba2ffddd26a7bc1, type: 3}
   m_Prefab: {fileID: 4597557650954906393, guid: 209da9585717a0e41a91f811ed43ce7d,
     type: 3}
   m_Description: 

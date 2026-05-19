@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Corsair Sword
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: e80fb84fb5330bb4c8d2225aa83ec3b0, type: 3}
   m_Prefab: {fileID: 6353319322634812030, guid: 00136e4362eeb964a967da6309274c9c,
     type: 3}
   m_Description: 

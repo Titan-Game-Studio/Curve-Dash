@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Reaver Sword
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: 3e9e9a300b14d8c4584dc4d6478233ea, type: 3}
   m_Prefab: {fileID: 2481575706427970861, guid: 404883cac4511534886e8150ca0b96fa,
     type: 3}
   m_Description: 

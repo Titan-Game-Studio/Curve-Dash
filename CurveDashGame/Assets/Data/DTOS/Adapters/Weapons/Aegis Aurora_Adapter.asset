@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Aegis Aurora
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 21300000, guid: acd08bd159e5d084082fc50330badedd, type: 3}
   m_Prefab: {fileID: 6524304573867782126, guid: ae0da4fd26885a44c8ea54ba6480df5d,
     type: 3}
   m_Description: 

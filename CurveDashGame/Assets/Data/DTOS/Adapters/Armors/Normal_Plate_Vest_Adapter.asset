@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Plate Vest
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: ea8d985057954d54da2d606524af8214, type: 3}
+  m_Icon: {fileID: 21300000, guid: c1f806a9d3260f445b67436c94594604, type: 3}
   m_Prefab: {fileID: 2197248094262845486, guid: 9c2bae9b9c1345047a8b6ef8129f77df,
     type: 3}
   m_Description: A simple padded leather chest protector.

@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Flight Arrow
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 21300000, guid: 05f8dc791aadbd24e922677d63dcc573, type: 3}
   m_Prefab: {fileID: 4600082755147866049, guid: f21e007e2e959e145889156357c181c7,
     type: 3}
   m_Description: 

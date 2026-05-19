@@ -16,18 +16,26 @@ namespace STG.CurveDash.Editor
             try
             {
                 // Step 1: Link and register Weapon Prefabs & Addressables
-                EditorUtility.DisplayProgressBar("Curve-Dash Database Sync", "[1/3] Syncing Weapon Prefabs & Addressables...", 0.2f);
+                EditorUtility.DisplayProgressBar("Curve-Dash Database Sync", "[1/5] Syncing Weapon Prefabs & Addressables...", 0.2f);
                 int weaponCount = RunWeaponPrefabLinking();
 
                 // Step 2: Link and register Armor Prefabs & Addressables
-                EditorUtility.DisplayProgressBar("Curve-Dash Database Sync", "[2/3] Mapping Armor Prefabs & Addressables...", 0.5f);
+                EditorUtility.DisplayProgressBar("Curve-Dash Database Sync", "[2/5] Mapping Armor Prefabs & Addressables...", 0.4f);
                 int armorCount = RunArmorPrefabLinking();
 
-                // Step 3: Create, update, and link Devion Adapters for ALL ItemData
-                EditorUtility.DisplayProgressBar("Curve-Dash Database Sync", "[3/3] Generating Devion Inventory Adapters...", 0.8f);
+                // Step 3: Link and register Default Pickup Prefabs & Addressables
+                EditorUtility.DisplayProgressBar("Curve-Dash Database Sync", "[3/5] Mapping Gems, Flasks & Currencies Pickup Prefabs...", 0.6f);
+                int defaultCount = RunDefaultPickupPrefabLinking();
+
+                // Step 4: Create, update, and link Devion Adapters for ALL ItemData
+                EditorUtility.DisplayProgressBar("Curve-Dash Database Sync", "[4/5] Generating Devion Inventory Adapters...", 0.8f);
                 int adapterCount = RunAdapterGenerationAndLinking();
 
-                // Step 4: Finalize & Refresh AssetDatabase
+                // Step 5: Clean and validate all DTOs (Delete any remaining null prefabs)
+                EditorUtility.DisplayProgressBar("Curve-Dash Database Sync", "[5/5] Cleaning & Validating DTOs...", 0.9f);
+                int deletedCount = CleanAndValidateAllDTOs();
+
+                // Step 6: Finalize & Refresh AssetDatabase
                 EditorUtility.DisplayProgressBar("Curve-Dash Database Sync", "Finalizing assets & updating Unity project...", 0.95f);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
@@ -38,7 +46,9 @@ namespace STG.CurveDash.Editor
                 string message = $"💎 Curve-Dash Database synchronized successfully!\n\n" +
                                  $"• {weaponCount} Weapon/Equippable prefabs linked & registered to Addressables.\n" +
                                  $"• {armorCount} Armor prefabs mapped, linked, and registered to Addressables.\n" +
-                                 $"• {adapterCount} Devion Inventory Adapters created/updated & linked back to ItemData.\n\n" +
+                                 $"• {defaultCount} Gem, Flask & Currency default pickup prefabs linked & registered to Addressables.\n" +
+                                 $"• {adapterCount} Devion Inventory Adapters created/updated & linked back to ItemData.\n" +
+                                 $"• {deletedCount} Orphaned/Invalid DTOs with no prefabs deleted.\n\n" +
                                  $"Everything has been built with 'One-Click' precision. You are ready to play!";
                 
                 EditorUtility.DisplayDialog("Database Sync Complete", message, "Fantastic");
@@ -53,6 +63,37 @@ namespace STG.CurveDash.Editor
 
         #region Private Sync Executors
 
+        private static string GetBaseAssetName(string variantName)
+        {
+            string clean = variantName;
+            if (clean.StartsWith("Normal_")) clean = clean.Substring("Normal_".Length);
+            else if (clean.StartsWith("Magic_")) clean = clean.Substring("Magic_".Length);
+            else if (clean.StartsWith("Rare_")) clean = clean.Substring("Rare_".Length);
+            else if (clean.StartsWith("Unique_")) clean = clean.Substring("Unique_".Length);
+
+            return clean.Replace("_", " ");
+        }
+
+        private static int CleanAndValidateAllDTOs()
+        {
+            string[] guids = AssetDatabase.FindAssets("t:ItemData");
+            int deletedCount = 0;
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                ItemData itemData = AssetDatabase.LoadAssetAtPath<ItemData>(path);
+                if (itemData == null) continue;
+
+                if (itemData.Prefab == null || !itemData.Prefab.RuntimeKeyIsValid())
+                {
+                    Debug.LogWarning($"🗑️ [Database Validator] DTO '{itemData.name}' at '{path}' has no Prefab assigned. Deleting asset...");
+                    AssetDatabase.DeleteAsset(path);
+                    deletedCount++;
+                }
+            }
+            return deletedCount;
+        }
+
         private static int RunWeaponPrefabLinking()
         {
             string[] guids = AssetDatabase.FindAssets("t:EquippableData");
@@ -63,6 +104,30 @@ namespace STG.CurveDash.Editor
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 EquippableData eqData = AssetDatabase.LoadAssetAtPath<EquippableData>(path);
                 if (eqData == null) continue;
+
+                if (eqData.VisualModel == null)
+                {
+                    // Attempt to locate base asset to inherit visuals/grip/offsets
+                    string baseName = GetBaseAssetName(eqData.name);
+                    if (baseName != eqData.name)
+                    {
+                        string[] baseGuids = AssetDatabase.FindAssets($"\"{baseName}\" t:EquippableData");
+                        if (baseGuids.Length > 0)
+                        {
+                            string basePath = AssetDatabase.GUIDToAssetPath(baseGuids[0]);
+                            EquippableData baseEq = AssetDatabase.LoadAssetAtPath<EquippableData>(basePath);
+                            if (baseEq != null && baseEq.VisualModel != null)
+                            {
+                                eqData.VisualModel = baseEq.VisualModel;
+                                eqData.PositionOffset = baseEq.PositionOffset;
+                                eqData.RotationOffset = baseEq.RotationOffset;
+                                eqData.MainAnimator = baseEq.MainAnimator;
+                                EditorUtility.SetDirty(eqData);
+                                Debug.Log($"🛡️ [Database Healer] Inherited visuals for variant '{eqData.name}' from base '{baseEq.name}'");
+                            }
+                        }
+                    }
+                }
 
                 if (eqData.VisualModel != null)
                 {
@@ -178,6 +243,53 @@ namespace STG.CurveDash.Editor
                 }
             }
             return linkedCount;
+        }
+
+        private static int RunDefaultPickupPrefabLinking()
+        {
+            int linkedCount = 0;
+
+            // 1. Gems
+            string[] gemGuids = AssetDatabase.FindAssets("t:GemItemData");
+            string gemPrefabPath = "Assets/Prefabs/Pickups/GemDefault.prefab";
+            linkedCount += LinkDefaultPrefab(gemGuids, gemPrefabPath, "GemDefault");
+
+            // 2. Flasks
+            string[] flaskGuids = AssetDatabase.FindAssets("t:FlaskItemData");
+            string flaskPrefabPath = "Assets/Prefabs/Pickups/FlaskDefault.prefab";
+            linkedCount += LinkDefaultPrefab(flaskGuids, flaskPrefabPath, "FlaskDefault");
+
+            // 3. Currencies
+            string[] currencyGuids = AssetDatabase.FindAssets("t:CurrencyItemData");
+            string currencyPrefabPath = "Assets/Prefabs/Pickups/CurencyDefault.prefab";
+            linkedCount += LinkDefaultPrefab(currencyGuids, currencyPrefabPath, "CurencyDefault");
+
+            return linkedCount;
+        }
+
+        private static int LinkDefaultPrefab(string[] guids, string prefabPath, string address)
+        {
+            int count = 0;
+            string prefabGuid = AssetDatabase.AssetPathToGUID(prefabPath);
+            if (string.IsNullOrEmpty(prefabGuid)) return 0;
+
+            MarkAsAddressableIfNecessary(prefabGuid, address);
+            var assetRef = new UnityEngine.AddressableAssets.AssetReferenceGameObject(prefabGuid);
+
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                ItemData itemData = AssetDatabase.LoadAssetAtPath<ItemData>(path);
+                if (itemData == null) continue;
+
+                if (itemData.Prefab == null || itemData.Prefab.AssetGUID != prefabGuid)
+                {
+                    itemData.Prefab = assetRef;
+                    EditorUtility.SetDirty(itemData);
+                    count++;
+                }
+            }
+            return count;
         }
 
         private static int RunAdapterGenerationAndLinking()

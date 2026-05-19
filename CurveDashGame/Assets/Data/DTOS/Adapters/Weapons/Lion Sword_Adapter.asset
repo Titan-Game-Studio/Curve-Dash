@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Lion Sword
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: 5ef65672705bda64d81f2b3ca5045771, type: 3}
   m_Prefab: {fileID: 6999725053200202163, guid: 3f85231310b14de468a0bfbe9c64b4c6,
     type: 3}
   m_Description: 

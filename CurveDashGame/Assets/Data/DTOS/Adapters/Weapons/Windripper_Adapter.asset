@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Windripper
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: 951eef08a25254c4aaf18952dff37c8b, type: 3}
   m_Prefab: {fileID: 3640484100630214564, guid: 1602fa88e20184448adc5cf6309d83d9,
     type: 3}
   m_Description: 

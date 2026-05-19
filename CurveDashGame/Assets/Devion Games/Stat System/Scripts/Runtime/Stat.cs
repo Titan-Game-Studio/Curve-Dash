@@ -56,7 +56,7 @@ namespace DevionGames.StatSystem
         public virtual void Initialize(StatsHandler handler, StatOverride statOverride)
         {
             this.m_StatsHandler = handler;
-            
+
             if (statOverride.overrideBaseValue)
                 this.m_BaseValue = statOverride.baseValue;
 
@@ -64,9 +64,17 @@ namespace DevionGames.StatSystem
 
             for (int i = 0; i < statNodes.Count; i++)
             {
-                Stat referencedStat = handler.GetStat(statNodes[i].stat.Trim());
+                // Normalize whitespace: YAML serialization can wrap multi-word stat names across
+                // lines, producing embedded newlines (e.g. "Min\n      Damage"). Trim() only
+                // strips leading/trailing whitespace, so collapse all internal runs to a single space.
+                string normalizedStatName = System.Text.RegularExpressions.Regex.Replace(
+                    statNodes[i].stat, @"\s+", " ").Trim();
+                Stat referencedStat = handler.GetStat(normalizedStatName);
                 statNodes[i].statValue = referencedStat;
-                referencedStat.onValueChangeInternal += CalculateValue;
+                if (referencedStat != null)
+                    referencedStat.onValueChangeInternal += CalculateValue;
+                else if (!string.IsNullOrEmpty(normalizedStatName))
+                    Debug.LogWarning($"[Stat.Initialize] Stat '{normalizedStatName}' not found in handler '{handler.HandlerName}' (formula stat: '{this.m_StatName}')");
             }
         
             for (int i = 0; i < this.m_Callbacks.Count; i++)

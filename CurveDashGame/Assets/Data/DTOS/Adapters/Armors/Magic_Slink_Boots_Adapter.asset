@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Slink Boots
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 0111c36e0cdd38e48952c85e65e30dcb, type: 3}
+  m_Icon: {fileID: 21300000, guid: 78f28e5ee31414249bc0faaf6d2b601e, type: 3}
   m_Prefab: {fileID: 1611417654298816959, guid: 0d7a0b4702b417941972c15167149dfc,
     type: 3}
   m_Description: Light and flexible magical running boots.

@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Imperial Bow
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: 73dcc45bd7aae6645985d35d10fcfb36, type: 3}
   m_Prefab: {fileID: 7282460741346298713, guid: 00c6512086b5a4546913730522cc4f09,
     type: 3}
   m_Description: 

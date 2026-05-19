@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Skyforth
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 0111c36e0cdd38e48952c85e65e30dcb, type: 3}
+  m_Icon: {fileID: 21300000, guid: 2e6d323d994dce3408a0f8f1b5de7468, type: 3}
   m_Prefab: {fileID: 5856986886592240110, guid: 57878dfecf6cbae4b952bde5697ed939,
     type: 3}
   m_Description: Increases mana pool and prevents stun based on mana.

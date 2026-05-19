@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Arc Gem
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: eb8b5bdf933b3af48931884f54c9cebc, type: 3}
+  m_Icon: {fileID: 21300000, guid: 1c5efcb06a55ba747b89133ce19b31f3, type: 3}
   m_Prefab: {fileID: 2830056364503120991, guid: 34e2c432db7052045b7914b974f6a1a3,
     type: 3}
   m_Description: 'Grants active ability ''Arc Gem'' when socketed. Cooldown: 0.6s.'

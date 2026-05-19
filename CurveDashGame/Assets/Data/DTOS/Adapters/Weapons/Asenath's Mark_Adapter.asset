@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Asenath's Mark
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 21300000, guid: ea7a1a9e734d05346b3e0be00723277d, type: 3}
   m_Prefab: {fileID: 4208308555125493634, guid: 610d9ae141cc55a4485cc00229ff3d29,
     type: 3}
   m_Description: 

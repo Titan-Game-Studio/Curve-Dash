@@ -168,12 +168,12 @@ namespace STG.CurveDash
                         instance.DynamicAbilities.Add(starterActive);
                     }
 
-                    combat.CurrentWeapon = instance;
+                    // Do not auto-equip weapon at start
+                    combat.CurrentWeapon = null;
 
                     var playerView = gameObject.GetComponent<PlayerView>();
                     if (playerView != null)
                     {
-                        playerView.Equip(starterWeapon);
                         playerView.StartCoroutine(GiveStarterEquipmentRoutine(starterWeapon, starterActive));
                     }
                 }
@@ -237,6 +237,27 @@ namespace STG.CurveDash
                     {
                         bool added = DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", devionInstance);
                         UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Starter weapon added to Inventory result: {added}</color>");
+                    }
+                }
+
+                // Nếu vũ khí khởi đầu là cung (Bow) -> Tự động thêm Tên (Arrow) vào túi đồ
+                if (starterWeapon is BowData)
+                {
+                    var arrows = GetAllItemsOfType<OffHandData>().Where(o => o.SubType == OffHandType.Arrow).ToList();
+                    if (arrows.Count > 0)
+                    {
+                        var starterArrow = arrows[UnityEngine.Random.Range(0, arrows.Count)];
+                        HelperAddStarterItemToInventory(starterArrow);
+                    }
+                }
+                // Nếu vũ khí khởi đầu là kiếm 1 tay (One-Handed Sword) -> Tự động thêm Khiên (Shield) vào túi đồ
+                else if (starterWeapon is OneHandedWeaponData)
+                {
+                    var shields = GetAllItemsOfType<OffHandData>().Where(o => o.SubType == OffHandType.Shield).ToList();
+                    if (shields.Count > 0)
+                    {
+                        var starterShield = shields[UnityEngine.Random.Range(0, shields.Count)];
+                        HelperAddStarterItemToInventory(starterShield);
                     }
                 }
 
@@ -586,6 +607,40 @@ namespace STG.CurveDash
 
             var entity = CreateEntity<ItemPickupComponent>(itemView.gameObject);
             return entity;
+        }
+
+        private void HelperAddStarterItemToInventory(ItemData itemData)
+        {
+            if (itemData == null || DevionGames.InventorySystem.InventoryManager.Database == null) return;
+
+            var devionAdapter = itemData.DevionAdapter;
+            if (devionAdapter == null)
+            {
+                string targetName = itemData.name + "_Adapter";
+                foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
+                {
+                    if (dbItem != null && dbItem.name == targetName)
+                    {
+                        devionAdapter = dbItem;
+                        itemData.DevionAdapter = dbItem;
+                        break;
+                    }
+                }
+            }
+
+            if (devionAdapter != null)
+            {
+                var devionInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(devionAdapter);
+                if (devionInstance != null)
+                {
+                    if (devionInstance is CurveDashEquipmentAdapter equipAdapter)
+                    {
+                        equipAdapter.SyncData();
+                    }
+                    bool added = DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", devionInstance);
+                    UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Extra starter item '{itemData.name}' added to Inventory bag: {added}</color>");
+                }
+            }
         }
 
         private List<T> GetAllItemsOfType<T>() where T : ItemData

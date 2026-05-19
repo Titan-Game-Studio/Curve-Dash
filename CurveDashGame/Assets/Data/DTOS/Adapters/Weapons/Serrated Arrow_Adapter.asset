@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Serrated Arrow
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 21300000, guid: 9e2793db716913d4b87ac0a9e084d008, type: 3}
   m_Prefab: {fileID: 2769366917364965134, guid: 15d1a8fc0915d85408e38faaa6bccb23,
     type: 3}
   m_Description: 

@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Kaoms Heart
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: ea8d985057954d54da2d606524af8214, type: 3}
+  m_Icon: {fileID: 21300000, guid: 63239c898cebd7d4d8545cfbd4ac96ec, type: 3}
   m_Prefab: {fileID: 3394364790541958516, guid: 757be0c78b6294741bf7f276ed1fa8df,
     type: 3}
   m_Description: Has no sockets, but grants legendary life pool (+500 HP).

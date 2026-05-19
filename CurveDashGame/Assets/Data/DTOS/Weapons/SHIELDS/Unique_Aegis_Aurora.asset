@@ -17,16 +17,17 @@ MonoBehaviour:
   Rarity: 3
   Type: 1
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: ae0da4fd26885a44c8ea54ba6480df5d
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Restores energy shield on block.
   DevionAdapter: {fileID: 11400000, guid: faec320f94e667049bd3f9d5f09848f8, type: 2}
-  VisualModel: {fileID: 0}
-  PositionOffset: {x: 0, y: 0, z: 0}
-  RotationOffset: {x: 0, y: 0, z: 0}
+  VisualModel: {fileID: 6524304573867782126, guid: ae0da4fd26885a44c8ea54ba6480df5d,
+    type: 3}
+  PositionOffset: {x: -0.016, y: 0.041, z: 0.023}
+  RotationOffset: {x: 28.759998, y: -0.0000019478257, z: 256.06}
   MainAnimator: {fileID: 0}
   SubType: 0
   BlockChance: 55

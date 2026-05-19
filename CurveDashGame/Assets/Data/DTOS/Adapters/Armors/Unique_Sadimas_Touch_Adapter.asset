@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Sadimas Touch
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: cfea9c36036ca9e4591419c6c526d558, type: 3}
+  m_Icon: {fileID: 21300000, guid: 4f9662fdf84bdbb439e3c7f682300283, type: 3}
   m_Prefab: {fileID: 6283810249110538892, guid: 1585f80466b711c40ae6df1e889de476,
     type: 3}
   m_Description: Highly sought gloves that increase item quantity found.

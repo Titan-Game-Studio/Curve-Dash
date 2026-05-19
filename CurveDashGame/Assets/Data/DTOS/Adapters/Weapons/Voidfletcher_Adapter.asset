@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Voidfletcher
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 21300000, guid: fdd5b2e02ad712045a6ac157105f9864, type: 3}
   m_Prefab: {fileID: 947843970086670812, guid: 866d94be47c38d746970603c59bf81ce, type: 3}
   m_Description: 
   m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,

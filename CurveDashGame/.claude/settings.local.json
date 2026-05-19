@@ -7,7 +7,9 @@
       "Bash(xargs grep -l \"socket\\\\|gem\\\\|ability\")",
       "Bash(PowerShell -Command 'Get-ChildItem '\\\\''D:\\\\UNITY_PROJECTS\\\\Curve-Dash\\\\CurveDashGame\\\\Assets\\\\Scripts'\\\\'' -Recurse -Filter '\\\\''*.cs'\\\\'' | Where-Object { \\(Get-Content $_.FullName -Raw\\) -match '\\\\''ability|Ability'\\\\'' } | Select-Object -ExpandProperty FullName | Sort-Object | head -30')",
       "Bash(PowerShell -Command \"Get-Content 'D:\\\\UNITY_PROJECTS\\\\Curve-Dash\\\\CurveDashGame\\\\Assets\\\\Scripts\\\\ScriptableObjects\\\\ItemData.cs' | Select-String 'namespace' | Select-Object -First 1\")",
-      "Bash(printf '\\\\n' >> \"D:/UNITY_PROJECTS/Curve-Dash/CurveDashGame/obsidian-unity/02_Active_Tasks/Task_SmartEquipmentResolver.md\")"
+      "Bash(printf '\\\\n' >> \"D:/UNITY_PROJECTS/Curve-Dash/CurveDashGame/obsidian-unity/02_Active_Tasks/Task_SmartEquipmentResolver.md\")",
+      "Read(//c/Users/TITAN-WINDOWS/AppData/Local/Temp/claude/d--UNITY-PROJECTS-Curve-Dash-CurveDashGame/9a86a1ac-21f3-4552-9e6e-a83305cf351f/tasks/**)",
+      "Bash(powershell -Command \"select-string -Path 'D:\\\\UNITY_PROJECTS\\\\Curve-Dash\\\\CurveDashGame\\\\Assets\\\\Scenes\\\\MainGame.unity' -Pattern 'EquipmentRegion|guid.*e0c|guid.*e0d' | head -20\")"
     ],
     "additionalDirectories": [
       "D:\\UNITY_PROJECTS\\Curve-Dash\\CurveDashGame\\obsidian-unity\\02_Active_Tasks"

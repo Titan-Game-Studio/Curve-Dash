@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Eternal Sword
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: 5ba736e4756f3ff489522287cce2523c, type: 3}
   m_Prefab: {fileID: 4573974495087520027, guid: a8b2b40a8ef388d47b3c1a9ce098ff86,
     type: 3}
   m_Description: 

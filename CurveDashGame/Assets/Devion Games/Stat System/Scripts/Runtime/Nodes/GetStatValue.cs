@@ -10,7 +10,7 @@ namespace DevionGames.Graphs
         {
             if (statValue == null)
             {
-                Debug.LogError("Please ensure a stat named " + stat + " is added to the StatsHandler.");
+                return 0f;
             }
             return statValue.Value;
         }

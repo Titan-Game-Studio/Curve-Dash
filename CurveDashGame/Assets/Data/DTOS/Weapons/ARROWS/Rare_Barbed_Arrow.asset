@@ -17,14 +17,15 @@ MonoBehaviour:
   Rarity: 2
   Type: 0
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: 610d9ae141cc55a4485cc00229ff3d29
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Causes bleed and heavy damage over time.
   DevionAdapter: {fileID: 11400000, guid: 53b244f94849f1849a11642987b2fe8c, type: 2}
-  VisualModel: {fileID: 0}
+  VisualModel: {fileID: 4208308555125493634, guid: 610d9ae141cc55a4485cc00229ff3d29,
+    type: 3}
   PositionOffset: {x: 0, y: 0, z: 0}
   RotationOffset: {x: 0, y: 0, z: 0}
   MainAnimator: {fileID: 0}

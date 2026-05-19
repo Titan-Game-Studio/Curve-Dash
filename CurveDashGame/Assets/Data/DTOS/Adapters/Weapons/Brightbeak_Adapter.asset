@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Brightbeak
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: 1e6e920c40d0fe945846c542c1ca5bb9, type: 3}
   m_Prefab: {fileID: 3938849827149747637, guid: 458bb21264f96b149b2be1c12ab3c391,
     type: 3}
   m_Description: 

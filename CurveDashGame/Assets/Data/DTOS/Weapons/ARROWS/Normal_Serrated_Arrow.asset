@@ -17,14 +17,15 @@ MonoBehaviour:
   Rarity: 0
   Type: 0
   Prefab:
-    m_AssetGUID: 
+    m_AssetGUID: 15d1a8fc0915d85408e38faaa6bccb23
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Basic pointed arrows.
   DevionAdapter: {fileID: 11400000, guid: a7acfd30a0f00124a9bba9d627e7815c, type: 2}
-  VisualModel: {fileID: 0}
+  VisualModel: {fileID: 2769366917364965134, guid: 15d1a8fc0915d85408e38faaa6bccb23,
+    type: 3}
   PositionOffset: {x: 0, y: 0, z: 0}
   RotationOffset: {x: 0, y: 0, z: 0}
   MainAnimator: {fileID: 0}

@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Corroded Blade
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: 8e1f11409e992bc4cb6acb5866a84143, type: 3}
+  m_Icon: {fileID: 21300000, guid: c32f2c76f56d8a34fa8dcd864d606a5f, type: 3}
   m_Prefab: {fileID: 1837474075855264105, guid: 5fc33f742aba5f347a47ffc814de8622,
     type: 3}
   m_Description: 

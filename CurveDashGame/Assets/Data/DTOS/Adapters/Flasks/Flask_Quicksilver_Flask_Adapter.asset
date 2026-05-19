@@ -16,7 +16,7 @@ MonoBehaviour:
   m_ItemName: Quicksilver Flask
   m_UseItemNameAsDisplayName: 1
   m_DisplayName: New Item
-  m_Icon: {fileID: 21300000, guid: ea19c0346458c0f498898b9175de1cae, type: 3}
+  m_Icon: {fileID: 21300000, guid: 3787799124a600241aba531efa3ce467, type: 3}
   m_Prefab: {fileID: 2830056364503120991, guid: 2e99512e3f5417c43bd46ea971aaeed6,
     type: 3}
   m_Description: Increases Movement Speed by 40% during effect.

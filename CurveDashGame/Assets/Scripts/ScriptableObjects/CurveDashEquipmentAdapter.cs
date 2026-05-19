@@ -35,9 +35,17 @@ namespace STG.CurveDash
                 // Removed hardcoded icon assignment logic as requested.
 #endif
 
-                this.Icon = m_OriginalEquipmentData.Icon;
+                try
+                {
+                    this.Icon = m_OriginalEquipmentData.Icon;
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogWarning($"[CurveDashEquipmentAdapter] Icon reference is missing or broken on '{m_OriginalEquipmentData.name}': {ex.Message}");
+                    this.Icon = null;
+                }
                 
-                Debug.Log($"<color=lime>[CurveDashEquipmentAdapter] SyncData for '{this.Name}' (Original='{m_OriginalEquipmentData.name}'): Icon='{(this.Icon != null ? this.Icon.name : "NULL")}', OriginalIcon='{(m_OriginalEquipmentData.Icon != null ? m_OriginalEquipmentData.Icon.name : "NULL")}'</color>");
+                Debug.Log($"<color=lime>[CurveDashEquipmentAdapter] SyncData for '{this.Name}' (Original='{m_OriginalEquipmentData.name}'): Icon='{(this.Icon != null ? "Assigned" : "NULL")}', OriginalIcon='{(m_OriginalEquipmentData.Icon != null ? "Assigned" : "NULL")}'</color>");
 
                 // Sync Description field using Reflection because m_Description is private inside DevionGames.Item
                 var descField = typeof(DevionGames.InventorySystem.Item).GetField("m_Description", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -45,6 +53,8 @@ namespace STG.CurveDash
                 {
                     descField.SetValue(this, m_OriginalEquipmentData.Description);
                 }
+
+                this.Prefab = null;
 
                 // Associate the visual model of our equipment as the world Prefab inside Devion Games
                 if (m_OriginalEquipmentData is EquippableData equippable && equippable.VisualModel != null)
@@ -142,14 +152,28 @@ namespace STG.CurveDash
                     try
                     {
                         db = DevionGames.InventorySystem.InventoryManager.Database;
+                        Debug.Log($"<color=cyan>[DB-DIAG] '{this.name}' | Runtime DB='{db?.name ?? "NULL"}' | equipments={db?.equipments?.Count ?? 0} regions={string.Join(", ", db?.equipments?.ConvertAll(e => e.Name) ?? new System.Collections.Generic.List<string>())}</color>");
                     }
-                    catch (System.Exception) { /* Fallback */ }
+                    catch (System.Exception ex)
+                    {
+                        Debug.LogWarning($"[DB-DIAG] Failed to get runtime database: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"[DB-DIAG] '{this.name}' | InventoryManager NOT FOUND in scene! Cannot get database.");
                 }
             }
             else
             {
                 #if UNITY_EDITOR
                 string[] guids = UnityEditor.AssetDatabase.FindAssets("t:ItemDatabase");
+                Debug.Log($"<color=cyan>[DB-DIAG][Editor] '{this.name}' | Found {guids.Length} ItemDatabase asset(s) in project:</color>");
+                for (int i = 0; i < guids.Length; i++)
+                {
+                    string p = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[i]);
+                    Debug.Log($"<color=cyan>[DB-DIAG][Editor]   [{i}] {p}{(i == 0 ? " ← USING THIS ONE" : "")}</color>");
+                }
                 if (guids.Length > 0)
                 {
                     string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[0]);
@@ -245,20 +269,27 @@ namespace STG.CurveDash
                 // 4. Auto-assign correct EquipmentRegion to prevent Devion from overwriting MainHand weapon!
                 if (db.equipments != null && db.equipments.Count > 0)
                 {
+                    Debug.Log($"<color=orange>[REGION-DIAG] '{this.name}' | DB has {db.equipments.Count} regions: [{string.Join(", ", db.equipments.ConvertAll(r => r.Name))}]</color>");
                     DevionGames.InventorySystem.EquipmentRegion matchingRegion = null;
                     System.Collections.Generic.List<string> searchKeywords = new System.Collections.Generic.List<string>();
 
                     if (m_OriginalEquipmentData is WeaponData || m_OriginalEquipmentData is OffHandData)
                     {
-                        // Gán cho cả 2 vùng để bỏ qua kiểm tra cứng của Devion, giao toàn quyền điều khiển logic cho PlayerView!
-                        var rightRegion = db.equipments.Find(r => r.Name.IndexOf("Right", System.StringComparison.OrdinalIgnoreCase) >= 0);
-                        var leftRegion = db.equipments.Find(r => r.Name.IndexOf("Left", System.StringComparison.OrdinalIgnoreCase) >= 0);
+                        // Search by "MainHand"/"OffHand" (CurveDash_Vaal_Reliquary naming) with "Right"/"Left" fallback
+                        var rightRegion = db.equipments.Find(r =>
+                            r.Name.IndexOf("MainHand", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            r.Name.IndexOf("Main Hand", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            r.Name.IndexOf("Right", System.StringComparison.OrdinalIgnoreCase) >= 0);
+                        var leftRegion = db.equipments.Find(r =>
+                            r.Name.IndexOf("OffHand", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            r.Name.IndexOf("Off Hand", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            r.Name.IndexOf("Left", System.StringComparison.OrdinalIgnoreCase) >= 0);
                         
                         this.Region = new System.Collections.Generic.List<DevionGames.InventorySystem.EquipmentRegion>();
                         if (rightRegion != null) this.Region.Add(rightRegion);
                         if (leftRegion != null) this.Region.Add(leftRegion);
                         
-                        UnityEngine.Debug.Log($"[CurveDashEquipmentAdapter] Weapon/Offhand '{this.Name}' successfully assigned to BOTH Left & Right Hand regions for dynamic logic.");
+                        UnityEngine.Debug.Log($"[CurveDashEquipmentAdapter] Weapon/Offhand '{this.Name}' assigned regions → Right='{rightRegion?.Name ?? "NULL"}' Left='{leftRegion?.Name ?? "NULL"}' (total={this.Region.Count}).");
                         return;
                     }
                     else if (m_OriginalEquipmentData is ArmorItemData armorItem)

@@ -34,25 +34,19 @@ namespace STG.CurveDash
                 this.Name = m_OriginalItemData.ItemName;
 
 #if UNITY_EDITOR
-                string prefabPath = "";
-                if (m_OriginalItemData is CurrencyItemData) prefabPath = "Assets/Prefabs/Pickups/CurencyDefault.prefab";
-                else if (m_OriginalItemData is FlaskItemData) prefabPath = "Assets/Prefabs/Pickups/FlaskDefault.prefab";
-                else if (m_OriginalItemData is GemItemData) prefabPath = "Assets/Prefabs/Pickups/GemDefault.prefab";
-
-                if (!string.IsNullOrEmpty(prefabPath))
+                this.Prefab = null;
+                if (m_OriginalItemData.Prefab != null && !string.IsNullOrEmpty(m_OriginalItemData.Prefab.AssetGUID))
                 {
-                    var pickupPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                    if (pickupPrefab != null)
+                    string prefabPath = UnityEditor.AssetDatabase.GUIDToAssetPath(m_OriginalItemData.Prefab.AssetGUID);
+                    if (!string.IsNullOrEmpty(prefabPath))
                     {
-                        this.Prefab = pickupPrefab;
+                        // Safely verify we do not assign ItemPickup to the adapter.
+                        if (!prefabPath.EndsWith("ItemPickup.prefab", System.StringComparison.OrdinalIgnoreCase))
+                        {
+                            this.Prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                        }
                     }
                 }
-                else
-                {
-                    this.Prefab = null;
-                }
-
-                // Removed hardcoded icon assignment as requested.
 #endif
 
                 this.Icon = m_OriginalItemData.Icon;
