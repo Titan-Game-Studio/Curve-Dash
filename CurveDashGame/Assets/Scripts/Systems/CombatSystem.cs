@@ -16,10 +16,13 @@ namespace STG.CurveDash
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
         private readonly EcsPool<EnemyHealthComponent> healthPool;
         private readonly EcsPool<EnemyDeadEvent> deadPool;
-        
-        public CombatSystem(EcsWorld world)
+
+        private readonly GemLevelService _gemLevelService;
+
+        public CombatSystem(EcsWorld world, GemLevelService gemLevelService)
         {
             this.world = world;
+            _gemLevelService = gemLevelService;
             
             playerFilter = world.Filter<PlayerComponent>().Inc<PlayerCombatComponent>().Inc<ViewLinkComponent>().End();
             enemyFilter = world.Filter<EnemyHealthComponent>().Inc<EnemyComponent>().Inc<ViewLinkComponent>().Exc<EnemyDeadEvent>().End();
@@ -409,15 +412,41 @@ namespace STG.CurveDash
 
             totalDamage = baseDamage + offhandBonus;
 
-            // 3. Critical Hit Mechanic (Base 10% chance for a 1.5x damage critical hit)
-            float critChance = 10f; 
+            // 3. Apply socketed gem level multiplier (highest-level active gem wins)
+            if (_gemLevelService != null && combat.CurrentWeapon != null)
+            {
+                float gemMultiplier = 1f;
+                foreach (var ab in combat.CurrentWeapon.GetAbilities())
+                {
+                    if (ab is PoEAbility poeAb && poeAb.SkillType != PoEAbilityType.Aura)
+                    {
+                        float m = _gemLevelService.GetDamageMultiplier(ab);
+                        if (m > gemMultiplier) gemMultiplier = m;
+                    }
+                }
+                if (playerViewComponent != null)
+                {
+                    foreach (var ab in playerViewComponent.GetEquippedArmorAbilities())
+                    {
+                        if (ab is PoEAbility poeAb && poeAb.SkillType != PoEAbilityType.Aura)
+                        {
+                            float m = _gemLevelService.GetDamageMultiplier(ab);
+                            if (m > gemMultiplier) gemMultiplier = m;
+                        }
+                    }
+                }
+                totalDamage *= gemMultiplier;
+            }
+
+            // 4. Critical Hit Mechanic (Base 10% chance for a 1.5x damage critical hit)
+            float critChance = 10f;
             if (Random.Range(0f, 100f) < critChance)
             {
                 isCrit = true;
                 totalDamage *= 1.5f;
             }
 
-            // 4. Subtract Health
+            // 5. Subtract Health
             targetHealth.CurrentHealth -= totalDamage;
 
             // Log damage with rich info
@@ -430,13 +459,26 @@ namespace STG.CurveDash
                 Debug.Log($"[Combat] Player dealt {totalDamage:F1} damage (Base: {baseDamage:F1} + Offhand: {offhandBonus:F1}) to enemy! HP left: {targetHealth.CurrentHealth:F1}");
             }
 
-            // 5. Handle Enemy Death
+            // 6. Handle Enemy Death — give gem XP
             if (targetHealth.CurrentHealth <= 0)
             {
                 deadPool.Add(enemyEntity);
+
+                if (_gemLevelService != null)
+                {
+                    var gemsToXP = new List<AbilityData>();
+                    if (combat.CurrentWeapon != null)
+                        gemsToXP.AddRange(combat.CurrentWeapon.GetAbilities());
+                    if (playerViewComponent != null)
+                        gemsToXP.AddRange(playerViewComponent.GetEquippedArmorAbilities());
+
+                    var leveledUp = _gemLevelService.AddKillXP(gemsToXP);
+                    foreach (var info in leveledUp)
+                        Debug.Log($"<color=yellow>[GemLevel] Level up! {info}</color>");
+                }
             }
 
-            // 6. Flash enemy white on damage
+            // 7. Flash enemy white on damage
             ref var targetEnemyView = ref viewLinkPool.Get(enemyEntity);
             if (targetEnemyView.Transform != null)
             {

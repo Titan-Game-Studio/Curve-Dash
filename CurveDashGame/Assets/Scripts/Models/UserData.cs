@@ -27,5 +27,8 @@ namespace STG.CurveDash
         public List<string> OwnedItems = new List<string>();
 
         public long LastUpdated;
+
+        // Gem level progression (ability.name → level + XP)
+        public System.Collections.Generic.List<GemProgressEntry> GemProgress = new System.Collections.Generic.List<GemProgressEntry>();
     }
 }

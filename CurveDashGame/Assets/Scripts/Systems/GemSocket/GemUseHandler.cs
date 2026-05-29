@@ -14,6 +14,7 @@ namespace STG.CurveDash
         [Inject(Id = "Equipment")] private readonly ItemContainer _equipmentContainer;
         [Inject(Id = "Inventory")] private readonly ItemContainer _inventoryContainer;
         [Inject] private readonly IGemSocketService _gemSocketService;
+        [Inject] private readonly AssetManager _assetManager;
         
         private PlayerView _playerView; // Implements IEquippedLoadout
 
@@ -78,6 +79,10 @@ namespace STG.CurveDash
                     _inventoryContainer.RemoveItem(item);
                 }
 
+                // Return displaced gem to Inventory when replacing a same-type gem
+                if (result.ResultType == GemSocketResultType.Replaced && result.ReplacedAbility != null)
+                    ReturnGemToInventory(result.ReplacedAbility);
+
                 // Active skill gems: sync the Actionbar to reflect newly socketed abilities
                 if (result.Success && gemData.GemType == GemType.Skill && gemData.EmbeddedAbility != null)
                 {
@@ -119,6 +124,60 @@ namespace STG.CurveDash
                 }
             }
             Debug.LogWarning($"[GemUseHandler] No Devion skill found for ability '{ability.AbilityName}' — Actionbar not updated.");
+        }
+
+        private void ReturnGemToInventory(AbilityData replacedAbility)
+        {
+            if (replacedAbility == null || _assetManager?.MasterItemCatalog == null) return;
+
+            GemItemData gem = null;
+            foreach (var item in _assetManager.MasterItemCatalog.Items)
+            {
+                if (item is GemItemData g && g.EmbeddedAbility == replacedAbility)
+                {
+                    gem = g;
+                    break;
+                }
+            }
+
+            if (gem == null)
+            {
+                Debug.LogWarning($"[GemUseHandler] Could not find GemItemData for displaced ability '{replacedAbility.name}' — gem may be lost.");
+                return;
+            }
+
+            var adapter = gem.DevionAdapter;
+            if (adapter == null)
+            {
+                string targetName = gem.name + "_Adapter";
+                var db = InventoryManager.Database;
+                if (db != null)
+                {
+                    foreach (var dbItem in db.items)
+                    {
+                        if (dbItem != null && dbItem.name == targetName)
+                        {
+                            adapter = dbItem;
+                            gem.DevionAdapter = adapter;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (adapter != null)
+            {
+                var instance = InventoryManager.CreateInstance(adapter);
+                if (instance != null)
+                {
+                    ItemContainer.AddItem("Inventory", instance);
+                    Debug.Log($"<color=cyan>[GemUseHandler] Displaced gem '{gem.name}' returned to Inventory.</color>");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[GemUseHandler] No Devion adapter found for gem '{gem.name}' — gem may be lost.");
+            }
         }
 
         private void RemoveAbilityFromActionbar(AbilityData ability)
