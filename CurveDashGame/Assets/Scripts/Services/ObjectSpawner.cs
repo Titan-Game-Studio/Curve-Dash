@@ -312,42 +312,6 @@ namespace STG.CurveDash
                     }
                 }
 
-                // Thêm Flask vào Inventory & Actionbar
-                var allFlasks = assetCatalog.MasterItemCatalog.Items.OfType<FlaskItemData>().ToList();
-                var lifeFlasks = allFlasks.Where(f => f.FlaskType == FlaskType.Life).ToList();
-                var manaFlasks = allFlasks.Where(f => f.FlaskType == FlaskType.Mana).ToList();
-                
-                var starterFlasks = new List<FlaskItemData>();
-                if (lifeFlasks.Count > 0) starterFlasks.Add(lifeFlasks[UnityEngine.Random.Range(0, lifeFlasks.Count)]);
-                if (manaFlasks.Count > 0) starterFlasks.Add(manaFlasks[UnityEngine.Random.Range(0, manaFlasks.Count)]);
-
-                foreach (var flask in starterFlasks)
-                {
-                    var fAdapter = flask.DevionAdapter;
-                    if (fAdapter == null)
-                    {
-                        string targetName = flask.name + "_Adapter";
-                        foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
-                        {
-                            if (dbItem != null && dbItem.name == targetName)
-                            {
-                                fAdapter = dbItem;
-                                flask.DevionAdapter = dbItem;
-                                break;
-                            }
-                        }
-                    }
-                    if (fAdapter != null)
-                    {
-                        var fInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(fAdapter);
-                        if (fInstance != null)
-                        {
-                            DevionGames.InventorySystem.ItemContainer.AddItem("Actionbar", fInstance);
-                            DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", fInstance);
-                        }
-                    }
-                }
-
                 // Thêm kỹ năng Active vào Actionbar
                 if (starterActive != null)
                 {

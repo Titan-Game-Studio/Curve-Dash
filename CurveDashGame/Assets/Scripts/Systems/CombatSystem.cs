@@ -64,18 +64,6 @@ namespace STG.CurveDash
             {
                 ref var combat = ref combatPool.Get(playerEntity);
 
-                // Update combo timer
-                if (combat.ComboIndex > 0)
-                {
-                    combat.ComboTimer += Time.deltaTime;
-                    if (combat.ComboTimer > 2.5f) // Reset back to Skill 1 if idle for 2.5 seconds
-                    {
-                        combat.ComboIndex = 0;
-                        combat.ComboTimer = 0f;
-                        Debug.Log("<color=orange>[Combo System] Combo timed out! Resetting to Skill 1.</color>");
-                    }
-                }
-
                 // Determine attack parameters (support unarmed fallback if no weapon equipped)
                 float attackRange = 2.0f; // Default unarmed attack range
                 float attackSpeed = 1.0f; // Default unarmed attack speed (attacks per second)
@@ -554,31 +542,22 @@ namespace STG.CurveDash
                 }
             }
 
-            // 8. Execute Active Offensive Skills as a Sequential Combo
+            // 8. Execute ALL Active Offensive Skills simultaneously (chained, no gap between skills)
             if (triggerAbilities && activeOffensiveSkills.Count > 0)
             {
                 ref var enemyView = ref viewLinkPool.Get(enemyEntity);
                 if (enemyView.Transform != null)
                 {
                     Vector3 targetFeetPosition = GetEnemyFeetPosition(enemyView.Transform);
-
-                    // Ensure combo index is valid
-                    if (combat.ComboIndex >= activeOffensiveSkills.Count)
+                    for (int i = 0; i < activeOffensiveSkills.Count; i++)
                     {
-                        combat.ComboIndex = 0;
+                        var skill = activeOffensiveSkills[i];
+                        if (skill != null)
+                        {
+                            Debug.Log($"<color=lime>[Combat] Chain cast {i + 1}/{activeOffensiveSkills.Count}: '{skill.AbilityName}'</color>");
+                            skill.Execute(playerView.Transform.gameObject, targetFeetPosition);
+                        }
                     }
-
-                    // Cast the skill for the current combo step
-                    var skillToCast = activeOffensiveSkills[combat.ComboIndex];
-                    if (skillToCast != null)
-                    {
-                        Debug.Log($"<color=lime>[Combo Combo!] Step {combat.ComboIndex + 1}/{activeOffensiveSkills.Count}: Cast '{skillToCast.AbilityName}'</color>");
-                        skillToCast.Execute(playerView.Transform.gameObject, targetFeetPosition);
-                    }
-
-                    // Advance sequence and reset idle timer
-                    combat.ComboIndex = (combat.ComboIndex + 1) % activeOffensiveSkills.Count;
-                    combat.ComboTimer = 0f;
                 }
             }
         }

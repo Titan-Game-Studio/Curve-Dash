@@ -77,10 +77,65 @@ namespace STG.CurveDash
                     Debug.Log($"[GemUseHandler] Removing gem '{gemData.name}' from Inventory after successful socket.");
                     _inventoryContainer.RemoveItem(item);
                 }
+
+                // Active skill gems: sync the Actionbar to reflect newly socketed abilities
+                if (result.Success && gemData.GemType == GemType.Skill && gemData.EmbeddedAbility != null)
+                {
+                    if (result.ResultType == GemSocketResultType.Replaced && result.ReplacedAbility != null)
+                        RemoveAbilityFromActionbar(result.ReplacedAbility);
+
+                    AddAbilityToActionbar(gemData.EmbeddedAbility);
+                }
             }
             else
             {
                 Debug.LogWarning($"[GemUseHandler] Item '{item.name}' is not a GemItemData – ignored.");
+            }
+        }
+
+        private void AddAbilityToActionbar(AbilityData ability)
+        {
+            if (ability == null) return;
+            var db = InventoryManager.Database;
+            if (db == null) return;
+
+            foreach (var dbItem in db.items)
+            {
+                if (dbItem == null) continue;
+                if (dbItem.Name.IndexOf(ability.AbilityName, System.StringComparison.OrdinalIgnoreCase) >= 0
+                    || dbItem.name.IndexOf(ability.AbilityName, System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    var instance = InventoryManager.CreateInstance(dbItem);
+                    if (instance != null)
+                    {
+                        // Show the skill's own icon, not the gem or database default icon
+                        if (ability.Icon != null)
+                            instance.Icon = ability.Icon;
+
+                        ItemContainer.AddItem("Actionbar", instance);
+                        Debug.Log($"<color=cyan>[GemUseHandler] Added '{ability.AbilityName}' to Actionbar (icon from AbilityData).</color>");
+                    }
+                    return;
+                }
+            }
+            Debug.LogWarning($"[GemUseHandler] No Devion skill found for ability '{ability.AbilityName}' — Actionbar not updated.");
+        }
+
+        private void RemoveAbilityFromActionbar(AbilityData ability)
+        {
+            if (ability == null) return;
+            var actionbar = DevionGames.UIWidgets.WidgetUtility.Find<ItemContainer>("Actionbar");
+            if (actionbar == null) return;
+
+            foreach (var s in actionbar.Slots)
+            {
+                if (s.IsEmpty || s.ObservedItem == null) continue;
+                if (s.ObservedItem.Name.IndexOf(ability.AbilityName, System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    actionbar.RemoveItem(s.ObservedItem, 1);
+                    Debug.Log($"<color=cyan>[GemUseHandler] Removed '{ability.AbilityName}' from Actionbar (replaced by new gem).</color>");
+                    return;
+                }
             }
         }
     }
