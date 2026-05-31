@@ -27,7 +27,10 @@
       "Bash(xargs grep -l \"Equipment\\\\|equipment\")",
       "Bash(python3 -c ' *)",
       "Bash(python3 *)",
-      "Bash(git status *)"
+      "Bash(git status *)",
+      "mcp__unity-mcp__Unity_Camera_Capture",
+      "mcp__unity-mcp__Unity_RunCommand",
+      "Bash(powershell -Command \"\\(Get-Content 'Assets/Scripts/ScriptableObjects/CurveDashEquipmentAdapter.cs' | Select-String -Pattern '\\(GetEquippedFlaskCount|FindEquippedBelt\\)' | Select-Object -First 5\\)\")"
     ],
     "additionalDirectories": [
       "D:\\UNITY_PROJECTS\\Curve-Dash\\CurveDashGame\\obsidian-unity\\02_Active_Tasks"

@@ -28,4 +28,7 @@ MonoBehaviour:
   MeshPartName: Legs Armor Type 2 Color 1
   HealthBonus: 50
   LifeRegeneration: 0
-  FlaskSlots: []
+  FlaskSlots:
+  - {fileID: 11400000, guid: e18a6363de4f10c4781093baab716855, type: 2}
+  - {fileID: 11400000, guid: 28899174d1484bb4ba1505c3d2e8f8ca, type: 2}
+  - {fileID: 11400000, guid: b2fd295451af6b748b47cb8c0a3e1fc2, type: 2}

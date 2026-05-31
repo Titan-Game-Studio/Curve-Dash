@@ -9,27 +9,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 20a93a8c91388c14b9ef4d3d0c9b4d1b, type: 3}
-  m_Name: Mana Flask Small
-  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashItemAdapter
-  m_Id: 213fa87a-b1ba-40d8-a1e3-9708efb8c28d
+  m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
+  m_Name: Flask_Mana_Flask_Small_Equipment_Adapter
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
+  m_Id: 550e8400-e29b-41d4-a716-446655440004
   m_ItemName: Mana Flask Small
   m_UseItemNameAsDisplayName: 1
-  m_DisplayName: New Item
+  m_DisplayName: 
   m_Icon: {fileID: 21300000, guid: 9484d127892a69c468ea86fc12986d2e, type: 3}
-  m_Prefab: {fileID: 2830056364503120991, guid: 2e99512e3f5417c43bd46ea971aaeed6,
-    type: 3}
+  m_Prefab: {fileID: 0}
   m_Description: Recovers 35 Mana over 4 seconds.
   m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,
     type: 2}
   m_IsSellable: 1
-  m_BuyPrice: 6
+  m_BuyPrice: 10
   m_CanBuyBack: 1
-  m_BuyCurrency: {fileID: -6623786914046544860, guid: 17787831f9b1b6f469b7778380828f6a,
-    type: 2}
-  m_SellPrice: 3
-  m_SellCurrency: {fileID: -6623786914046544860, guid: 17787831f9b1b6f469b7778380828f6a,
-    type: 2}
+  m_BuyCurrency: {fileID: 0}
+  m_SellPrice: 5
+  m_SellCurrency: {fileID: 0}
   m_Stack: 1
   m_MaxStack: 1
   m_IsDroppable: 1
@@ -47,21 +44,9 @@ MonoBehaviour:
     modifiers: []
   ingredients: []
   properties:
-  - name: Item Type
+  - name: Equipment Type
     typeIndex: 0
     stringValue: Flask
-    intValue: 0
-    floatValue: 0
-    colorValue: {r: 0, g: 0, b: 0, a: 0}
-    boolValue: 0
-    objectReferenceValue: {fileID: 0}
-    vector2Value: {x: 0, y: 0}
-    vector3Value: {x: 0, y: 0, z: 0}
-    show: 1
-    color: {r: 1, g: 1, b: 1, a: 1}
-  - name: Rarity
-    typeIndex: 0
-    stringValue: Normal
     intValue: 0
     floatValue: 0
     colorValue: {r: 0, g: 0, b: 0, a: 0}
@@ -82,8 +67,8 @@ MonoBehaviour:
     vector2Value: {x: 0, y: 0}
     vector3Value: {x: 0, y: 0, z: 0}
     show: 1
-    color: {r: 0, g: 1, b: 1, a: 1}
-  - name: Recovery Amount
+    color: {r: 0.4, g: 0.6, b: 1, a: 1}
+  - name: Mana Recovery
     typeIndex: 3
     stringValue: 
     intValue: 0
@@ -94,23 +79,11 @@ MonoBehaviour:
     vector2Value: {x: 0, y: 0}
     vector3Value: {x: 0, y: 0, z: 0}
     show: 1
-    color: {r: 0, g: 1, b: 0, a: 1}
-  - name: Duration
-    typeIndex: 3
-    stringValue: 
+    color: {r: 0.4, g: 0.6, b: 1, a: 1}
+  - name: Rarity
+    typeIndex: 0
+    stringValue: Normal
     intValue: 0
-    floatValue: 4
-    colorValue: {r: 0, g: 0, b: 0, a: 0}
-    boolValue: 0
-    objectReferenceValue: {fileID: 0}
-    vector2Value: {x: 0, y: 0}
-    vector3Value: {x: 0, y: 0, z: 0}
-    show: 1
-    color: {r: 1, g: 1, b: 1, a: 1}
-  - name: Max Charges
-    typeIndex: 5
-    stringValue: 
-    intValue: 30
     floatValue: 0
     colorValue: {r: 0, g: 0, b: 0, a: 0}
     boolValue: 0
@@ -119,16 +92,14 @@ MonoBehaviour:
     vector3Value: {x: 0, y: 0, z: 0}
     show: 1
     color: {r: 1, g: 1, b: 1, a: 1}
-  - name: Charges Per Use
-    typeIndex: 5
-    stringValue: 
-    intValue: 10
-    floatValue: 0
-    colorValue: {r: 0, g: 0, b: 0, a: 0}
-    boolValue: 0
-    objectReferenceValue: {fileID: 0}
-    vector2Value: {x: 0, y: 0}
-    vector3Value: {x: 0, y: 0, z: 0}
-    show: 1
-    color: {r: 1, g: 1, b: 1, a: 1}
-  m_OriginalItemData: {fileID: 11400000, guid: cfe69795a43f12340b4f96fc19e41ad1, type: 2}
+  m_UseCategoryCooldown: 1
+  m_Cooldown: 1
+  actions: []
+  m_OverrideEquipPrefab: {fileID: 0}
+  m_Region:
+  - {fileID: -8888359219924490327, guid: 9acf401ad757e3f419dd0f256a9f2d80, type: 2}
+  m_OriginalEquipmentData: {fileID: 11400000, guid: cfe69795a43f12340b4f96fc19e41ad1,
+    type: 2}
+  references:
+    version: 2
+    RefIds: []

@@ -23,8 +23,8 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Recovers 35 Mana over 4 seconds.
-  DevionAdapter: {fileID: 11400000, guid: b01090fb3d842e2419f8e0dd2e297f47, type: 2}
-  AutoUseCondition: 0
+  DevionAdapter: {fileID: 11400000, guid: 44165a2e6caf57543b45816808ff98f2, type: 2}
+  AutoUseCondition: 1
   FlaskType: 1
   RecoveryAmount: 35
   Duration: 4

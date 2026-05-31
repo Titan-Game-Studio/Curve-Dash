@@ -14,6 +14,7 @@ namespace STG.CurveDash
         [Inject] private DataManager _dataManager;
         [Inject] private ShopService _shopService;
         [Inject] private GameSettings _gameSettings;
+        [Inject] private PlayerStatService _playerStatService;
         
         [SerializeField] private Transform _skinContainerTransform;
         [SerializeField] private Transform _auraContainerTransform;
@@ -509,6 +510,8 @@ namespace STG.CurveDash
                         if (_modularView != null)
                             _modularView.SetPartByName(EquipmentSlot.Belt, belt.MeshPartName, belt.ModularPartIndex);
                         _beltFlaskService.SetBelt(belt);
+                        // Check for flask equipment items and populate belt's flask slots
+                        UpdateBeltFlasksFromEquipment();
                     }
                     else if (itemData is AmuletItemData amulet)
                     {
@@ -741,11 +744,20 @@ namespace STG.CurveDash
             }
 
             // Belt flask auto-use tick (POE-style)
-            if (_beltFlaskService.HasActiveBelt)
+            if (_beltFlaskService.HasActiveBelt && _playerStatService != null)
             {
-                // TODO: Pass real currentHealth/maxHealth from ECS PlayerStatComponent
-                float healing = _beltFlaskService.Tick(Time.deltaTime, 0f, 0f);
-                // TODO: Apply healing to player health stat via ECS event
+                ref var playerStats = ref _playerStatService.GetPlayerStat();
+                float healing = _beltFlaskService.Tick(Time.deltaTime, playerStats.CurrentLife, playerStats.MaxLife);
+                if (healing > 0f)
+                {
+                    _playerStatService.AddLife(healing);
+                }
+
+                // Apply flask modifiers to movement speed and attack speed
+                float speedMod = _beltFlaskService.GetSpeedModifier();
+                float attackSpeedMod = _beltFlaskService.GetAttackSpeedModifier();
+                MovementSpeed *= speedMod;
+                AttackSpeed *= attackSpeedMod;
             }
         }
 
@@ -1104,6 +1116,30 @@ namespace STG.CurveDash
         }
 
         #endregion
+
+        // Scans equipment container for Flask equipment items (Flask First, Flask Second, Flask Third regions)
+        // and logs them for debugging - the actual flask functionality is in the belt's FlaskSlots
+        private void UpdateBeltFlasksFromEquipment()
+        {
+            if (_equipmentContainer == null) return;
+
+            var flaskCount = 0;
+            foreach (var slot in _equipmentContainer.Slots)
+            {
+                if (slot.IsEmpty || slot.ObservedItem == null) continue;
+
+                if (slot.ObservedItem is CurveDashEquipmentAdapter adapter && adapter.OriginalEquipmentData is FlaskItemData flask)
+                {
+                    flaskCount++;
+                    Debug.Log($"<color=cyan>[PlayerView] Flask equipped via equipment: {flask.ItemName}</color>");
+                }
+            }
+
+            if (flaskCount > 0)
+            {
+                Debug.Log($"<color=lime>[PlayerView] Total {flaskCount} flasks equipped in equipment slots</color>");
+            }
+        }
 
         private void LoadOrEnableAsset(
             int index, 

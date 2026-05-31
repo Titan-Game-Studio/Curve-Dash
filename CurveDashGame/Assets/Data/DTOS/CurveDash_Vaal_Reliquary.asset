@@ -240,19 +240,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unstackEvent: -1
   unstackKeyCode: 304
---- !u!114 &-7664582539774421209
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
-  m_Name: Ring
-  m_EditorClassIdentifier: DevionGames.InventorySystem::DevionGames.InventorySystem.EquipmentRegion
-  name: Ring
 --- !u!114 &-7427245140175711199
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -363,9 +350,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
-  m_Name: Flask Second
+  m_Name: Flask 2
   m_EditorClassIdentifier: DevionGames.InventorySystem::DevionGames.InventorySystem.EquipmentRegion
-  name: Flask Second
+  name: Flask 2
 --- !u!114 &-6623786914046544860
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -699,9 +686,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
-  m_Name: Flask First
+  m_Name: Flask 1
   m_EditorClassIdentifier: DevionGames.InventorySystem::DevionGames.InventorySystem.EquipmentRegion
-  name: Flask First
+  name: Flask 1
 --- !u!114 &-3817802777368614781
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -719,6 +706,19 @@ MonoBehaviour:
   queriesHitTriggers: 0
   debugMessages: 1
   showAllComponents: 0
+--- !u!114 &-3294864034715802336
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
+  m_Name: Ring
+  m_EditorClassIdentifier: DevionGames.InventorySystem::DevionGames.InventorySystem.EquipmentRegion
+  name: Ring
 --- !u!114 &-2839999955813321745
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -975,9 +975,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
-  m_Name: Flask Third
+  m_Name: Flask 3
   m_EditorClassIdentifier: DevionGames.InventorySystem::DevionGames.InventorySystem.EquipmentRegion
-  name: Flask Third
+  name: Flask 3
 --- !u!114 &-1474344929657048262
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1124,12 +1124,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 0bd84c3bcf1a91b479b06d315f920cc6, type: 2}
   - {fileID: 11400000, guid: e227272887b45124c8949e191bb9022e, type: 2}
   - {fileID: 11400000, guid: 574c6533ffedf8d41b876a518475d106, type: 2}
-  - {fileID: 11400000, guid: 4f2a9af021b2d57449018fb977079ec6, type: 2}
+  - {fileID: 11400000, guid: af7a3dadc35388d40b78e829610ddf52, type: 2}
   - {fileID: 11400000, guid: 1a4cde7e454e3604793037d945443a62, type: 2}
-  - {fileID: 11400000, guid: 7689e58709f100241a38fbe21d5cdbe4, type: 2}
-  - {fileID: 11400000, guid: bd6e727537d05564190ca11e5b688f8c, type: 2}
-  - {fileID: 11400000, guid: b01090fb3d842e2419f8e0dd2e297f47, type: 2}
-  - {fileID: 11400000, guid: 0ee2ccb71de05ea4a8ce46bf12dd1e09, type: 2}
+  - {fileID: 11400000, guid: 2e07237f39f303848b398cbea7340de2, type: 2}
+  - {fileID: 11400000, guid: 7bbe4043156f7504f81fa0195770371a, type: 2}
+  - {fileID: 11400000, guid: 44165a2e6caf57543b45816808ff98f2, type: 2}
+  - {fileID: 11400000, guid: 091c33afaac5b134f92e4cf0c3fb59ec, type: 2}
   - {fileID: 11400000, guid: f334a22d81048cf44a20841768c15452, type: 2}
   - {fileID: 11400000, guid: 318ca4f193646454a8cb8c792984795c, type: 2}
   - {fileID: 11400000, guid: f03c1c0b6bc64a542a6adc211123996d, type: 2}
@@ -1264,12 +1264,13 @@ MonoBehaviour:
   - {fileID: 7481220999571344}
   - {fileID: 3254584067454643436}
   - {fileID: -5555395134905393651}
+  - {fileID: -3294864034715802336}
   - {fileID: -955630765228900268}
   - {fileID: 7837530231282610383}
+  - {fileID: 8958046357759177953}
   - {fileID: -4154291347320157044}
   - {fileID: -6696289741287929438}
   - {fileID: -1912798079421224063}
-  - {fileID: -7664582539774421209}
   itemGroups: []
   settings:
   - {fileID: -3817802777368614781}
@@ -2806,6 +2807,19 @@ MonoBehaviour:
   chance: 1
   multiplier: 1.8
   m_PriceMultiplier: 25
+--- !u!114 &8958046357759177953
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
+  m_Name: Flask
+  m_EditorClassIdentifier: DevionGames.InventorySystem::DevionGames.InventorySystem.EquipmentRegion
+  name: Flask
 --- !u!114 &9220062648813220349
 MonoBehaviour:
   m_ObjectHideFlags: 1

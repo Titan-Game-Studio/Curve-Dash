@@ -9,27 +9,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 20a93a8c91388c14b9ef4d3d0c9b4d1b, type: 3}
-  m_Name: Granite Flask
-  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashItemAdapter
-  m_Id: 242bf126-a371-48e1-830b-cbdb2180e4f0
+  m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
+  m_Name: Flask_Granite_Flask_Equipment_Adapter
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
+  m_Id: 550e8400-e29b-41d4-a716-446655440003
   m_ItemName: Granite Flask
   m_UseItemNameAsDisplayName: 1
-  m_DisplayName: New Item
+  m_DisplayName: 
   m_Icon: {fileID: 21300000, guid: c1fd910e186e2aa41a2d67651c5d776d, type: 3}
-  m_Prefab: {fileID: 2830056364503120991, guid: 2e99512e3f5417c43bd46ea971aaeed6,
-    type: 3}
+  m_Prefab: {fileID: 0}
   m_Description: Grants +1000 Armor during effect.
   m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,
     type: 2}
   m_IsSellable: 1
-  m_BuyPrice: 25
+  m_BuyPrice: 10
   m_CanBuyBack: 1
-  m_BuyCurrency: {fileID: -6623786914046544860, guid: 17787831f9b1b6f469b7778380828f6a,
-    type: 2}
-  m_SellPrice: 12
-  m_SellCurrency: {fileID: -6623786914046544860, guid: 17787831f9b1b6f469b7778380828f6a,
-    type: 2}
+  m_BuyCurrency: {fileID: 0}
+  m_SellPrice: 5
+  m_SellCurrency: {fileID: 0}
   m_Stack: 1
   m_MaxStack: 1
   m_IsDroppable: 1
@@ -47,21 +44,9 @@ MonoBehaviour:
     modifiers: []
   ingredients: []
   properties:
-  - name: Item Type
+  - name: Equipment Type
     typeIndex: 0
     stringValue: Flask
-    intValue: 0
-    floatValue: 0
-    colorValue: {r: 0, g: 0, b: 0, a: 0}
-    boolValue: 0
-    objectReferenceValue: {fileID: 0}
-    vector2Value: {x: 0, y: 0}
-    vector3Value: {x: 0, y: 0, z: 0}
-    show: 1
-    color: {r: 1, g: 1, b: 1, a: 1}
-  - name: Rarity
-    typeIndex: 0
-    stringValue: Normal
     intValue: 0
     floatValue: 0
     colorValue: {r: 0, g: 0, b: 0, a: 0}
@@ -82,10 +67,22 @@ MonoBehaviour:
     vector2Value: {x: 0, y: 0}
     vector3Value: {x: 0, y: 0, z: 0}
     show: 1
-    color: {r: 0, g: 1, b: 1, a: 1}
-  - name: Recovery Amount
-    typeIndex: 3
+    color: {r: 0.6, g: 0.8, b: 1, a: 1}
+  - name: Armor Bonus
+    typeIndex: 5
     stringValue: 
+    intValue: 20
+    floatValue: 0
+    colorValue: {r: 0, g: 0, b: 0, a: 0}
+    boolValue: 0
+    objectReferenceValue: {fileID: 0}
+    vector2Value: {x: 0, y: 0}
+    vector3Value: {x: 0, y: 0, z: 0}
+    show: 1
+    color: {r: 0.6, g: 0.8, b: 1, a: 1}
+  - name: Rarity
+    typeIndex: 0
+    stringValue: Normal
     intValue: 0
     floatValue: 0
     colorValue: {r: 0, g: 0, b: 0, a: 0}
@@ -94,41 +91,15 @@ MonoBehaviour:
     vector2Value: {x: 0, y: 0}
     vector3Value: {x: 0, y: 0, z: 0}
     show: 1
-    color: {r: 0, g: 1, b: 0, a: 1}
-  - name: Duration
-    typeIndex: 3
-    stringValue: 
-    intValue: 0
-    floatValue: 4
-    colorValue: {r: 0, g: 0, b: 0, a: 0}
-    boolValue: 0
-    objectReferenceValue: {fileID: 0}
-    vector2Value: {x: 0, y: 0}
-    vector3Value: {x: 0, y: 0, z: 0}
-    show: 1
     color: {r: 1, g: 1, b: 1, a: 1}
-  - name: Max Charges
-    typeIndex: 5
-    stringValue: 
-    intValue: 60
-    floatValue: 0
-    colorValue: {r: 0, g: 0, b: 0, a: 0}
-    boolValue: 0
-    objectReferenceValue: {fileID: 0}
-    vector2Value: {x: 0, y: 0}
-    vector3Value: {x: 0, y: 0, z: 0}
-    show: 1
-    color: {r: 1, g: 1, b: 1, a: 1}
-  - name: Charges Per Use
-    typeIndex: 5
-    stringValue: 
-    intValue: 30
-    floatValue: 0
-    colorValue: {r: 0, g: 0, b: 0, a: 0}
-    boolValue: 0
-    objectReferenceValue: {fileID: 0}
-    vector2Value: {x: 0, y: 0}
-    vector3Value: {x: 0, y: 0, z: 0}
-    show: 1
-    color: {r: 1, g: 1, b: 1, a: 1}
-  m_OriginalItemData: {fileID: 11400000, guid: b2fd295451af6b748b47cb8c0a3e1fc2, type: 2}
+  m_UseCategoryCooldown: 1
+  m_Cooldown: 1
+  actions: []
+  m_OverrideEquipPrefab: {fileID: 0}
+  m_Region:
+  - {fileID: -8888359219924490327, guid: 9acf401ad757e3f419dd0f256a9f2d80, type: 2}
+  m_OriginalEquipmentData: {fileID: 11400000, guid: b2fd295451af6b748b47cb8c0a3e1fc2,
+    type: 2}
+  references:
+    version: 2
+    RefIds: []
