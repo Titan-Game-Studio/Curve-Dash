@@ -533,7 +533,7 @@ namespace STG.CurveDash
                     // Try to find the region matching any of our keywords (case-insensitive)
                     foreach (var keyword in searchKeywords)
                     {
-                        matchingRegion = db.equipments.Find(r => r.Name.IndexOf(keyword, System.StringComparison.OrdinalIgnoreCase) >= 0);
+                        matchingRegion = db.equipments.Find(r => r != null && r.Name.IndexOf(keyword, System.StringComparison.OrdinalIgnoreCase) >= 0);
                         if (matchingRegion != null) break;
                     }
 
