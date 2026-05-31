@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20a93a8c91388c14b9ef4d3d0c9b4d1b, type: 3}
-  m_Name: Cold_Hatred_Gem_Adapter
+  m_Name: Hatred Gem
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashItemAdapter
   m_Id: e0c71fa2-f5b8-443c-8631-4e5174c46cde
   m_ItemName: Hatred Gem

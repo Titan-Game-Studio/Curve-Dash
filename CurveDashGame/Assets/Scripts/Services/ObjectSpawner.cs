@@ -312,6 +312,64 @@ namespace STG.CurveDash
                     }
                 }
 
+                // Thêm Belt khởi đầu (Normal rarity ưu tiên)
+                var allBelts = GetAllItemsOfType<BeltItemData>();
+                if (allBelts.Count > 0)
+                {
+                    var normalBelts = allBelts.Where(b => b.Rarity == ItemRarity.Normal).ToList();
+                    var starterBelt = normalBelts.Count > 0 ? normalBelts[0] : allBelts[0];
+                    HelperAddStarterItemToInventory(starterBelt);
+                    UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Added starter Belt '{starterBelt.name}' to Inventory.</color>");
+                }
+
+                // Thêm Amulet khởi đầu (Normal rarity ưu tiên)
+                var allAmulets = GetAllItemsOfType<AmuletItemData>();
+                if (allAmulets.Count > 0)
+                {
+                    var normalAmulets = allAmulets.Where(a => a.Rarity == ItemRarity.Normal).ToList();
+                    var starterAmulet = normalAmulets.Count > 0 ? normalAmulets[0] : allAmulets[0];
+                    HelperAddStarterItemToInventory(starterAmulet);
+                    UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Added starter Amulet '{starterAmulet.name}' to Inventory.</color>");
+                }
+
+                // Thêm Ring1 và Ring2 khởi đầu
+                var allRings = GetAllItemsOfType<RingItemData>();
+                foreach (var ringSlot in new[] { EquipmentSlot.Ring1, EquipmentSlot.Ring2 })
+                {
+                    var slotRings = allRings.Where(r => r.Slot == ringSlot).ToList();
+                    if (slotRings.Count > 0)
+                    {
+                        var normalRings = slotRings.Where(r => r.Rarity == ItemRarity.Normal).ToList();
+                        var starterRing = normalRings.Count > 0 ? normalRings[0] : slotRings[0];
+                        HelperAddStarterItemToInventory(starterRing);
+                        UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Added starter Ring '{starterRing.name}' ({ringSlot}) to Inventory.</color>");
+                    }
+                }
+
+                // Thêm 3 Flask khởi đầu: 1 Life + 1 Utility (nếu có) + fallback
+                var allFlasks = GetAllItemsOfType<FlaskItemData>();
+                if (allFlasks.Count > 0)
+                {
+                    var starterFlasks = new System.Collections.Generic.List<FlaskItemData>();
+                    var lifeFlask    = allFlasks.FirstOrDefault(f => f.FlaskType == FlaskType.Life);
+                    var utilityFlask = allFlasks.FirstOrDefault(f => f.FlaskType == FlaskType.Utility);
+                    var manaFlask    = allFlasks.FirstOrDefault(f => f.FlaskType == FlaskType.Mana);
+                    if (lifeFlask    != null) starterFlasks.Add(lifeFlask);
+                    if (utilityFlask != null) starterFlasks.Add(utilityFlask);
+                    if (manaFlask    != null && starterFlasks.Count < 3) starterFlasks.Add(manaFlask);
+                    // Điền đủ 3 nếu chưa đủ
+                    foreach (var f in allFlasks)
+                    {
+                        if (starterFlasks.Count >= 3) break;
+                        if (!starterFlasks.Contains(f)) starterFlasks.Add(f);
+                    }
+                    foreach (var flask in starterFlasks)
+                    {
+                        HelperAddStarterItemToInventory(flask);
+                        UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Added starter Flask '{flask.name}' to Inventory.</color>");
+                    }
+                }
+
                 // Thêm kỹ năng Active vào Actionbar
                 if (starterActive != null)
                 {

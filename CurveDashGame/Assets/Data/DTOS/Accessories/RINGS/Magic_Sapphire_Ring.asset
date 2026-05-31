@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 509bd08cec4d2c040a9e1efdb3fbdf44, type: 3}
+  m_Name: Magic_Sapphire_Ring
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.RingItemData
+  ItemName: Sapphire Ring
+  Icon: {fileID: 21300000, guid: 9a929ae2d6d5a7c4ca9fa6ca6f4e396f, type: 3}
+  Rarity: 1
+  Type: 2
+  Prefab:
+    m_AssetGUID: 5ceb9b929e884f74ab6b82cd30e54bef
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
+  Description: Grants cold resistance.
+  DevionAdapter: {fileID: 11400000, guid: 37b75ea5376c9ef42badc79b32a050b0, type: 2}
+  Slot: 7
+  HealthBonus: 20
+  AddedFlatDamage: 0
+  AttackSpeedBonus: 0
+  AllResistances: 15

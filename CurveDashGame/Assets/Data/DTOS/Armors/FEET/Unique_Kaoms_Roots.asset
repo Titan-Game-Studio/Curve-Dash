@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Unique_Kaoms_Roots
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Kaoms Roots
-  Icon: {fileID: 21300000, guid: 55a2cfaa5b1f3ce41acd8654be4aa9a6, type: 3}
+  Icon: {fileID: 0}
   Rarity: 3
   Type: 1
   Prefab:
@@ -22,7 +22,7 @@ MonoBehaviour:
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
-  Description: Prevents action speed from being slowed below base value.
+  Description: Unstoppable boots.
   DevionAdapter: {fileID: 11400000, guid: 12d26d1ff8948b843858044e6dbe16ed, type: 2}
   Slot: 3
   ModularPartIndex: 17

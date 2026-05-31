@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Beheaded Sword_Adapter
+  m_Name: Beheaded Sword
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: f719900b-d802-4e5f-a83a-2668e8282b77
   m_ItemName: Beheaded Sword

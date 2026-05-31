@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Bronze Shield_Adapter
+  m_Name: Bronze Shield
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: dbf29069-d72b-448d-b7d7-e05f578afbc0
   m_ItemName: Bronze Shield

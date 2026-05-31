@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Vaal Blade_Adapter
+  m_Name: Vaal Blade
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: 8a67342a-7dae-4d26-a50d-6552566edf13
   m_ItemName: Vaal Blade

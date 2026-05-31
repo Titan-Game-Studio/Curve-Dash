@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Unique_Reach_of_the_Council
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.BowData
   ItemName: Reach of the Council
-  Icon: {fileID: 21300000, guid: d4c6570e9078d2b4bb105e605ac78999, type: 3}
+  Icon: {fileID: 0}
   Rarity: 3
   Type: 0
   Prefab:
@@ -22,12 +22,12 @@ MonoBehaviour:
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
-  Description: Fires additional arrows simultaneously.
+  Description: Fires multiple arrows.
   DevionAdapter: {fileID: 11400000, guid: 54caf41f531c2484a81e336e614b2c84, type: 2}
   VisualModel: {fileID: 471844061573884813, guid: cc7ba3620ad40724bbd0dda3cd3ba953,
     type: 3}
   PositionOffset: {x: -0.033, y: 0.061, z: 0.014}
-  RotationOffset: {x: 15.308332, y: 355.27133, z: 116.77159}
+  RotationOffset: {x: 15.308332, y: 355.27133, z: 80}
   MainAnimator: {fileID: 9100000, guid: 0a18ab27e14fa1a40b9106b93b50207e, type: 2}
   BaseMinDamage: 40
   BaseMaxDamage: 58

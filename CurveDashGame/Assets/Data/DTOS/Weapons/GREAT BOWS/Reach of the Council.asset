@@ -27,7 +27,7 @@ MonoBehaviour:
   VisualModel: {fileID: 471844061573884813, guid: cc7ba3620ad40724bbd0dda3cd3ba953,
     type: 3}
   PositionOffset: {x: -0.033, y: 0.061, z: 0.014}
-  RotationOffset: {x: 15.308332, y: 355.27133, z: 116.77159}
+  RotationOffset: {x: 15.308332, y: 355.27133, z: 80}
   MainAnimator: {fileID: 9100000, guid: 0a18ab27e14fa1a40b9106b93b50207e, type: 2}
   BaseMinDamage: 40
   BaseMaxDamage: 58

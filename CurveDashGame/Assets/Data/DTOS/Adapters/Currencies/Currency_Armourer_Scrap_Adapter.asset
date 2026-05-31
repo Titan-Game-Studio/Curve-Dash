@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20a93a8c91388c14b9ef4d3d0c9b4d1b, type: 3}
-  m_Name: Currency_Armourer_Scrap_Adapter
+  m_Name: Armourer Scrap
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashItemAdapter
   m_Id: 2ac1e7f1-45a6-4621-a182-9c71ccfc498e
   m_ItemName: Armourer Scrap

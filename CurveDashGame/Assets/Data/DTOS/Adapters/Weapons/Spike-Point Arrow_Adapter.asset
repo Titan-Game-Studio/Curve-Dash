@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Spike-Point Arrow_Adapter
+  m_Name: Spike-Point Arrow
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: 68d85887-8c05-4bc4-9714-f8bf766ad95f
   m_ItemName: Spike-Point Arrow

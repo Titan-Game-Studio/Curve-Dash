@@ -15,7 +15,6 @@ namespace STG.CurveDash
                     { LeftHand = twoH, RightHand = null, IsValid = true },
 
                 BowData bow => new LoadoutAssignment
-                    // Bow goes left; right hand kept as-is (SmartEquipService handles auto-pair)
                     { LeftHand = bow, RightHand = currentRight is OffHandData oh && oh.SubType == OffHandType.Arrow ? currentRight : null, IsValid = true },
 
                 OneHandedWeaponData sword => ResolveOneHanded(sword, currentLeft, currentRight),
@@ -37,13 +36,19 @@ namespace STG.CurveDash
         {
             if (removedItem == currentRight)
             {
-                // SMART FIX Bug 2: nếu left có OneHandedWeapon → promote sang right
+                // Song kiếm: bỏ tay phải → promote tay trái lên tay phải
                 var newRight = currentLeft is OneHandedWeaponData ? currentLeft : null;
                 var newLeft  = currentLeft is OneHandedWeaponData ? null : currentLeft;
                 return new LoadoutAssignment { LeftHand = newLeft, RightHand = newRight, IsValid = true };
             }
             if (removedItem == currentLeft)
-                return new LoadoutAssignment { LeftHand = null, RightHand = currentRight, IsValid = true };
+            {
+                // Bỏ Cung → Tên ở tay phải không còn ý nghĩa, phải xóa luôn
+                var newRight = (currentLeft is BowData && currentRight is OffHandData oh && oh.SubType == OffHandType.Arrow)
+                    ? null
+                    : currentRight;
+                return new LoadoutAssignment { LeftHand = null, RightHand = newRight, IsValid = true };
+            }
 
             return new LoadoutAssignment { LeftHand = currentLeft, RightHand = currentRight, IsValid = true };
         }
@@ -51,38 +56,50 @@ namespace STG.CurveDash
         private LoadoutAssignment ResolveOneHanded(
             OneHandedWeaponData sword, EquippableData left, EquippableData right)
         {
+            // Vũ khí 2 tay và Cung đều không thể dùng chung với kiếm 1 tay — clear cả hai
+            // (Cung chỉ pair với Tên, không pair với Kiếm)
+            if (left is TwoHandedWeaponData || left is BowData)
+                left = null;
+
+            // Nếu tay phải trống, ưu tiên tay phải
             if (right == null)
                 return new LoadoutAssignment { LeftHand = left, RightHand = sword, IsValid = true };
 
+            // Nếu tay phải đang cầm khiên, đẩy khiên sang tay trái (nếu tay trái trống) và cầm kiếm tay phải
+            if (right is OffHandData off && off.SubType == OffHandType.Shield && left == null)
+                return new LoadoutAssignment { LeftHand = right, RightHand = sword, IsValid = true };
+
+            // Nếu tay phải đang cầm kiếm, và tay trái trống → Song kiếm
             if (right is OneHandedWeaponData && left == null)
                 return new LoadoutAssignment { LeftHand = sword, RightHand = right, IsValid = true };
 
-            // Right bị chiếm → replace right
+            // Mặc định thay thế tay phải
             return new LoadoutAssignment { LeftHand = left, RightHand = sword, IsValid = true };
         }
 
         private LoadoutAssignment ResolveArrow(
             OffHandData arrow, EquippableData left, EquippableData right)
         {
-            // Arrow chỉ valid nếu left là Bow (SmartEquipService đảm bảo pre-load bow trước khi gọi resolver)
+            // Arrow luôn đi với Bow ở tay trái
             if (left is BowData)
                 return new LoadoutAssignment { LeftHand = left, RightHand = arrow, IsValid = true };
 
-            return LoadoutAssignment.Invalid("No bow equipped or found in inventory");
+            return LoadoutAssignment.Invalid("No bow equipped");
         }
 
         private LoadoutAssignment ResolveShield(
             OffHandData shield, EquippableData left, EquippableData right)
         {
-            // SMART FIX Bug 1: nếu left có OneHandedWeapon và right trống → move sword sang right
-            if (left is OneHandedWeaponData leftSword && right == null)
-                return new LoadoutAssignment { LeftHand = shield, RightHand = leftSword, IsValid = true };
-
-            // 2H / Bow chiếm cả 2 tay → replace left, clear right
-            if (left is TwoHandedWeaponData || left is BowData)
+            // Nếu tay trái đang cầm Cung hoặc Vũ khí 2 tay → xóa cả hai tay
+            // (Cung mang theo Tên ở tay phải; Vũ khí 2 tay chiếm cả hai tay)
+            if (left is BowData || left is TwoHandedWeaponData)
                 return new LoadoutAssignment { LeftHand = shield, RightHand = null, IsValid = true };
 
-            return new LoadoutAssignment { LeftHand = shield, RightHand = right, IsValid = true };
+            // Nếu tay phải đang cầm Tên nhưng không còn Cung → Tên vô nghĩa, xóa đi
+            var newRight = (right is OffHandData oh && oh.SubType == OffHandType.Arrow) ? null : right;
+
+            // Shield luôn đặt vào tay trái, giữ nguyên tay phải (nếu là kiếm 1 tay)
+            return new LoadoutAssignment { LeftHand = shield, RightHand = newRight, IsValid = true };
         }
     }
 }

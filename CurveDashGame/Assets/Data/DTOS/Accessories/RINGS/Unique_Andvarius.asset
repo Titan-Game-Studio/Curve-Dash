@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 509bd08cec4d2c040a9e1efdb3fbdf44, type: 3}
+  m_Name: Unique_Andvarius
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.RingItemData
+  ItemName: Andvarius
+  Icon: {fileID: 21300000, guid: 55a1fb1031f418c48a09c4a12579ab81, type: 3}
+  Rarity: 3
+  Type: 2
+  Prefab:
+    m_AssetGUID: 5ceb9b929e884f74ab6b82cd30e54bef
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
+  Description: Massive item quantity. High gold find.
+  DevionAdapter: {fileID: 11400000, guid: 64d5956bdd914404cb93260d89e2cf06, type: 2}
+  Slot: 8
+  HealthBonus: 0
+  AddedFlatDamage: 30
+  AttackSpeedBonus: 0.2
+  AllResistances: 30

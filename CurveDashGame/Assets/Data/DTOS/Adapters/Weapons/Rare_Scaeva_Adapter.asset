@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Rare_Scaeva_Adapter
+  m_Name: Scaeva
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: b933b551-790e-4db9-9c86-4fff01d31e14
   m_ItemName: Scaeva
@@ -18,7 +18,7 @@ MonoBehaviour:
   m_DisplayName: New Item
   m_Icon: {fileID: 21300000, guid: 62a7e110ce4e1ac42b6c8af4f662888b, type: 3}
   m_Prefab: {fileID: 0}
-  m_Description: A high quality golden gladius.
+  m_Description: A golden gladius.
   m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,
     type: 2}
   m_IsSellable: 1

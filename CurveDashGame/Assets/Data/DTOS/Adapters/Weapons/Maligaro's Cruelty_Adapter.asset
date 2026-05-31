@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Maligaro's Cruelty_Adapter
+  m_Name: Maligaro's Cruelty
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: c9dd67e5-50fb-4706-9ca6-e3e8aa3ecd4f
   m_ItemName: Maligaro's Cruelty

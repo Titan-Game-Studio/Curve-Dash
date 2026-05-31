@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Unique_Abyssus_Adapter
+  m_Name: Abyssus
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: 456976a7-8193-458b-bef5-4bacd391b640
   m_ItemName: Abyssus
@@ -122,7 +122,8 @@ MonoBehaviour:
   actions: []
   m_OverrideEquipPrefab: {fileID: 3517828984631180630, guid: c0c2e1a54ed77034384794a6d4e09a1c,
     type: 3}
-  m_Region: []
+  m_Region:
+  - {fileID: 2995979371151673093, guid: 9acf401ad757e3f419dd0f256a9f2d80, type: 2}
   m_OriginalEquipmentData: {fileID: 11400000, guid: 727e41767db402846862674869b74e94,
     type: 2}
   references:

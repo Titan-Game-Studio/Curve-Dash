@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Vaal Greatsword_Adapter
+  m_Name: Vaal Greatsword
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: de6d5b05-4b61-415b-81e9-e9b54b1ec5d6
   m_ItemName: Vaal Greatsword

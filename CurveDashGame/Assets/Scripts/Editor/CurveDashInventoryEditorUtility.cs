@@ -20,8 +20,9 @@ namespace STG.CurveDash.Editor
                 int weaponCount = RunWeaponPrefabLinking();
 
                 // Step 2: Link and register Armor Prefabs & Addressables
-                EditorUtility.DisplayProgressBar("Curve-Dash Database Sync", "[2/5] Mapping Armor Prefabs & Addressables...", 0.4f);
+                EditorUtility.DisplayProgressBar("Curve-Dash Database Sync", "[2/5] Mapping Armor & Belt Prefabs & Addressables...", 0.4f);
                 int armorCount = RunArmorPrefabLinking();
+                armorCount += RunBeltPrefabLinking();
 
                 // Step 3: Link and register Default Pickup Prefabs & Addressables
                 EditorUtility.DisplayProgressBar("Curve-Dash Database Sync", "[3/5] Mapping Gems, Flasks & Currencies Pickup Prefabs...", 0.6f);
@@ -83,6 +84,9 @@ namespace STG.CurveDash.Editor
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 ItemData itemData = AssetDatabase.LoadAssetAtPath<ItemData>(path);
                 if (itemData == null) continue;
+
+                // Amulet and Ring have no 3D model by design — skip prefab validation.
+                if (itemData is AmuletItemData || itemData is RingItemData) continue;
 
                 if (itemData.Prefab == null || !itemData.Prefab.RuntimeKeyIsValid())
                 {
@@ -186,6 +190,7 @@ namespace STG.CurveDash.Editor
                         break;
                 }
 
+                // Belt slot is handled separately via BeltItemData — skip here
                 if (string.IsNullOrEmpty(prefix)) continue;
 
                 // Determine Type and Color based on rarity and name
@@ -237,6 +242,57 @@ namespace STG.CurveDash.Editor
                             armorData.ModularPartIndex = exactChildIndex; // Synchronize exact ModularIndex!
                             armorData.MeshPartName = exactPartName; // Synchronize exact MeshPartName!
                             EditorUtility.SetDirty(armorData);
+                            linkedCount++;
+                        }
+                    }
+                }
+            }
+            return linkedCount;
+        }
+
+        private static int RunBeltPrefabLinking()
+        {
+            string[] guids = AssetDatabase.FindAssets("t:BeltItemData");
+            int linkedCount = 0;
+            string armorPartsDir = "Assets/URP GanzSe Free Modular Character Pack/Prefabs/Non-Skinned Mesh Parts/Armor Parts";
+
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                BeltItemData beltData = AssetDatabase.LoadAssetAtPath<BeltItemData>(path);
+                if (beltData == null) continue;
+
+                // Belt uses the "Legs Armor" prefix from GanzSe pack
+                int nameHash = Mathf.Abs(beltData.name.GetHashCode());
+                int type = 1;
+                int color = 1;
+                switch (beltData.Rarity)
+                {
+                    case ItemRarity.Normal:  type = (nameHash % 2) + 1; color = 1; break;
+                    case ItemRarity.Magic:   type = (nameHash % 2) + 3; color = 2; break;
+                    case ItemRarity.Rare:    type = 5; color = 3; break;
+                    case ItemRarity.Unique:  type = 6; color = 3; break;
+                }
+
+                string prefabName = $"Legs Armor Type {type} Color {color} Part.prefab";
+                string prefabPath = Path.Combine(armorPartsDir, prefabName).Replace('\\', '/');
+
+                GameObject prefabAsset = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                if (prefabAsset != null)
+                {
+                    string prefabGuid = AssetDatabase.AssetPathToGUID(prefabPath);
+                    if (!string.IsNullOrEmpty(prefabGuid))
+                    {
+                        MarkAsAddressableIfNecessary(prefabGuid, Path.GetFileNameWithoutExtension(prefabName));
+                        var assetRef = new UnityEngine.AddressableAssets.AssetReferenceGameObject(prefabGuid);
+                        int exactChildIndex = (type - 1) * 3 + (color - 1);
+                        string exactPartName = $"Legs Armor Type {type} Color {color}";
+                        if (beltData.Prefab == null || beltData.Prefab.AssetGUID != prefabGuid || beltData.ModularPartIndex != exactChildIndex || beltData.MeshPartName != exactPartName)
+                        {
+                            beltData.Prefab = assetRef;
+                            beltData.ModularPartIndex = exactChildIndex;
+                            beltData.MeshPartName = exactPartName;
+                            EditorUtility.SetDirty(beltData);
                             linkedCount++;
                         }
                     }
@@ -472,7 +528,11 @@ namespace STG.CurveDash.Editor
                 targetPath = Path.Combine(directory, adapterName + ".asset").Replace("\\", "/");
                 isNew = true;
 
-                if (itemData is EquippableData || itemData is ArmorItemData)
+                // Belt, Amulet, Ring go into Devion equipment slots — use EquipmentAdapter
+                bool isEquipmentSlotItem = itemData is EquippableData || itemData is ArmorItemData
+                    || itemData is BeltItemData || itemData is AmuletItemData || itemData is RingItemData;
+
+                if (isEquipmentSlotItem)
                 {
                     var newAdapter = ScriptableObject.CreateInstance<CurveDashEquipmentAdapter>();
                     newAdapter.OriginalEquipmentData = itemData;

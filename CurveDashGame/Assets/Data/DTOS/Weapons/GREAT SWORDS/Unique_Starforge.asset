@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Unique_Starforge
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.TwoHandedWeaponData
   ItemName: Starforge
-  Icon: {fileID: 21300000, guid: d4e64b2bf716dd748b1e48007c02c58b, type: 3}
+  Icon: {fileID: 0}
   Rarity: 3
   Type: 0
   Prefab:
@@ -22,7 +22,7 @@ MonoBehaviour:
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
-  Description: Grants massive physical power and high shock capacity.
+  Description: Legendary celestial sword.
   DevionAdapter: {fileID: 11400000, guid: a0cd833f31db621408dd80dd79255ff6, type: 2}
   VisualModel: {fileID: 4040911424271386890, guid: 8305d74f2e457034a944f92e4768f38c,
     type: 3}

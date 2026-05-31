@@ -156,6 +156,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1e4fff70abcc6984aa5372fa47f67501
+    m_Address: Assets/Prefabs/Pickups/AmuletDefault.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1e5adf25871338d46bf7edde0e756481
     m_Address: FREE SHIELD 2 COLOR 3
     m_ReadOnly: 0
@@ -196,6 +201,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 281337f9f48ed10479e4ecb9c9b600d4
+    m_Address: Legs Armor Type 6 Color 3 Part
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2af81e53d3092b840b143fdb902b343d
     m_Address: FREE GREAT BOW 1 COLOR 3
     m_ReadOnly: 0
@@ -228,6 +238,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 33918cdf161d1224ba679bded61b21ce
     m_Address: Fish
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 348bd839337456b4f8ef7f1acbb1238c
+    m_Address: Legs Armor Type 5 Color 3 Part
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -288,6 +303,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 458bb21264f96b149b2be1c12ab3c391
     m_Address: FREE HAMMER 1 COLOR 3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 45ed60dcd579f0f40bb28fc16f5f061e
+    m_Address: Legs Armor Type 2 Color 1 Part
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -378,6 +398,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5ba921c5d3a579f4b8406b968f8ca5e8
     m_Address: FREE ONE HANDED SWORD 3 COLOR 3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5ceb9b929e884f74ab6b82cd30e54bef
+    m_Address: Assets/Prefabs/Pickups/RingDefault.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -513,6 +538,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7e9232d1122d64b4e873b1598e17f5a6
     m_Address: Deer
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7f587687cc6fa204ba66efe34b0f27e6
+    m_Address: Legs Armor Type 3 Color 2 Part
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

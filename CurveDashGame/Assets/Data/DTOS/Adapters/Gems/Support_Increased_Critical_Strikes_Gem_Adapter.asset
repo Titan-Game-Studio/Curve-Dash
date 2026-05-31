@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20a93a8c91388c14b9ef4d3d0c9b4d1b, type: 3}
-  m_Name: Support_Increased_Critical_Strikes_Gem_Adapter
+  m_Name: Increased Critical Strikes Gem
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashItemAdapter
   m_Id: ed7c56f4-46f6-48e3-8ff6-09c66ec37607
   m_ItemName: Increased Critical Strikes Gem

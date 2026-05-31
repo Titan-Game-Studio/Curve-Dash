@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20a93a8c91388c14b9ef4d3d0c9b4d1b, type: 3}
-  m_Name: Flask_Mana_Flask_Small_Adapter
+  m_Name: Mana Flask Small
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashItemAdapter
   m_Id: 213fa87a-b1ba-40d8-a1e3-9708efb8c28d
   m_ItemName: Mana Flask Small

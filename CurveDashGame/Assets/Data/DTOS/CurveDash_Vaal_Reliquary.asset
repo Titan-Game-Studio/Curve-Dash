@@ -240,6 +240,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unstackEvent: -1
   unstackKeyCode: 304
+--- !u!114 &-7664582539774421209
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
+  m_Name: Ring
+  m_EditorClassIdentifier: DevionGames.InventorySystem::DevionGames.InventorySystem.EquipmentRegion
+  name: Ring
 --- !u!114 &-7427245140175711199
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -340,7 +353,7 @@ MonoBehaviour:
         m_Type: DevionGames.Wait
         m_Enabled: 1
         duration: 3
---- !u!114 &-6642204398173666289
+--- !u!114 &-6696289741287929438
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -350,9 +363,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
-  m_Name: Ring
-  m_EditorClassIdentifier: 
-  name: Ring
+  m_Name: Flask Second
+  m_EditorClassIdentifier: DevionGames.InventorySystem::DevionGames.InventorySystem.EquipmentRegion
+  name: Flask Second
 --- !u!114 &-6623786914046544860
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -676,6 +689,19 @@ MonoBehaviour:
   sellPriceTooltipName: Sell Price Tooltip
   stackName: Stack
   notificationName: Notification
+--- !u!114 &-4154291347320157044
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
+  m_Name: Flask First
+  m_EditorClassIdentifier: DevionGames.InventorySystem::DevionGames.InventorySystem.EquipmentRegion
+  name: Flask First
 --- !u!114 &-3817802777368614781
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -939,6 +965,19 @@ MonoBehaviour:
   - item: {fileID: -5663772737389988193}
     amount: 3
   properties: []
+--- !u!114 &-1912798079421224063
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
+  m_Name: Flask Third
+  m_EditorClassIdentifier: DevionGames.InventorySystem::DevionGames.InventorySystem.EquipmentRegion
+  name: Flask Third
 --- !u!114 &-1474344929657048262
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1066,19 +1105,6 @@ MonoBehaviour:
   references:
     version: 2
     RefIds: []
---- !u!114 &-327638963660831434
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8f5f34ef39fbec438e689ea49ddb023, type: 3}
-  m_Name: Shoulders
-  m_EditorClassIdentifier: 
-  name: Shoulders
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1194,6 +1220,26 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 496699f8bfb2ca04e906f6fcd07497dc, type: 2}
   - {fileID: 11400000, guid: f0276104d2569b44aaa4e7568db111ee, type: 2}
   - {fileID: 11400000, guid: a666493f7843ec84ba289a0ac2e54f8f, type: 2}
+  - {fileID: 11400000, guid: 79733f815b42c5a4ea49e5131f19fe31, type: 2}
+  - {fileID: 11400000, guid: 446b72177044c7c428f86d18e92ca1c5, type: 2}
+  - {fileID: 11400000, guid: 7326f96217fe8a84a9692444f586afd1, type: 2}
+  - {fileID: 11400000, guid: abbb292191e6b654aa343c83111df96c, type: 2}
+  - {fileID: 11400000, guid: e0c23d9151411e64cab39bca76a07520, type: 2}
+  - {fileID: 11400000, guid: aefe98bd4f2268046bad7e56e42c5d75, type: 2}
+  - {fileID: 11400000, guid: 4d55e643c12097a43b5d9e7de4ffa522, type: 2}
+  - {fileID: 11400000, guid: 7a8f18ccd23b3ff47b7029671a2201f9, type: 2}
+  - {fileID: 11400000, guid: 078f7513b0fce7f4680208742540fed1, type: 2}
+  - {fileID: 11400000, guid: aec364860bf9a5342b62ede0ff5bc1fc, type: 2}
+  - {fileID: 11400000, guid: d6dcf90ad27d3b7419d989a50362074f, type: 2}
+  - {fileID: 11400000, guid: d570c146f28efc3468369531cdba3047, type: 2}
+  - {fileID: 11400000, guid: d143909a2f3b8e14fa08cfc0fcd39a63, type: 2}
+  - {fileID: 11400000, guid: 37b75ea5376c9ef42badc79b32a050b0, type: 2}
+  - {fileID: 11400000, guid: 33903c1b63d768140babe0dd6939e873, type: 2}
+  - {fileID: 11400000, guid: 572bae3a6db67074fbc6dcedb53ac109, type: 2}
+  - {fileID: 11400000, guid: d47606db9eb50a74db6f6220c21cf33f, type: 2}
+  - {fileID: 11400000, guid: 3a70d4af727a2c249bf7e7b1de029a71, type: 2}
+  - {fileID: 11400000, guid: 64d5956bdd914404cb93260d89e2cf06, type: 2}
+  - {fileID: 11400000, guid: eb60b1fa5819853439556b4001df7b8c, type: 2}
   currencies:
   - {fileID: -6623786914046544860}
   raritys:
@@ -1210,10 +1256,8 @@ MonoBehaviour:
   - {fileID: 164684216256526245}
   equipments:
   - {fileID: -1474344929657048262}
-  - {fileID: -327638963660831434}
-  - {fileID: -8061578217545172497}
   - {fileID: 5786703032187707280}
-  - {fileID: -6642204398173666289}
+  - {fileID: -8061578217545172497}
   - {fileID: 316844889573954113}
   - {fileID: 5658350685615726283}
   - {fileID: 7014612192586799646}
@@ -1222,6 +1266,10 @@ MonoBehaviour:
   - {fileID: -5555395134905393651}
   - {fileID: -955630765228900268}
   - {fileID: 7837530231282610383}
+  - {fileID: -4154291347320157044}
+  - {fileID: -6696289741287929438}
+  - {fileID: -1912798079421224063}
+  - {fileID: -7664582539774421209}
   itemGroups: []
   settings:
   - {fileID: -3817802777368614781}

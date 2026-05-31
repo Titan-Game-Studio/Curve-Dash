@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Unique_Reach_of_the_Council_Adapter
+  m_Name: Reach of the Council
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: a50fdd66-4981-4b4e-806c-c2baed59fec3
   m_ItemName: Reach of the Council
@@ -18,7 +18,7 @@ MonoBehaviour:
   m_DisplayName: New Item
   m_Icon: {fileID: 21300000, guid: d4c6570e9078d2b4bb105e605ac78999, type: 3}
   m_Prefab: {fileID: 471844061573884813, guid: cc7ba3620ad40724bbd0dda3cd3ba953, type: 3}
-  m_Description: Fires additional arrows simultaneously.
+  m_Description: Fires multiple arrows.
   m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,
     type: 2}
   m_IsSellable: 1

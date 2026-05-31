@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20a93a8c91388c14b9ef4d3d0c9b4d1b, type: 3}
-  m_Name: Currency_Exalted_Orb_Adapter
+  m_Name: Exalted Orb
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashItemAdapter
   m_Id: cb0a0321-b5de-485d-8651-7ef5729b0b67
   m_ItemName: Exalted Orb

@@ -9,7 +9,25 @@
       "Bash(PowerShell -Command \"Get-Content 'D:\\\\UNITY_PROJECTS\\\\Curve-Dash\\\\CurveDashGame\\\\Assets\\\\Scripts\\\\ScriptableObjects\\\\ItemData.cs' | Select-String 'namespace' | Select-Object -First 1\")",
       "Bash(printf '\\\\n' >> \"D:/UNITY_PROJECTS/Curve-Dash/CurveDashGame/obsidian-unity/02_Active_Tasks/Task_SmartEquipmentResolver.md\")",
       "Read(//c/Users/TITAN-WINDOWS/AppData/Local/Temp/claude/d--UNITY-PROJECTS-Curve-Dash-CurveDashGame/9a86a1ac-21f3-4552-9e6e-a83305cf351f/tasks/**)",
-      "Bash(powershell -Command \"select-string -Path 'D:\\\\UNITY_PROJECTS\\\\Curve-Dash\\\\CurveDashGame\\\\Assets\\\\Scenes\\\\MainGame.unity' -Pattern 'EquipmentRegion|guid.*e0c|guid.*e0d' | head -20\")"
+      "Bash(powershell -Command \"select-string -Path 'D:\\\\UNITY_PROJECTS\\\\Curve-Dash\\\\CurveDashGame\\\\Assets\\\\Scenes\\\\MainGame.unity' -Pattern 'EquipmentRegion|guid.*e0c|guid.*e0d' | head -20\")",
+      "Bash(Get-ChildItem -Path \"D:\\\\UNITY_PROJECTS\\\\Curve-Dash\\\\CurveDashGame\" -Directory)",
+      "Bash(Select-Object -ExpandProperty Name)",
+      "mcp__ide__getDiagnostics",
+      "PowerShell($file = Get-Content \"D:\\\\UNITY_PROJECTS\\\\Curve-Dash\\\\CurveDashGame\\\\Assets\\\\Scripts\\\\Views\\\\PlayerView.cs\" -Raw; $open = \\($file.ToCharArray\\(\\) | Where-Object {$_ -eq '{'}\\).Count; $close = \\($file.ToCharArray\\(\\) | Where-Object {$_ -eq '}'}\\).Count; \"Open: $open, Close: $close, Balance: $\\($open - $close\\)\")",
+      "PowerShell(Test-Path *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git commit -m 'chore: add Unity meta files for GemProgress and GemLevelService *)",
+      "Bash(Get-ChildItem -Path \"D:\\\\UNITY_PROJECTS\\\\Curve-Dash\\\\CurveDashGame\\\\Assets\\\\Devion Games\\\\Inventory System\\\\Scripts\\\\Runtime\" -Recurse -Filter \"*.cs\")",
+      "mcp__unity-mcp__Unity_GetConsoleLogs",
+      "Bash(grep -E 'AffixName|Stat:|TypeOfAffix|MinValue|MaxValue' D:/UNITY_PROJECTS/Curve-Dash/CurveDashGame/Assets/Data/DTOS/Affixs/__TRACKED_VAR__.asset)",
+      "Bash(xargs grep -l \"ItemDatabase\")",
+      "Bash(xargs grep -l \"EquipmentRegion\")",
+      "Bash(xargs grep -l \"Equipment\\\\|equipment\")",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 *)",
+      "Bash(git status *)"
     ],
     "additionalDirectories": [
       "D:\\UNITY_PROJECTS\\Curve-Dash\\CurveDashGame\\obsidian-unity\\02_Active_Tasks"

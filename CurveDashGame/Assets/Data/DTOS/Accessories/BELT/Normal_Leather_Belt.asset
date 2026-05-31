@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b10b4a28bc97ba44ba3ebdfab95bef61, type: 3}
+  m_Name: Normal_Leather_Belt
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.BeltItemData
+  ItemName: Leather Belt
+  Icon: {fileID: 21300000, guid: da1bd9c10694ca14ca09872d9ef07e22, type: 3}
+  Rarity: 0
+  Type: 2
+  Prefab:
+    m_AssetGUID: 45ed60dcd579f0f40bb28fc16f5f061e
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
+  Description: A simple leather belt.
+  DevionAdapter: {fileID: 11400000, guid: aec364860bf9a5342b62ede0ff5bc1fc, type: 2}
+  ModularPartIndex: 3
+  MeshPartName: Legs Armor Type 2 Color 1
+  HealthBonus: 50
+  LifeRegeneration: 0
+  FlaskSlots: []

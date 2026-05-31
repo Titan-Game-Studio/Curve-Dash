@@ -36,6 +36,9 @@ namespace STG.CurveDash
         private readonly Collider[] hitColliders1 = new Collider[8];
 
         private float playerSize = 1f;
+        // Frames to skip edge-stop after resuming from a standstill, preventing the check
+        // from firing in the same (or next) frame before the player has moved off the snap point.
+        private int _edgeCheckGraceFrames = 0;
 
         public PlayerMovementSystem(EcsWorld world, AudioPlayer audioPlayer, AudioSettings audioSettings,
             GameSettings gameSettings)
@@ -70,31 +73,38 @@ namespace STG.CurveDash
             ref var viewLinkComponent = ref viewLinkPool.Get(ball);
             var position = viewLinkComponent.Transform.position;
 
+            Debug.Log($"[Move] ChangeDirection called — pos={position}");
+
             // Use a highly forgiving radius (0.6f) when changing direction so slight animation/combat offsets don't softlock tap controls!
-            if (!CheckEntityUnder(position, out var blockEntity, 0.6f))
+            if (!CheckEntityUnder(position, out var blockEntity, 0.6f, verbose: true))
             {
-                Debug.LogWarning($"[Movement] ChangeDirection ignored! CheckEntityUnder returned FALSE at position {position}");
-                return; // can't change direction when fall
+                Debug.LogWarning($"[Move] ChangeDirection BLOCKED — no block found under pos={position}");
+                return;
             }
 
             ref var playerComponent = ref playerPool.Get(ball);
-            
-            // Log when character starts moving (Direction transitions from zero)
+
+            bool wasStopped = playerComponent.Direction == Vector3.zero;
+            Vector3 prevDir = playerComponent.Direction;
             if (playerComponent.Direction == Vector3.zero)
             {
-                // Debug.Log($"[Movement] Character started moving! Initial tap on block entity {blockEntity}.");
-                Vector3 lastDir = playerComponent.LastNonZeroDirection != Vector3.zero 
-                    ? playerComponent.LastNonZeroDirection 
+                Vector3 lastDir = playerComponent.LastNonZeroDirection != Vector3.zero
+                    ? playerComponent.LastNonZeroDirection
                     : Vector3.forward;
                 playerComponent.Direction = lastDir == Vector3.forward ? -Vector3.left : Vector3.forward;
             }
             else
             {
-                // Debug.Log($"[Movement] Direction changed on block entity {blockEntity}.");
                 playerComponent.Direction = playerComponent.Direction == Vector3.forward ? -Vector3.left : Vector3.forward;
             }
 
             playerComponent.LastNonZeroDirection = playerComponent.Direction;
+            Debug.Log($"[Move] Direction: {prevDir} → {playerComponent.Direction}");
+
+            // Give 2 frames of grace so the edge check doesn't fire in the same/next frame
+            // before the player has moved off the snap position (frame-ordering issue with Zenject ITickables).
+            if (wasStopped)
+                _edgeCheckGraceFrames = 2;
 
             audioPlayer.Play(audioSettings.BallTurnSound);
         }
@@ -136,8 +146,16 @@ namespace STG.CurveDash
             {
                 var position = viewLinkComponent.Transform.position;
 
-                // Predict if the next step would overshoot and run off the road
-                if (playerComponent.Direction != Vector3.zero)
+                // Predict if the next step would overshoot and run off the road.
+                // Skip this check for a few frames after the player resumes from standstill:
+                // ChangeDirection() and this Update() can run in the same Zenject frame, so without
+                // grace the check fires before the player has moved off the snap position and
+                // immediately resets the direction to zero, making the tap appear to do nothing.
+                if (_edgeCheckGraceFrames > 0)
+                {
+                    _edgeCheckGraceFrames--;
+                }
+                else if (playerComponent.Direction != Vector3.zero)
                 {
                     Vector3 nextPosition = position + playerComponent.Direction * playerComponent.Speed * Time.deltaTime;
                     if (!CheckEntityUnder(nextPosition, out var nextBlock) || !blockPool.Has(nextBlock))
@@ -168,7 +186,7 @@ namespace STG.CurveDash
                         // Stop the player smoothly
                         playerComponent.Direction = Vector3.zero;
                         if (ballView != null) ballView.SetRunning(false);
-                        Debug.Log("[Movement] Edge reached! Stopped player safely. Tap to turn!");
+                        Debug.Log($"[Move] Edge reached — snapped to {playerTransform.position}, waiting for tap");
                     }
                 }
 
@@ -192,8 +210,8 @@ namespace STG.CurveDash
                         if (enemyComp.AttackCooldown <= 0f && !enemyComp.IsChargingAttack)
                         {
                             enemyComp.IsChargingAttack = true;
-                            enemyComp.AttackTimer = 0.5f; // 0.5 seconds of charging attack
-                            UnityEngine.Debug.Log($"<color=orange>[EnemyAttack] Enemy {enemy} started charging attack! Hits in 0.5s...</color>");
+                            enemyComp.AttackTimer = 0.5f;
+                            // UnityEngine.Debug.Log($"<color=orange>[EnemyAttack] Enemy {enemy} started charging attack!</color>");
                         }
                     }
 
@@ -202,7 +220,14 @@ namespace STG.CurveDash
                         if (block != playerComponent.PreviousHitEntity)
                         {
                             if (playerComponent.PreviousHitEntity != null)
-                                playerPassedPool.Add(playerComponent.PreviousHitEntity.Value);
+                            {
+                                int prev = playerComponent.PreviousHitEntity.Value;
+                                // Guard: entity must still be a live block and not already have the event
+                                if (blockPool.Has(prev) && !playerPassedPool.Has(prev))
+                                    playerPassedPool.Add(prev);
+                                else
+                                    Debug.LogWarning($"[Move] Skipped PlayerPassedComponent for entity {prev}: blockAlive={blockPool.Has(prev)} alreadyHas={playerPassedPool.Has(prev)}");
+                            }
                             playerComponent.PreviousHitEntity = block;
                         }
                     }
@@ -225,45 +250,36 @@ namespace STG.CurveDash
             }
         }
 
-        private bool CheckEntityUnder(Vector3 position, out int hitEntity, float radius = 0.1f)
+        private bool CheckEntityUnder(Vector3 position, out int hitEntity, float radius = 0.1f, bool verbose = false)
         {
-            // Spherecast from a safe height above the position to ensure it hits the block even if jumping, falling, or performing animation-driven root motion
-            var hits = Physics.SphereCastAll(new Vector3(position.x, position.y + 5.0f, position.z), radius, Vector3.down, 10.0f);
-            
-            // if (hits.Length > 0)
-            // {
-            //     Debug.Log($"[CheckEntityUnder] Position: {position}, Hit count: {hits.Length}");
-            // }
-            
+            var origin = new Vector3(position.x, position.y + 5.0f, position.z);
+            var hits = Physics.SphereCastAll(origin, radius, Vector3.down, 10.0f);
+
+            if (verbose)
+                Debug.Log($"[CheckEntityUnder] origin={origin} radius={radius} → {hits.Length} physics hit(s)");
+
             foreach (var hit in hits)
             {
                 var linkView = hit.transform.GetComponent<EntityLinkView>();
                 int entity = -1;
                 bool unpacked = false;
                 bool isBlock = false;
-                
-                if (linkView != null)
-                {
-                    unpacked = linkView.Entity.Unpack(world, out entity);
-                }
 
-                // Nếu bản thân đối tượng va chạm không có LinkView hoặc có nhưng không unpack được thực thể hợp lệ (do prefab có sẵn LinkView trống)
-                // Ta sẽ tìm kiếm trên đối tượng Cha để giải mã thực thể đúng
+                if (linkView != null)
+                    unpacked = linkView.Entity.Unpack(world, out entity);
+
                 if (!unpacked && hit.transform.parent != null)
                 {
                     var parentLinkView = hit.transform.parent.GetComponent<EntityLinkView>();
                     if (parentLinkView != null)
-                    {
                         unpacked = parentLinkView.Entity.Unpack(world, out entity);
-                    }
                 }
-                
+
                 if (unpacked)
-                {
                     isBlock = blockPool.Has(entity);
-                }
-                
-                // Debug.Log($"[CheckEntityUnder] Hit: {hit.transform.name} | Parent: {(hit.transform.parent != null ? hit.transform.parent.name : "null")} | Unpacked: {unpacked} | Entity: {entity} | IsBlock: {isBlock}");
+
+                if (verbose)
+                    Debug.Log($"  hit='{hit.transform.name}' parent='{(hit.transform.parent != null ? hit.transform.parent.name : "-")}' unpacked={unpacked} entity={entity} isBlock={isBlock}");
 
                 if (unpacked && isBlock)
                 {

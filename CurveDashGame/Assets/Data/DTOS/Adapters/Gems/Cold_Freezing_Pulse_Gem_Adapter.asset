@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20a93a8c91388c14b9ef4d3d0c9b4d1b, type: 3}
-  m_Name: Cold_Freezing_Pulse_Gem_Adapter
+  m_Name: Freezing Pulse Gem
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashItemAdapter
   m_Id: 145e1df0-5b40-4d86-a8d0-67f930dc9370
   m_ItemName: Freezing Pulse Gem

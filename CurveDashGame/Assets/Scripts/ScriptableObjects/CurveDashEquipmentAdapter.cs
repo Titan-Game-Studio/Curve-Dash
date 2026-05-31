@@ -77,6 +77,18 @@ namespace STG.CurveDash
                     }
 #endif
                 }
+                else if (m_OriginalEquipmentData is BeltItemData beltData)
+                {
+#if UNITY_EDITOR
+                    if (beltData.Prefab != null && !string.IsNullOrEmpty(beltData.Prefab.AssetGUID))
+                    {
+                        string beltPath = UnityEditor.AssetDatabase.GUIDToAssetPath(beltData.Prefab.AssetGUID);
+                        if (!string.IsNullOrEmpty(beltPath))
+                            this.Prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(beltPath);
+                    }
+#endif
+                }
+                // AmuletItemData and RingItemData have no 3D model — Prefab stays null.
 
                 // Sync Rarity, Category, and Prices/Currencies with Devion Games database if available
                 SyncDatabaseReferences();
@@ -90,7 +102,7 @@ namespace STG.CurveDash
                 {
                     int minDmg = Mathf.RoundToInt(weaponData.BaseMinDamage);
                     int maxDmg = Mathf.RoundToInt(weaponData.BaseMaxDamage);
-                    
+
                     SetOrUpdateProperty("Min Damage", minDmg, Color.white);
                     SetOrUpdateProperty("Max Damage", maxDmg, Color.white);
                     SetOrUpdateProperty("Damage", new Vector2(minDmg, maxDmg), Color.yellow);
@@ -103,10 +115,119 @@ namespace STG.CurveDash
                     SetOrUpdateProperty("Health", armorItem.HealthBonus, Color.green);
                     SetOrUpdateProperty("Armor Slot", armorItem.Slot.ToString(), Color.white);
                 }
+                else if (m_OriginalEquipmentData is BeltItemData beltData)
+                {
+                    SetOrUpdateProperty("Health", beltData.HealthBonus, Color.green);
+                    SetOrUpdateProperty("Life Regen", beltData.LifeRegeneration, new Color(0.5f, 1f, 0.5f));
+                    SetOrUpdateProperty("Flask Slots", beltData.FlaskSlots.Count, Color.yellow);
+                    SetOrUpdateProperty("Armor Slot", "Belt", Color.white);
+                }
+                else if (m_OriginalEquipmentData is AmuletItemData amuletData)
+                {
+                    SetOrUpdateProperty("Health", amuletData.HealthBonus, Color.green);
+                    SetOrUpdateProperty("Mana", amuletData.ManaBonus, new Color(0.4f, 0.6f, 1f));
+                    SetOrUpdateProperty("Crit Chance", amuletData.CritChanceBonus, Color.yellow);
+                    SetOrUpdateProperty("All Resistances", amuletData.AllResistances, new Color(1f, 0.6f, 0.2f));
+                    SetOrUpdateProperty("Armor Slot", "Amulet", Color.white);
+                }
+                else if (m_OriginalEquipmentData is RingItemData ringData)
+                {
+                    SetOrUpdateProperty("Health", ringData.HealthBonus, Color.green);
+                    SetOrUpdateProperty("Added Damage", ringData.AddedFlatDamage, Color.yellow);
+                    SetOrUpdateProperty("Attack Speed", ringData.AttackSpeedBonus, Color.cyan);
+                    SetOrUpdateProperty("All Resistances", ringData.AllResistances, new Color(1f, 0.6f, 0.2f));
+                    SetOrUpdateProperty("Armor Slot", ringData.Slot.ToString(), Color.white);
+                }
             }
             else
             {
                 Debug.LogWarning($"[CurveDashEquipmentAdapter] SyncData skipped because m_OriginalEquipmentData is null on '{this.name}'");
+            }
+        }
+
+        // Call this BEFORE the item enters Devion's equipment container so EquipmentHandler
+        // picks up the updated properties when it applies stat modifiers.
+        public void SyncAffixes(System.Collections.Generic.List<StatModifier> affixes)
+        {
+            // Reset all properties to base values before applying new affix set.
+            SyncData();
+
+            if (affixes == null || affixes.Count == 0) return;
+
+            // Accumulate flat and percent contributions per Devion stat name.
+            var flatSums    = new System.Collections.Generic.Dictionary<string, float>();
+            var percentSums = new System.Collections.Generic.Dictionary<string, float>();
+
+            foreach (var affix in affixes)
+            {
+                foreach (var mapping in AffixStatMapper.GetMappings(affix.Type))
+                {
+                    string key = mapping.DevionStatName;
+                    if (mapping.Contribution == AffixStatMapper.ContributionType.FlatAdd)
+                    {
+                        flatSums[key] = (flatSums.TryGetValue(key, out float fv) ? fv : 0f) + affix.Value;
+                    }
+                    else
+                    {
+                        percentSums[key] = (percentSums.TryGetValue(key, out float pv) ? pv : 0f) + affix.Value;
+                    }
+                }
+            }
+
+            // Track which stat names have already been processed.
+            var processed = new System.Collections.Generic.HashSet<string>();
+
+            // Stats that already have a base property (written by SyncData): merge flat+pct into one value.
+            // EquipmentHandler infers modType from magnitude: >1 → Flat, <=1 → PercentAdd.
+            // By writing the fully resolved value we avoid the limitation of a single property per name.
+            foreach (var key in flatSums.Keys)
+            {
+                var prop = FindProperty(key);
+                if (prop == null) continue;
+
+                float baseVal = System.Convert.ToSingle(prop.GetValue());
+                float flat    = flatSums.TryGetValue(key, out float fv)    ? fv : 0f;
+                float pct     = percentSums.TryGetValue(key, out float pv) ? pv : 0f;
+                float final   = (baseVal + flat) * (1f + pct / 100f);
+                prop.SetValue(Mathf.RoundToInt(final));
+                processed.Add(key);
+            }
+
+            foreach (var key in percentSums.Keys)
+            {
+                if (processed.Contains(key)) continue;
+
+                var prop = FindProperty(key);
+                if (prop != null)
+                {
+                    // Base property exists but only percent affix modifies it.
+                    float baseVal = System.Convert.ToSingle(prop.GetValue());
+                    float pct     = percentSums[key];
+                    prop.SetValue(Mathf.RoundToInt(baseVal * (1f + pct / 100f)));
+                    processed.Add(key);
+                }
+            }
+
+            // Stats with NO base property: create new ones.
+            // Flat stats → large value (>1) so Devion treats as Flat modifier.
+            foreach (var kvp in flatSums)
+            {
+                if (processed.Contains(kvp.Key)) continue;
+                float flat  = kvp.Value;
+                float pct   = percentSums.TryGetValue(kvp.Key, out float pv) ? pv : 0f;
+                float final = flat * (1f + pct / 100f);
+                SetOrUpdateProperty(kvp.Key, final, Color.yellow);
+                processed.Add(kvp.Key);
+            }
+
+            // Pure percent stats with no base (e.g. "Melee Attack" from IncreasedAttackSpeed):
+            // write value in [0,1] so Devion auto-infers PercentAdd.
+            foreach (var kvp in percentSums)
+            {
+                if (processed.Contains(kvp.Key)) continue;
+                float percentAsDecimal = kvp.Value / 100f;
+                SetOrUpdateProperty(kvp.Key, percentAsDecimal, Color.cyan);
+                processed.Add(kvp.Key);
             }
         }
 
@@ -278,49 +399,86 @@ namespace STG.CurveDash
 
                     if (m_OriginalEquipmentData is WeaponData || m_OriginalEquipmentData is OffHandData)
                     {
-                        // Search by "MainHand"/"OffHand" (CurveDash_Vaal_Reliquary naming) with "Right"/"Left" fallback
-                        var rightRegion = db.equipments.Find(r =>
+                        var mainHandRegion = db.equipments.Find(r =>
                             r.Name.IndexOf("MainHand", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
                             r.Name.IndexOf("Main Hand", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
                             r.Name.IndexOf("Right", System.StringComparison.OrdinalIgnoreCase) >= 0);
-                        var leftRegion = db.equipments.Find(r =>
+                        var offHandRegion = db.equipments.Find(r =>
                             r.Name.IndexOf("OffHand", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
                             r.Name.IndexOf("Off Hand", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
                             r.Name.IndexOf("Left", System.StringComparison.OrdinalIgnoreCase) >= 0);
-                        
+
                         this.Region = new System.Collections.Generic.List<DevionGames.InventorySystem.EquipmentRegion>();
-                        if (rightRegion != null) this.Region.Add(rightRegion);
-                        if (leftRegion != null) this.Region.Add(leftRegion);
-                        
-                        // UnityEngine.Debug.Log($"[CurveDashEquipmentAdapter] Weapon/Offhand '{this.Name}' assigned regions → Right='{rightRegion?.Name ?? "NULL"}' Left='{leftRegion?.Name ?? "NULL"}' (total={this.Region.Count}).");
+
+                        if (m_OriginalEquipmentData is TwoHandedWeaponData)
+                        {
+                            // Vũ khí 2 tay chiếm cả 2 slot → Devion tự block OffHand, icon hiện cả 2 tay
+                            if (mainHandRegion != null) this.Region.Add(mainHandRegion);
+                            if (offHandRegion  != null) this.Region.Add(offHandRegion);
+                        }
+                        else if (m_OriginalEquipmentData is OneHandedWeaponData || m_OriginalEquipmentData is BowData)
+                        {
+                            // Kiếm 1 tay và Cung: chỉ MainHand — tránh Devion hiện icon ở 2 slot
+                            // Song kiếm được xử lý programmatically (xem PlayerView.PlaceDualWieldInOffHand)
+                            if (mainHandRegion != null) this.Region.Add(mainHandRegion);
+                        }
+                        else if (m_OriginalEquipmentData is OffHandData)
+                        {
+                            // Khiên và Tên chỉ vào OffHand — tránh Devion thay thế kiếm chính
+                            if (offHandRegion != null) this.Region.Add(offHandRegion);
+                        }
+
+                        UnityEngine.Debug.Log($"[CurveDashEquipmentAdapter] '{this.Name}' ({m_OriginalEquipmentData.GetType().Name}) → regions=[{string.Join(", ", this.Region.ConvertAll(r => r.Name))}]");
                         return;
                     }
                     else if (m_OriginalEquipmentData is ArmorItemData armorItem)
                     {
                         switch (armorItem.Slot)
                         {
-                            case EquipmentSlot.Head: 
-                                searchKeywords.Add("Head"); 
+                            case EquipmentSlot.Head:
+                                searchKeywords.Add("Head");
                                 break;
-                            case EquipmentSlot.Body: 
-                                searchKeywords.AddRange(new[] { "Torso", "Chest", "Body" }); 
+                            case EquipmentSlot.Body:
+                                searchKeywords.AddRange(new[] { "Torso", "Chest", "Body" });
                                 break;
-                            case EquipmentSlot.Hands: 
-                                searchKeywords.AddRange(new[] { "Hands", "Gloves" }); 
+                            case EquipmentSlot.Hands:
+                                searchKeywords.AddRange(new[] { "Hands", "Gloves" });
                                 break;
-                            case EquipmentSlot.Feet: 
-                                searchKeywords.AddRange(new[] { "Feet", "Boots", "Legs" }); 
+                            case EquipmentSlot.Feet:
+                                searchKeywords.AddRange(new[] { "Feet", "Boots" });
                                 break;
-                            case EquipmentSlot.Amulet: 
-                                searchKeywords.Add("Amulet"); 
+                            case EquipmentSlot.Amulet:
+                                searchKeywords.Add("Amulet");
                                 break;
                             case EquipmentSlot.Ring1:
-                            case EquipmentSlot.Ring2: 
-                                searchKeywords.Add("Ring"); 
+                            case EquipmentSlot.Ring2:
+                                searchKeywords.Add("Ring");
                                 break;
-                            case EquipmentSlot.Belt: 
-                                searchKeywords.Add("Belt"); 
+                            case EquipmentSlot.Belt:
+                                searchKeywords.Add("Belt");
                                 break;
+                        }
+                    }
+                    else if (m_OriginalEquipmentData is BeltItemData)
+                    {
+                        searchKeywords.Add("Belt");
+                    }
+                    else if (m_OriginalEquipmentData is AmuletItemData)
+                    {
+                        searchKeywords.Add("Amulet");
+                    }
+                    else if (m_OriginalEquipmentData is RingItemData ringData)
+                    {
+                        // Chỉ định Ring1 (Left) hay Ring2 (Right), fallback sang "Ring" chung
+                        if (ringData.Slot == EquipmentSlot.Ring1)
+                        {
+                            searchKeywords.Add("Ring Left");
+                            searchKeywords.Add("Ring");  // Fallback
+                        }
+                        else
+                        {
+                            searchKeywords.Add("Ring Right");
+                            searchKeywords.Add("Ring");  // Fallback
                         }
                     }
 

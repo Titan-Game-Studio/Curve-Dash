@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b10b4a28bc97ba44ba3ebdfab95bef61, type: 3}
+  m_Name: Unique_Headhunter
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.BeltItemData
+  ItemName: Headhunter
+  Icon: {fileID: 21300000, guid: 00c2d27afd394574193b00de472fede9, type: 3}
+  Rarity: 3
+  Type: 2
+  Prefab:
+    m_AssetGUID: 281337f9f48ed10479e4ecb9c9b600d4
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
+  Description: Gain modifiers of rare monsters you kill for 20 seconds.
+  DevionAdapter: {fileID: 11400000, guid: d143909a2f3b8e14fa08cfc0fcd39a63, type: 2}
+  ModularPartIndex: 17
+  MeshPartName: Legs Armor Type 6 Color 3
+  HealthBonus: 150
+  LifeRegeneration: 15
+  FlaskSlots: []

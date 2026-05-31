@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d41a0bb84d9ffd54199f6aa4eda4feb8, type: 3}
+  m_Name: Rare_Onyx_Amulet
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.AmuletItemData
+  ItemName: Onyx Amulet
+  Icon: {fileID: 21300000, guid: 5d6735adc0337204aac1b7ec8f0d745f, type: 3}
+  Rarity: 2
+  Type: 2
+  Prefab:
+    m_AssetGUID: 1e4fff70abcc6984aa5372fa47f67501
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
+  Description: Superior all-attribute amulet.
+  DevionAdapter: {fileID: 11400000, guid: e0c23d9151411e64cab39bca76a07520, type: 2}
+  HealthBonus: 50
+  ManaBonus: 30
+  CritChanceBonus: 10
+  AllResistances: 10

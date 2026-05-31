@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Unique_Goldrim
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.ArmorItemData
   ItemName: Goldrim
-  Icon: {fileID: 21300000, guid: 22e5e4fd089524343ab57a84dd617f72, type: 3}
+  Icon: {fileID: 0}
   Rarity: 3
   Type: 1
   Prefab:
@@ -22,7 +22,7 @@ MonoBehaviour:
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
-  Description: Provides excellent elemental resistances for early levels.
+  Description: High resistance circlet.
   DevionAdapter: {fileID: 11400000, guid: 76b94f4dd834dfd4dbd4e36c00661705, type: 2}
   Slot: 0
   ModularPartIndex: 17

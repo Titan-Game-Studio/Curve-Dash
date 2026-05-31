@@ -80,13 +80,13 @@ namespace STG.CurveDash
                 return;
 
             int block1 = -1;
-            while (block1 != block)
+            while (block1 != block && liveBlocksEntities.Count > 0)
             {
                 block1 = liveBlocksEntities.Dequeue();
-                
+
                 // Enqueue the block that was just passed into our trailing queue
                 passedBlocksEntities.Enqueue(block1);
-                
+
                 // If we have more than 10 blocks behind the player, despawn the oldest one
                 if (passedBlocksEntities.Count > 10)
                 {
@@ -96,6 +96,9 @@ namespace STG.CurveDash
 
                 SpawnNextBlocks();
             }
+
+            if (block1 != block)
+                Debug.LogWarning($"[BlockSystem] OnMovedToNextBlock: entity {block} not found in liveBlocksEntities — likely a recycled entity ID, skipping.");
         }
 
         private void SpawnNextBlocks()

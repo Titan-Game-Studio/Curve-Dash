@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20a93a8c91388c14b9ef4d3d0c9b4d1b, type: 3}
-  m_Name: Support_Faster_Projectiles_Gem_Adapter
+  m_Name: Faster Projectiles Gem
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashItemAdapter
   m_Id: 753e0d82-0fdf-4cd3-8d09-2b233b21e088
   m_ItemName: Faster Projectiles Gem

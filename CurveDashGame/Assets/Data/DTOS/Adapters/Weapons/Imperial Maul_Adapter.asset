@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Imperial Maul_Adapter
+  m_Name: Imperial Maul
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: 2c4da0df-3dd8-48c8-80eb-91ad56a46e24
   m_ItemName: Imperial Maul

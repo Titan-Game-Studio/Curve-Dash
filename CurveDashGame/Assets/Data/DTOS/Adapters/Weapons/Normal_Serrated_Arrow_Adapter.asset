@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Normal_Serrated_Arrow_Adapter
+  m_Name: Serrated Arrow
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: 26c0ddc7-13d7-4b89-89b1-3306f87a0476
   m_ItemName: Serrated Arrow

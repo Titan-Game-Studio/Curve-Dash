@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d41a0bb84d9ffd54199f6aa4eda4feb8, type: 3}
+  m_Name: Magic_Jade_Amulet
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.AmuletItemData
+  ItemName: Jade Amulet
+  Icon: {fileID: 21300000, guid: 86cd9262d1ccb0d4493d258dd500f6ea, type: 3}
+  Rarity: 1
+  Type: 2
+  Prefab:
+    m_AssetGUID: 1e4fff70abcc6984aa5372fa47f67501
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
+  Description: Balanced elemental amulet.
+  DevionAdapter: {fileID: 11400000, guid: 79733f815b42c5a4ea49e5131f19fe31, type: 2}
+  HealthBonus: 30
+  ManaBonus: 20
+  CritChanceBonus: 5
+  AllResistances: 5

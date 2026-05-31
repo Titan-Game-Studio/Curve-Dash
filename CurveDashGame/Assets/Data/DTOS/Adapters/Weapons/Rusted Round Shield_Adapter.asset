@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Rusted Round Shield_Adapter
+  m_Name: Rusted Round Shield
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: bf8d2b3f-a6cd-47c1-8558-3bbe37d3fb11
   m_ItemName: Rusted Round Shield

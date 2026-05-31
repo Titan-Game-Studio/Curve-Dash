@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Normal_Rusted_Sword_Adapter
+  m_Name: Rusted Sword
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: e5ba592d-d65d-4ceb-be72-4838e60303f6
   m_ItemName: Rusted Sword
@@ -19,7 +19,7 @@ MonoBehaviour:
   m_Icon: {fileID: 21300000, guid: 77db979aea871104ab625715b58de66d, type: 3}
   m_Prefab: {fileID: 6654403910166112854, guid: c1f779f2e34d39041bfff6c9cfcd5d0b,
     type: 3}
-  m_Description: A simple rusted sword.
+  m_Description: A basic blade.
   m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,
     type: 2}
   m_IsSellable: 1

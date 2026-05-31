@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Normal_Iron_Helmet_Adapter
+  m_Name: Iron Helmet
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: 5c25092b-69d7-4d63-bba1-22cac628260e
   m_ItemName: Iron Helmet
@@ -19,7 +19,7 @@ MonoBehaviour:
   m_Icon: {fileID: 21300000, guid: 0c628c77b68e92b42b5b7228d68750f4, type: 3}
   m_Prefab: {fileID: 8725457531430950257, guid: c58a0f3d265344c438e99a7d3139dd17,
     type: 3}
-  m_Description: A heavy iron bucket for basic skull protection.
+  m_Description: Basic metal headgear.
   m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,
     type: 2}
   m_IsSellable: 1
@@ -122,7 +122,8 @@ MonoBehaviour:
   actions: []
   m_OverrideEquipPrefab: {fileID: 3517828984631180630, guid: c0c2e1a54ed77034384794a6d4e09a1c,
     type: 3}
-  m_Region: []
+  m_Region:
+  - {fileID: 2995979371151673093, guid: 9acf401ad757e3f419dd0f256a9f2d80, type: 2}
   m_OriginalEquipmentData: {fileID: 11400000, guid: 0032593d1ab53ed46b568a1efcdf9ee8,
     type: 2}
   references:

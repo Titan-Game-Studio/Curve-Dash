@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Unique_Facebreaker_Adapter
+  m_Name: Facebreaker
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: b78b192b-44fb-4d45-88ad-a71e0bd8cb30
   m_ItemName: Facebreaker
@@ -19,7 +19,7 @@ MonoBehaviour:
   m_Icon: {fileID: 21300000, guid: a9eece3b9f5314e45a8535f9182da500, type: 3}
   m_Prefab: {fileID: 6283810249110538892, guid: 1585f80466b711c40ae6df1e889de476,
     type: 3}
-  m_Description: Grants massive unarmed damage bonuses.
+  m_Description: Grants unarmed multipliers.
   m_Category: {fileID: -6294223960729143046, guid: 9acf401ad757e3f419dd0f256a9f2d80,
     type: 2}
   m_IsSellable: 1
@@ -122,7 +122,8 @@ MonoBehaviour:
   actions: []
   m_OverrideEquipPrefab: {fileID: 3517828984631180630, guid: c0c2e1a54ed77034384794a6d4e09a1c,
     type: 3}
-  m_Region: []
+  m_Region:
+  - {fileID: 2995979371151673093, guid: 9acf401ad757e3f419dd0f256a9f2d80, type: 2}
   m_OriginalEquipmentData: {fileID: 11400000, guid: 57b97a099bf8bb844ab5569ef52e15de,
     type: 2}
   references:

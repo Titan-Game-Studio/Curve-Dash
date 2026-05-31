@@ -25,13 +25,20 @@ namespace STG.CurveDash.Editor
         // --- DIRECTORY PATHS ---
         private const string WEAPONS_PATH = "Assets/Data/DTOS/Weapons";
         private const string ARMORS_PATH = "Assets/Data/DTOS/Armors";
+        private const string ACCESSORIES_PATH = "Assets/Data/DTOS/Accessories";
         private const string ABILITIES_PATH = "Assets/Data/DTOS/Abilities";
         private const string AFFIXES_PATH = "Assets/Data/DTOS/Affixs";
         private const string RPG_BASE_PATH = "Assets/Data/DTOS/RPGItems";
         private const string ADAPTERS_BASE_PATH = "Assets/Data/DTOS/Adapters";
 
-        // --- TAB 1: WEAPONS & ARMORS ---
-        private bool _isWeapon = true;
+        // --- TAB 1: WEAPONS & ARMORS & ACCESSORIES ---
+        private enum EquipGenMode { Weapon, Armor, Accessory }
+        private enum AccessoryGenType { Belt, Amulet, Ring }
+
+        private EquipGenMode _equipGenMode = EquipGenMode.Weapon;
+        private AccessoryGenType _accessoryGenType = AccessoryGenType.Belt;
+
+        // Weapon/Armor shared
         private string _equipName = "Exquisite Foil";
         private ItemRarity _equipRarity = ItemRarity.Normal;
         private WeaponGenCategory _weaponCat = WeaponGenCategory.OneHandedSword;
@@ -40,6 +47,20 @@ namespace STG.CurveDash.Editor
         private int _armorDefense = 25, _armorHealth = 20, _modularIndex = 0;
         private float _blockChance = 30f, _bonusDamage = 0f;
         private string _equipDesc = "A refined and powerful piece of equipment.";
+
+        // Accessory fields
+        private string _accName = "Leather Belt";
+        private ItemRarity _accRarity = ItemRarity.Normal;
+        private string _accDesc = "A valuable accessory.";
+        // Belt
+        private int _beltHealth = 60, _beltLifeRegen = 5;
+        // Amulet
+        private int _amuletHealth = 30, _amuletMana = 20;
+        private float _amuletCrit = 5f, _amuletAllResist = 10f;
+        // Ring
+        private EquipmentSlot _ringSlot = EquipmentSlot.Ring1;
+        private int _ringHealth = 20;
+        private float _ringDamage = 5f, _ringAttackSpeed = 0.05f, _ringAllResist = 5f;
 
         // --- TAB 2: ABILITIES & GEMS ---
         private bool _isActiveAbility = true;
@@ -103,35 +124,34 @@ namespace STG.CurveDash.Editor
         }
 
         // ====================================================================
-        // TAB 1: WEAPONS & ARMORS
+        // TAB 1: WEAPONS, ARMORS & ACCESSORIES
         // ====================================================================
         private void DrawWeaponsAndArmorsTab()
         {
+            // 3-mode selector
             EditorGUILayout.BeginHorizontal();
-            GUI.backgroundColor = _isWeapon ? new Color(0.3f, 0.8f, 0.4f, 1f) : Color.white;
-            if (GUILayout.Button("🗡️ Weapon Generator", GUILayout.Height(30))) _isWeapon = true;
-            GUI.backgroundColor = !_isWeapon ? new Color(0.9f, 0.6f, 0.2f, 1f) : Color.white;
-            if (GUILayout.Button("🛡️ Armor Generator", GUILayout.Height(30))) _isWeapon = false;
+            GUI.backgroundColor = _equipGenMode == EquipGenMode.Weapon ? new Color(0.3f, 0.8f, 0.4f, 1f) : Color.white;
+            if (GUILayout.Button("🗡️ Weapon", GUILayout.Height(30))) _equipGenMode = EquipGenMode.Weapon;
+            GUI.backgroundColor = _equipGenMode == EquipGenMode.Armor ? new Color(0.9f, 0.6f, 0.2f, 1f) : Color.white;
+            if (GUILayout.Button("🛡️ Armor", GUILayout.Height(30))) _equipGenMode = EquipGenMode.Armor;
+            GUI.backgroundColor = _equipGenMode == EquipGenMode.Accessory ? new Color(0.7f, 0.3f, 1f, 1f) : Color.white;
+            if (GUILayout.Button("💍 Accessory (Belt/Amulet/Ring)", GUILayout.Height(30))) _equipGenMode = EquipGenMode.Accessory;
             GUI.backgroundColor = Color.white;
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.Space();
-            EditorGUILayout.BeginVertical("box");
-            GUILayout.Label(_isWeapon ? "Single Weapon Settings" : "Single Armor Settings", EditorStyles.boldLabel);
-            EditorGUILayout.Space();
 
-            _equipName = EditorGUILayout.TextField("Item Name", _equipName);
-            _equipRarity = (ItemRarity)EditorGUILayout.EnumPopup("Rarity", _equipRarity);
-
-            if (_isWeapon)
+            // ── WEAPON ──────────────────────────────────────────────────────
+            if (_equipGenMode == EquipGenMode.Weapon)
             {
+                EditorGUILayout.BeginVertical("box");
+                GUILayout.Label("Single Weapon Settings", EditorStyles.boldLabel);
+                EditorGUILayout.Space();
+                _equipName = EditorGUILayout.TextField("Item Name", _equipName);
+                _equipRarity = (ItemRarity)EditorGUILayout.EnumPopup("Rarity", _equipRarity);
                 EditorGUI.BeginChangeCheck();
                 _weaponCat = (WeaponGenCategory)EditorGUILayout.EnumPopup("Weapon Category", _weaponCat);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    ApplyWeaponDefaults();
-                }
-
+                if (EditorGUI.EndChangeCheck()) ApplyWeaponDefaults();
                 EditorGUILayout.Space();
                 if (_weaponCat == WeaponGenCategory.Shield || _weaponCat == WeaponGenCategory.Arrow)
                 {
@@ -145,40 +165,122 @@ namespace STG.CurveDash.Editor
                     _attackSpeed = EditorGUILayout.FloatField("Attack Speed", _attackSpeed);
                     _attackRange = EditorGUILayout.FloatField("Attack Range", _attackRange);
                 }
+                EditorGUILayout.Space();
+                _equipDesc = EditorGUILayout.TextField("Description", _equipDesc);
+                EditorGUILayout.Space();
+                GUI.backgroundColor = new Color(0.2f, 0.7f, 1f);
+                if (GUILayout.Button("Create Single Weapon", GUILayout.Height(35)))
+                    CreateWeapon(_equipName, _weaponCat, _equipRarity, _minDamage, _maxDamage, _attackSpeed, _attackRange, _blockChance, _bonusDamage, _equipDesc);
+                GUI.backgroundColor = Color.white;
+                EditorGUILayout.EndVertical();
             }
-            else
+
+            // ── ARMOR ───────────────────────────────────────────────────────
+            else if (_equipGenMode == EquipGenMode.Armor)
             {
+                EditorGUILayout.BeginVertical("box");
+                GUILayout.Label("Single Armor Settings", EditorStyles.boldLabel);
+                EditorGUILayout.Space();
+                _equipName = EditorGUILayout.TextField("Item Name", _equipName);
+                _equipRarity = (ItemRarity)EditorGUILayout.EnumPopup("Rarity", _equipRarity);
                 _armorSlot = (EquipmentSlot)EditorGUILayout.EnumPopup("Equipment Slot", _armorSlot);
                 _armorDefense = EditorGUILayout.IntField("Defense Value", _armorDefense);
                 _armorHealth = EditorGUILayout.IntField("Health Bonus", _armorHealth);
                 _modularIndex = EditorGUILayout.IntField("Modular Part Index", _modularIndex);
+                EditorGUILayout.Space();
+                _equipDesc = EditorGUILayout.TextField("Description", _equipDesc);
+                EditorGUILayout.Space();
+                GUI.backgroundColor = new Color(0.9f, 0.6f, 0.2f);
+                if (GUILayout.Button("Create Single Armor", GUILayout.Height(35)))
+                    CreateArmor(_equipName, _armorSlot, _equipRarity, _armorDefense, _armorHealth, _modularIndex, _equipDesc);
+                GUI.backgroundColor = Color.white;
+                EditorGUILayout.EndVertical();
             }
 
-            EditorGUILayout.Space();
-            _equipDesc = EditorGUILayout.TextField("Description", _equipDesc);
-
-            EditorGUILayout.Space();
-            GUI.backgroundColor = new Color(0.2f, 0.7f, 1f);
-            if (GUILayout.Button(_isWeapon ? "Create Single Weapon" : "Create Single Armor", GUILayout.Height(35)))
+            // ── ACCESSORY (Belt / Amulet / Ring) ────────────────────────────
+            else
             {
-                if (_isWeapon) CreateWeapon(_equipName, _weaponCat, _equipRarity, _minDamage, _maxDamage, _attackSpeed, _attackRange, _blockChance, _bonusDamage, _equipDesc);
-                else CreateArmor(_equipName, _armorSlot, _equipRarity, _armorDefense, _armorHealth, _modularIndex, _equipDesc);
-            }
-            GUI.backgroundColor = Color.white;
-            EditorGUILayout.EndVertical();
+                EditorGUILayout.BeginHorizontal();
+                GUI.backgroundColor = _accessoryGenType == AccessoryGenType.Belt   ? new Color(0.8f, 0.5f, 0.1f) : Color.white;
+                if (GUILayout.Button("🔶 Belt",   GUILayout.Height(26))) _accessoryGenType = AccessoryGenType.Belt;
+                GUI.backgroundColor = _accessoryGenType == AccessoryGenType.Amulet ? new Color(0.4f, 0.8f, 0.9f) : Color.white;
+                if (GUILayout.Button("🔷 Amulet", GUILayout.Height(26))) _accessoryGenType = AccessoryGenType.Amulet;
+                GUI.backgroundColor = _accessoryGenType == AccessoryGenType.Ring   ? new Color(0.9f, 0.3f, 0.6f) : Color.white;
+                if (GUILayout.Button("💎 Ring",   GUILayout.Height(26))) _accessoryGenType = AccessoryGenType.Ring;
+                GUI.backgroundColor = Color.white;
+                EditorGUILayout.EndHorizontal();
 
+                EditorGUILayout.Space();
+                EditorGUILayout.BeginVertical("box");
+
+                _accName   = EditorGUILayout.TextField("Item Name", _accName);
+                _accRarity = (ItemRarity)EditorGUILayout.EnumPopup("Rarity", _accRarity);
+                EditorGUILayout.Space();
+
+                if (_accessoryGenType == AccessoryGenType.Belt)
+                {
+                    GUILayout.Label("Belt Settings  (uses LEGS/pants visual, 3 flask slots)", EditorStyles.boldLabel);
+                    _beltHealth   = EditorGUILayout.IntField("Health Bonus", _beltHealth);
+                    _beltLifeRegen = EditorGUILayout.IntField("Life Regeneration", _beltLifeRegen);
+                    EditorGUILayout.HelpBox("Flask slots are assigned in the Inspector after creation. Max 3 flasks.", MessageType.Info);
+                }
+                else if (_accessoryGenType == AccessoryGenType.Amulet)
+                {
+                    GUILayout.Label("Amulet Settings  (no 3D model)", EditorStyles.boldLabel);
+                    _amuletHealth     = EditorGUILayout.IntField("Health Bonus", _amuletHealth);
+                    _amuletMana       = EditorGUILayout.IntField("Mana Bonus", _amuletMana);
+                    _amuletCrit       = EditorGUILayout.FloatField("Crit Chance Bonus (%)", _amuletCrit);
+                    _amuletAllResist  = EditorGUILayout.FloatField("All Resistances (%)", _amuletAllResist);
+                }
+                else
+                {
+                    GUILayout.Label("Ring Settings  (no 3D model)", EditorStyles.boldLabel);
+                    _ringSlot         = (EquipmentSlot)EditorGUILayout.EnumPopup("Ring Slot", _ringSlot);
+                    if (_ringSlot != EquipmentSlot.Ring1 && _ringSlot != EquipmentSlot.Ring2)
+                    {
+                        EditorGUILayout.HelpBox("Ring slot must be Ring1 or Ring2.", MessageType.Warning);
+                        _ringSlot = EquipmentSlot.Ring1;
+                    }
+                    _ringHealth       = EditorGUILayout.IntField("Health Bonus", _ringHealth);
+                    _ringDamage       = EditorGUILayout.FloatField("Added Flat Damage", _ringDamage);
+                    _ringAttackSpeed  = EditorGUILayout.FloatField("Attack Speed Bonus", _ringAttackSpeed);
+                    _ringAllResist    = EditorGUILayout.FloatField("All Resistances (%)", _ringAllResist);
+                }
+
+                EditorGUILayout.Space();
+                _accDesc = EditorGUILayout.TextField("Description", _accDesc);
+                EditorGUILayout.Space();
+
+                GUI.backgroundColor = new Color(0.7f, 0.3f, 1f);
+                string createLabel = $"Create {_accessoryGenType}";
+                if (GUILayout.Button(createLabel, GUILayout.Height(35)))
+                {
+                    if (_accessoryGenType == AccessoryGenType.Belt)
+                        CreateBelt(_accName, _accRarity, _beltHealth, _beltLifeRegen, _accDesc);
+                    else if (_accessoryGenType == AccessoryGenType.Amulet)
+                        CreateAmulet(_accName, _accRarity, _amuletHealth, _amuletMana, _amuletCrit, _amuletAllResist, _accDesc);
+                    else
+                        CreateRing(_accName, _ringSlot, _accRarity, _ringHealth, _ringDamage, _ringAttackSpeed, _ringAllResist, _accDesc);
+                }
+                GUI.backgroundColor = Color.white;
+                EditorGUILayout.EndVertical();
+            }
+
+            // ── PRESET GENERATOR (always visible) ───────────────────────────
             EditorGUILayout.Space();
             EditorGUILayout.BeginVertical("box");
             GUILayout.Label("Database Preset Generator", EditorStyles.boldLabel);
-            GUILayout.Label("Instantly generates the full PoE-inspired preset databases.", EditorStyles.miniLabel);
+            GUILayout.Label("Generates the full PoE-inspired preset database (Weapons + Armors + Belt/Amulet/Ring).", EditorStyles.miniLabel);
             EditorGUILayout.Space();
 
             GUI.backgroundColor = new Color(0.1f, 0.8f, 0.5f);
-            if (GUILayout.Button("⚡ Generate Full Preset Weapons & Armors Database", GUILayout.Height(40)))
+            if (GUILayout.Button("⚡ Generate Full Preset: Weapons + Armors + Accessories", GUILayout.Height(40)))
             {
                 GeneratePresetWeapons();
                 GeneratePresetArmors();
-                EditorUtility.DisplayDialog("Success", "Preset Weapons and Armors databases generated successfully!", "OK");
+                GeneratePresetAccessories();
+                CurveDashInventoryEditorUtility.SyncAndBuildAllAssets();
+                EditorUtility.DisplayDialog("Success", "Preset Weapons, Armors and Accessories generated + Database synced!", "OK");
             }
             GUI.backgroundColor = Color.white;
             EditorGUILayout.EndVertical();
@@ -281,11 +383,99 @@ namespace STG.CurveDash.Editor
 
         private void GeneratePresetArmors()
         {
-            CreateArmor("Iron Helmet", EquipmentSlot.Head, ItemRarity.Normal, 15, 10, 0, "Basic metal headgear.");
-            CreateArmor("Goldrim", EquipmentSlot.Head, ItemRarity.Unique, 50, 40, 4, "High resistance circlet.");
-            CreateArmor("Kaoms Heart", EquipmentSlot.Body, ItemRarity.Unique, 0, 500, 3, "Grants massive life pool (+500 HP).");
-            CreateArmor("Facebreaker", EquipmentSlot.Hands, ItemRarity.Unique, 20, 10, 3, "Grants unarmed multipliers.");
-            CreateArmor("Kaoms Roots", EquipmentSlot.Feet, ItemRarity.Unique, 100, 150, 3, "Unstoppable boots.");
+            CreateArmor("Iron Helmet",  EquipmentSlot.Head,  ItemRarity.Normal,  15, 10,  0, "Basic metal headgear.");
+            CreateArmor("Goldrim",      EquipmentSlot.Head,  ItemRarity.Unique,  50, 40,  4, "High resistance circlet.");
+            CreateArmor("Kaoms Heart",  EquipmentSlot.Body,  ItemRarity.Unique,   0, 500, 3, "Grants massive life pool (+500 HP).");
+            CreateArmor("Facebreaker",  EquipmentSlot.Hands, ItemRarity.Unique,  20,  10, 3, "Grants unarmed multipliers.");
+            CreateArmor("Kaoms Roots",  EquipmentSlot.Feet,  ItemRarity.Unique, 100, 150, 3, "Unstoppable boots.");
+        }
+
+        private void GeneratePresetAccessories()
+        {
+            // Belts (3 flask slots, uses LEGS visual)
+            CreateBelt("Leather Belt",    ItemRarity.Normal,  50,  0, "A simple leather belt.");
+            CreateBelt("Heavy Belt",      ItemRarity.Normal,  80,  0, "A sturdy heavy belt.");
+            CreateBelt("Rustic Sash",     ItemRarity.Magic,   90,  5, "Increases Life regeneration.");
+            CreateBelt("Studded Belt",    ItemRarity.Rare,   110,  8, "A reinforced leather belt.");
+            CreateBelt("Vanguard Belt",   ItemRarity.Rare,   120, 10, "High armour belt with bonuses.");
+            CreateBelt("Headhunter",      ItemRarity.Unique, 150, 15, "Gain modifiers of rare monsters you kill for 20 seconds.");
+
+            // Amulets (no 3D model)
+            CreateAmulet("Coral Amulet",    ItemRarity.Normal, 20,   0,  0f,  0f, "Provides some Life regeneration.");
+            CreateAmulet("Paua Amulet",     ItemRarity.Normal,  0,  20,  0f,  0f, "Provides some Mana regeneration.");
+            CreateAmulet("Amber Amulet",    ItemRarity.Normal, 15,   0,  0f,  0f, "Provides some Strength.");
+            CreateAmulet("Jade Amulet",     ItemRarity.Magic,  30,  20,  5f,  5f, "Balanced elemental amulet.");
+            CreateAmulet("Onyx Amulet",     ItemRarity.Rare,   50,  30, 10f, 10f, "Superior all-attribute amulet.");
+            CreateAmulet("Malachite Orb",   ItemRarity.Unique, 80,   0, 25f, 20f, "Legendary elemental resistance amulet.");
+            CreateAmulet("Eye of Chayula",  ItemRarity.Unique,  0,   0, 30f, 25f, "Converts life damage to chaos damage.");
+
+            // Rings (no 3D model)
+            CreateRing("Iron Ring",      EquipmentSlot.Ring1, ItemRarity.Normal,  30,   0f, 0f,   0f, "Basic iron ring.");
+            CreateRing("Coral Ring",     EquipmentSlot.Ring2, ItemRarity.Normal,  20,   0f, 0f,   0f, "A regenerative coral ring.");
+            CreateRing("Sapphire Ring",  EquipmentSlot.Ring1, ItemRarity.Magic,   20,   0f, 0f,  15f, "Grants cold resistance.");
+            CreateRing("Topaz Ring",     EquipmentSlot.Ring2, ItemRarity.Magic,   20,   0f, 0f,  15f, "Grants lightning resistance.");
+            CreateRing("Two-Stone Ring", EquipmentSlot.Ring1, ItemRarity.Rare,    30,  10f, 0.05f, 20f, "Dual elemental resistance ring.");
+            CreateRing("Andvarius",      EquipmentSlot.Ring2, ItemRarity.Unique,   0,  30f, 0.20f, 30f, "Massive item quantity. High gold find.");
+            CreateRing("Ventor's Gamble",EquipmentSlot.Ring1, ItemRarity.Unique,  50,  20f, 0.15f, 25f, "Flask effect and item quantity ring.");
+        }
+
+        private void CreateBelt(string name, ItemRarity rarity, int health, int lifeRegen, string desc)
+        {
+            string folder = EnsureDirectory(Path.Combine(ACCESSORIES_PATH, "BELT"));
+            string path   = Path.Combine(folder, $"{rarity}_{name.Replace(" ", "_")}.asset").Replace("\\", "/");
+
+            var asset = ScriptableObject.CreateInstance<BeltItemData>();
+            asset.ItemName        = name;
+            asset.Rarity          = rarity;
+            asset.HealthBonus     = health;
+            asset.LifeRegeneration = lifeRegen;
+            asset.Description     = desc;
+
+            AssetDatabase.CreateAsset(asset, path);
+            AssetDatabase.SaveAssets();
+            Selection.activeObject = asset;
+            Debug.Log($"[Studio] Created Belt: {path}");
+        }
+
+        private void CreateAmulet(string name, ItemRarity rarity, int health, int mana, float crit, float allResist, string desc)
+        {
+            string folder = EnsureDirectory(Path.Combine(ACCESSORIES_PATH, "AMULETS"));
+            string path   = Path.Combine(folder, $"{rarity}_{name.Replace(" ", "_")}.asset").Replace("\\", "/");
+
+            var asset = ScriptableObject.CreateInstance<AmuletItemData>();
+            asset.ItemName       = name;
+            asset.Rarity         = rarity;
+            asset.HealthBonus    = health;
+            asset.ManaBonus      = mana;
+            asset.CritChanceBonus = crit;
+            asset.AllResistances = allResist;
+            asset.Description    = desc;
+
+            AssetDatabase.CreateAsset(asset, path);
+            AssetDatabase.SaveAssets();
+            Selection.activeObject = asset;
+            Debug.Log($"[Studio] Created Amulet: {path}");
+        }
+
+        private void CreateRing(string name, EquipmentSlot slot, ItemRarity rarity, int health, float addedDmg, float atkSpeed, float allResist, string desc)
+        {
+            string folder = EnsureDirectory(Path.Combine(ACCESSORIES_PATH, "RINGS"));
+            string path   = Path.Combine(folder, $"{rarity}_{name.Replace(" ", "_")}.asset").Replace("\\", "/");
+
+            var asset = ScriptableObject.CreateInstance<RingItemData>();
+            asset.ItemName         = name;
+            asset.Slot             = slot;
+            asset.Rarity           = rarity;
+            asset.HealthBonus      = health;
+            asset.AddedFlatDamage  = addedDmg;
+            asset.AttackSpeedBonus = atkSpeed;
+            asset.AllResistances   = allResist;
+            asset.Description      = desc;
+
+            AssetDatabase.CreateAsset(asset, path);
+            AssetDatabase.SaveAssets();
+            Selection.activeObject = asset;
+            Debug.Log($"[Studio] Created Ring: {path}");
         }
 
         // ====================================================================
@@ -728,11 +918,15 @@ namespace STG.CurveDash.Editor
         {
             EnsureDirectory(ADAPTERS_BASE_PATH);
             int count = 0;
-            count += BulkCreateAdapters($"{RPG_BASE_PATH}/Gems", $"{ADAPTERS_BASE_PATH}/Gems");
-            count += BulkCreateAdapters($"{RPG_BASE_PATH}/Flasks", $"{ADAPTERS_BASE_PATH}/Flasks");
+            count += BulkCreateAdapters($"{RPG_BASE_PATH}/Gems",       $"{ADAPTERS_BASE_PATH}/Gems");
+            count += BulkCreateAdapters($"{RPG_BASE_PATH}/Flasks",     $"{ADAPTERS_BASE_PATH}/Flasks");
             count += BulkCreateAdapters($"{RPG_BASE_PATH}/Currencies", $"{ADAPTERS_BASE_PATH}/Currencies");
-            count += BulkCreateAdapters(WEAPONS_PATH, $"{ADAPTERS_BASE_PATH}/Weapons");
-            count += BulkCreateAdapters(ARMORS_PATH, $"{ADAPTERS_BASE_PATH}/Armors");
+            count += BulkCreateAdapters(WEAPONS_PATH,                  $"{ADAPTERS_BASE_PATH}/Weapons");
+            count += BulkCreateAdapters(ARMORS_PATH,                   $"{ADAPTERS_BASE_PATH}/Armors");
+            // Accessories (Belt / Amulet / Ring)
+            count += BulkCreateAdapters($"{ACCESSORIES_PATH}/BELT",    $"{ADAPTERS_BASE_PATH}/Accessories");
+            count += BulkCreateAdapters($"{ACCESSORIES_PATH}/AMULETS", $"{ADAPTERS_BASE_PATH}/Accessories");
+            count += BulkCreateAdapters($"{ACCESSORIES_PATH}/RINGS",   $"{ADAPTERS_BASE_PATH}/Accessories");
 
             AssetDatabase.SaveAssets(); AssetDatabase.Refresh();
             EditorUtility.DisplayDialog("Success", $"Successfully Created/Updated {count} Devion Adapters inside: {ADAPTERS_BASE_PATH}", "OK");
@@ -756,7 +950,10 @@ namespace STG.CurveDash.Editor
                 bool isNew = false;
                 ScriptableObject adapter;
 
-                if (itemData is EquippableData || itemData is ArmorItemData)
+                bool isEquipSlotItem = itemData is EquippableData || itemData is ArmorItemData
+                    || itemData is BeltItemData || itemData is AmuletItemData || itemData is RingItemData;
+
+                if (isEquipSlotItem)
                 {
                     var existing = AssetDatabase.LoadAssetAtPath<CurveDashEquipmentAdapter>(adapterPath);
                     if (existing != null) { adapter = existing; existing.OriginalEquipmentData = itemData; existing.SyncData(); }

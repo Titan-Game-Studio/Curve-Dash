@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Unique_Aegis_Aurora_Adapter
+  m_Name: Aegis Aurora
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: 19b1bc30-cd56-4dca-b7ca-52cf0f44a360
   m_ItemName: Aegis Aurora

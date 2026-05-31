@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20a93a8c91388c14b9ef4d3d0c9b4d1b, type: 3}
-  m_Name: Support_Lesser_Multiple_Projectiles_Gem_Adapter
+  m_Name: Lesser Multiple Projectiles Gem
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashItemAdapter
   m_Id: 1da09ee1-a7d6-4a14-9f4f-592ff4b7ffe3
   m_ItemName: Lesser Multiple Projectiles Gem

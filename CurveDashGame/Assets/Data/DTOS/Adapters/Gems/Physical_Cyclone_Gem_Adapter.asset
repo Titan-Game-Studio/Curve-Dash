@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20a93a8c91388c14b9ef4d3d0c9b4d1b, type: 3}
-  m_Name: Physical_Cyclone_Gem_Adapter
+  m_Name: Cyclone Gem
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashItemAdapter
   m_Id: 578c7e32-b1ec-4c58-987a-71fb4d9c3b71
   m_ItemName: Cyclone Gem

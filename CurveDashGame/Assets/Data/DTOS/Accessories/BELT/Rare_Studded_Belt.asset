@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b10b4a28bc97ba44ba3ebdfab95bef61, type: 3}
+  m_Name: Rare_Studded_Belt
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.BeltItemData
+  ItemName: Studded Belt
+  Icon: {fileID: 21300000, guid: 02a348816b90f5a458d36e1c0ef62457, type: 3}
+  Rarity: 2
+  Type: 2
+  Prefab:
+    m_AssetGUID: 348bd839337456b4f8ef7f1acbb1238c
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
+  Description: A reinforced leather belt.
+  DevionAdapter: {fileID: 11400000, guid: d6dcf90ad27d3b7419d989a50362074f, type: 2}
+  ModularPartIndex: 14
+  MeshPartName: Legs Armor Type 5 Color 3
+  HealthBonus: 110
+  LifeRegeneration: 8
+  FlaskSlots: []

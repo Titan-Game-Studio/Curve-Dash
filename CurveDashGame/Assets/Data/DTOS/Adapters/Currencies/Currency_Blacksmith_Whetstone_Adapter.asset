@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20a93a8c91388c14b9ef4d3d0c9b4d1b, type: 3}
-  m_Name: Currency_Blacksmith_Whetstone_Adapter
+  m_Name: Blacksmith Whetstone
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashItemAdapter
   m_Id: 3aa05670-44cc-46c2-95c1-c12d8120cde4
   m_ItemName: Blacksmith Whetstone

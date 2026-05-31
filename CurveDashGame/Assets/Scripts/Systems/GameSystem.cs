@@ -173,10 +173,43 @@ namespace STG.CurveDash
             bool screenTapOrClick = false;
             if (UnityEngine.InputSystem.Pointer.current != null && UnityEngine.InputSystem.Pointer.current.press.wasPressedThisFrame)
             {
-                if (UnityEngine.EventSystems.EventSystem.current == null || !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+                bool overInteractableUI = false;
+                var es = UnityEngine.EventSystems.EventSystem.current;
+                if (es != null)
                 {
-                    screenTapOrClick = true;
+                    var ped = new UnityEngine.EventSystems.PointerEventData(es)
+                    {
+                        position = UnityEngine.InputSystem.Pointer.current.position.ReadValue()
+                    };
+                    var results = new System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult>();
+                    es.RaycastAll(ped, results);
+
+                    // DEBUG: log every UI hit so we can see what's blocking input
+                    if (results.Count > 0)
+                    {
+                        var sb = new System.Text.StringBuilder($"[Input] Click at {ped.position} — RaycastAll hits ({results.Count}): ");
+                        foreach (var r in results)
+                        {
+                            bool sel = r.gameObject.GetComponentInParent<UnityEngine.UI.Selectable>() != null;
+                            sb.Append($"'{r.gameObject.name}'[sel={sel}] ");
+                            if (sel) overInteractableUI = true;
+                        }
+                        Debug.Log(sb.ToString());
+                    }
+                    else
+                    {
+                        Debug.Log($"[Input] Click at {ped.position} — no UI hits, tap accepted (state={gameStateComponent.State})");
+                    }
                 }
+                else
+                {
+                    Debug.Log("[Input] EventSystem is null — tap accepted unconditionally");
+                }
+
+                if (!overInteractableUI)
+                    screenTapOrClick = true;
+                else
+                    Debug.LogWarning("[Input] Tap BLOCKED by interactable UI (see hits above)");
             }
 
             switch (gameStateComponent.State)
@@ -371,13 +404,10 @@ namespace STG.CurveDash
                 var ballEntity = playerFilter.GetRawEntities()[0];
                 ref var viewLink = ref viewLinkPool.Get(ballEntity);
                 var ballView = viewLink.Transform.GetComponent<PlayerView>();
-                Debug.Log($"[GameStart] Found player entity: {ballEntity}, ballView is {(ballView != null ? "valid" : "null")}");
+                // Debug.Log($"[GameStart] Found player entity: {ballEntity}, ballView is {(ballView != null ? "valid" : "null")}");
                 if (ballView != null) ballView.SetRunning(true);
             }
-            else 
-            {
-                Debug.LogWarning("[GameStart] playerFilter is empty!");
-            }
+            // else Debug.LogWarning("[GameStart] playerFilter is empty!");
         }
 
 

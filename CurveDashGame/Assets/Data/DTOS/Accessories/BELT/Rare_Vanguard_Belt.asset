@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b10b4a28bc97ba44ba3ebdfab95bef61, type: 3}
+  m_Name: Rare_Vanguard_Belt
+  m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.BeltItemData
+  ItemName: Vanguard Belt
+  Icon: {fileID: 21300000, guid: 767c7c8d9f78c4d4a88b8bbefe88a642, type: 3}
+  Rarity: 2
+  Type: 2
+  Prefab:
+    m_AssetGUID: 348bd839337456b4f8ef7f1acbb1238c
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
+  Description: High armour belt with bonuses.
+  DevionAdapter: {fileID: 11400000, guid: d570c146f28efc3468369531cdba3047, type: 2}
+  ModularPartIndex: 14
+  MeshPartName: Legs Armor Type 5 Color 3
+  HealthBonus: 120
+  LifeRegeneration: 10
+  FlaskSlots: []
