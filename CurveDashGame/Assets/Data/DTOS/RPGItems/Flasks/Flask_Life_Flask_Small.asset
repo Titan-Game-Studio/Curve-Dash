@@ -24,7 +24,7 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   Description: Recovers 50 Life over 5 seconds.
   DevionAdapter: {fileID: 11400000, guid: 7bbe4043156f7504f81fa0195770371a, type: 2}
-  AutoUseCondition: 3
+  AutoUseCondition: 2
   FlaskType: 0
   RecoveryAmount: 50
   Duration: 5

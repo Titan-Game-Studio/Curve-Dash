@@ -262,30 +262,56 @@ namespace STG.CurveDash
             }
         }
 
-        private int GetEquippedFlaskCount()
+        private string FindNextFlaskRegion(DevionGames.InventorySystem.ItemDatabase db)
         {
-            // Count flasks already equipped by checking Equipment container
+            // Find the first Flask slot that's available (not occupied by another flask)
+            // Try Flask 1, Flask 2, Flask 3 in order
+            var flaskRegionNames = new[] { "Flask 1", "Flask 2", "Flask 3" };
+
             try
             {
                 var equipmentContainer = DevionGames.UIWidgets.WidgetUtility.Find<DevionGames.InventorySystem.ItemContainer>("Equipment");
                 if (equipmentContainer != null)
                 {
-                    int flaskCount = 0;
-                    foreach (var slot in equipmentContainer.Slots)
+                    // For each Flask slot, check if it already has a flask
+                    foreach (var regionName in flaskRegionNames)
                     {
-                        if (slot != null && !slot.IsEmpty && slot.ObservedItem != null)
+                        bool regionOccupied = false;
+
+                        // Check if any slot with this region has a flask item
+                        foreach (var slot in equipmentContainer.Slots)
                         {
-                            if (slot.ObservedItem is CurveDashEquipmentAdapter adapter && adapter.OriginalEquipmentData is FlaskItemData)
+                            if (slot != null && !slot.IsEmpty && slot.ObservedItem != null)
                             {
-                                flaskCount++;
+                                // Try to get the slot's assigned region
+                                var itemAdapter = slot.ObservedItem as CurveDashEquipmentAdapter;
+                                if (itemAdapter != null && itemAdapter.OriginalEquipmentData is FlaskItemData)
+                                {
+                                    // Check if this adapter has the region we're looking for
+                                    if (itemAdapter.Region != null && itemAdapter.Region.Count > 0)
+                                    {
+                                        if (itemAdapter.Region[0].Name == regionName)
+                                        {
+                                            regionOccupied = true;
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                         }
+
+                        // If this region is not occupied, use it
+                        if (!regionOccupied)
+                        {
+                            return regionName;
+                        }
                     }
-                    return flaskCount;
                 }
             }
             catch { }
-            return 0; // Default to Flask 1 if cannot determine
+
+            // Fallback to Flask 1 if something goes wrong
+            return "Flask 1";
         }
 
         private void SyncDatabaseReferences()
@@ -509,20 +535,15 @@ namespace STG.CurveDash
                     }
                     else if (m_OriginalEquipmentData is FlaskItemData)
                     {
-                        // Flask items - dynamically assign Flask 1/2/3 region based on equipment flask count
-                        int equippedFlaskCount = GetEquippedFlaskCount();
-
-                        // Clamp to 0-2 (Flask 1, 2, 3)
-                        int slotIndex = Mathf.Min(equippedFlaskCount, 2);
-                        string[] flaskRegionNames = { "Flask 1", "Flask 2", "Flask 3" };
-                        string targetRegionName = flaskRegionNames[slotIndex];
+                        // Flask items - find next available Flask slot (1, 2, or 3)
+                        string targetRegionName = FindNextFlaskRegion(db);
 
                         // Find and assign the region
-                        var targetRegion = db.equipments.Find(r => r.Name == targetRegionName);
+                        var targetRegion = db.equipments.Find(r => r != null && r.Name == targetRegionName);
                         if (targetRegion != null)
                         {
                             this.Region = new System.Collections.Generic.List<DevionGames.InventorySystem.EquipmentRegion> { targetRegion };
-                            UnityEngine.Debug.Log($"[CurveDashEquipmentAdapter] Flask '{this.Name}' → region='{targetRegion.Name}' (Flask #{slotIndex + 1}, equipped={equippedFlaskCount})");
+                            UnityEngine.Debug.Log($"[CurveDashEquipmentAdapter] Flask '{this.Name}' → region='{targetRegion.Name}'");
                             return;
                         }
 

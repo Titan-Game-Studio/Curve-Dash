@@ -24,7 +24,7 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   Description: Your Critical Strike Chance is Lucky during effect.
   DevionAdapter: {fileID: 11400000, guid: af7a3dadc35388d40b78e829610ddf52, type: 2}
-  AutoUseCondition: 1
+  AutoUseCondition: 2
   FlaskType: 2
   RecoveryAmount: 0
   Duration: 4
