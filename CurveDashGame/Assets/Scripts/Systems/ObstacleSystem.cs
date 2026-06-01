@@ -7,19 +7,23 @@ namespace STG.CurveDash
     public class ObstacleSystem : ITickable
     {
         private readonly ObjectSpawner spawner;
+        private readonly PlayerStatService playerStatService;
         private const float RotationSpeed = 60.0f;
 
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
+        private readonly EcsPool<EnemyComponent> enemyPool;
 
         private readonly EcsFilter obstacleFilter;
         private readonly EcsFilter playerHitObstacleFilter;
         private readonly EcsFilter deadEnemyFilter;
 
-        public ObstacleSystem(EcsWorld world, ObjectSpawner spawner)
+        public ObstacleSystem(EcsWorld world, ObjectSpawner spawner, PlayerStatService playerStatService)
         {
             this.spawner = spawner;
+            this.playerStatService = playerStatService;
 
             viewLinkPool = world.GetPool<ViewLinkComponent>();
+            enemyPool = world.GetPool<EnemyComponent>();
 
             obstacleFilter = world.Filter<ObstacleComponent>().End();
             playerHitObstacleFilter = world.Filter<ObstacleComponent>().Inc<PlayerHitObstacleEvent>().End();
@@ -33,6 +37,10 @@ namespace STG.CurveDash
 
             foreach (var obstacle in deadEnemyFilter)
             {
+                ref var enemy = ref enemyPool.Get(obstacle);
+                if (enemy.Data != null)
+                    playerStatService.AddScore((int)enemy.Data.ExperienceReward);
+
                 if (viewLinkPool.Has(obstacle))
                 {
                     ref var viewLink = ref viewLinkPool.Get(obstacle);

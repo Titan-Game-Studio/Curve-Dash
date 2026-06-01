@@ -43,12 +43,31 @@ namespace STG.CurveDash
             var playerStat = playerStatFilter.GetRawEntities()[0];
             ref var playerStatComponent = ref playerStatPool.Get(playerStat);
             playerStatComponent.Score += score;
+            if (cachedExpStat != null) cachedExpStat.BaseValue = playerStatComponent.Score;
             if (playerStatComponent.Score > playerStatComponent.Level * ScoreForNextLevel)
             {
                 playerStatComponent.Level++;
                 playerLevelUpPool.Add(playerStat);
                 AddLife(20f);
                 AddMana(10f);
+                GrantFreePoints();
+            }
+        }
+
+        private void GrantFreePoints()
+        {
+            try
+            {
+                if (cachedFreePointsStat == null)
+                {
+                    var handler = DevionGames.StatSystem.StatsManager.GetStatsHandler("Player Stats");
+                    cachedFreePointsStat = handler?.GetStat("Free Points");
+                }
+                cachedFreePointsStat?.Add(FreePointsPerLevel);
+            }
+            catch (System.Exception ex)
+            {
+                UnityEngine.Debug.LogWarning($"[PlayerStatService] GrantFreePoints failed: {ex.Message}");
             }
         }
 
@@ -189,12 +208,16 @@ namespace STG.CurveDash
             StoreResult(playerStatComponent);
         }
 
+        private const int FreePointsPerLevel = 5;
+
         private DevionGames.StatSystem.StatsHandler cachedHandler;
         // Attributes (have CurrentValue)
         private DevionGames.StatSystem.Attribute cachedHeartStat;
         private DevionGames.StatSystem.Attribute cachedManaStat;
         private DevionGames.StatSystem.Attribute cachedShieldStat;
         // Plain stats (value only)
+        private DevionGames.StatSystem.Stat cachedExpStat;
+        private DevionGames.StatSystem.Stat cachedFreePointsStat;
         private DevionGames.StatSystem.Stat cachedStrStat;
         private DevionGames.StatSystem.Stat cachedDexStat;
         private DevionGames.StatSystem.Stat cachedIntStat;
@@ -215,6 +238,7 @@ namespace STG.CurveDash
         {
             cachedHandler = null;
             cachedHeartStat = null; cachedManaStat = null; cachedShieldStat = null;
+            cachedExpStat = null; cachedFreePointsStat = null;
             cachedStrStat = null; cachedDexStat = null; cachedIntStat = null;
             cachedArmourStat = null; cachedEvasionStat = null; cachedAccuracyStat = null;
             cachedFireResStat = null; cachedColdResStat = null; cachedLightResStat = null;
@@ -232,10 +256,12 @@ namespace STG.CurveDash
                 if (cachedHandler != handler)
                 {
                     cachedHandler = handler;
-                    cachedHeartStat    = handler.GetStat("Heart")                as DevionGames.StatSystem.Attribute;
-                    cachedManaStat     = handler.GetStat("Mana")                 as DevionGames.StatSystem.Attribute;
-                    cachedShieldStat   = handler.GetStat("Shield")               as DevionGames.StatSystem.Attribute;
-                    cachedStrStat      = handler.GetStat("Strength");
+                    cachedHeartStat      = handler.GetStat("Heart")          as DevionGames.StatSystem.Attribute;
+                    cachedManaStat       = handler.GetStat("Mana")           as DevionGames.StatSystem.Attribute;
+                    cachedShieldStat     = handler.GetStat("Shield")         as DevionGames.StatSystem.Attribute;
+                    cachedExpStat        = handler.GetStat("Exp");
+                    cachedFreePointsStat = handler.GetStat("Free Points");
+                    cachedStrStat        = handler.GetStat("Strength");
                     cachedDexStat      = handler.GetStat("Dexterity");
                     cachedIntStat      = handler.GetStat("Intelligence");
                     cachedArmourStat   = handler.GetStat("Armor");
@@ -285,6 +311,7 @@ namespace STG.CurveDash
                         cachedShieldStat.CurrentValue = max;
                     }
 
+                    if (cachedExpStat != null) cachedExpStat.BaseValue = 0;
                     PullPlainStats(ref comp);
                     hasPushedInitialStats = true;
                     handler.onUpdate?.Invoke();
