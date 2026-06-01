@@ -18,11 +18,15 @@ namespace STG.CurveDash
         private readonly EcsPool<EnemyDeadEvent> deadPool;
 
         private readonly GemLevelService _gemLevelService;
+        private readonly PlayerStatService _playerStatService;
+        private readonly BeltFlaskService _beltFlaskService;
 
-        public CombatSystem(EcsWorld world, GemLevelService gemLevelService)
+        public CombatSystem(EcsWorld world, GemLevelService gemLevelService, PlayerStatService playerStatService, BeltFlaskService beltFlaskService)
         {
             this.world = world;
             _gemLevelService = gemLevelService;
+            _playerStatService = playerStatService;
+            _beltFlaskService = beltFlaskService;
             
             playerFilter = world.Filter<PlayerComponent>().Inc<PlayerCombatComponent>().Inc<ViewLinkComponent>().End();
             enemyFilter = world.Filter<EnemyHealthComponent>().Inc<EnemyComponent>().Inc<ViewLinkComponent>().Exc<EnemyDeadEvent>().End();
@@ -345,13 +349,41 @@ namespace STG.CurveDash
                                      targetsToHit.Add(finalTargetEnemy);
                                  }
 
+                                 // Deduct mana cost of all active abilities (once per attack, not per target)
+                                 bool abilitiesAllowed = true;
+                                 if (_playerStatService != null)
+                                 {
+                                     float totalManaCost = 0f;
+                                     if (combatPool.Has(capturedPlayerEntity))
+                                     {
+                                         ref var combatForMana = ref combatPool.Get(capturedPlayerEntity);
+                                         var abilitiesForMana = new System.Collections.Generic.List<AbilityData>();
+                                         if (combatForMana.CurrentWeapon != null)
+                                         {
+                                             var wa = combatForMana.CurrentWeapon.GetAbilities();
+                                             if (wa != null) abilitiesForMana.AddRange(wa);
+                                         }
+                                         if (playerViewComponent != null)
+                                             abilitiesForMana.AddRange(playerViewComponent.GetEquippedArmorAbilities());
+
+                                         foreach (var ab in abilitiesForMana)
+                                         {
+                                             if (ab is PoEAbility poeAb && poeAb.SkillType != PoEAbilityType.Aura)
+                                                 totalManaCost += poeAb.ManaCost;
+                                         }
+                                     }
+
+                                     if (totalManaCost > 0f)
+                                         abilitiesAllowed = _playerStatService.TrySpendMana(totalManaCost);
+                                 }
+
                                  // Deal damage to ALL resolved targets!
                                  bool isFirstTarget = true;
                                  foreach (var targetEntity in targetsToHit)
                                  {
                                      if (healthPool.Has(targetEntity) && !deadPool.Has(targetEntity))
                                      {
-                                         DealDamageToEnemy(capturedPlayerEntity, targetEntity, playerViewComponent, isFirstTarget);
+                                         DealDamageToEnemy(capturedPlayerEntity, targetEntity, playerViewComponent, isFirstTarget && abilitiesAllowed);
                                          isFirstTarget = false;
                                      }
                                  }
@@ -438,6 +470,47 @@ namespace STG.CurveDash
                 totalDamage *= gemMultiplier;
             }
 
+            // 3.5. Apply active offensive skill's DamageMultiplier + AddedFlatDamage (+ support gem bonuses)
+            {
+                var allAbilitiesForDmg = new List<AbilityData>();
+                if (combat.CurrentWeapon != null)
+                {
+                    var wa = combat.CurrentWeapon.GetAbilities();
+                    if (wa != null) allAbilitiesForDmg.AddRange(wa);
+                }
+                if (playerViewComponent != null)
+                    allAbilitiesForDmg.AddRange(playerViewComponent.GetEquippedArmorAbilities());
+
+                // Pick the first active (non-Aura) PoEAbility as the primary skill
+                PoEAbility primarySkill = null;
+                foreach (var ab in allAbilitiesForDmg)
+                {
+                    if (ab is PoEAbility poeAb && poeAb.SkillType != PoEAbilityType.Aura)
+                    {
+                        primarySkill = poeAb;
+                        break;
+                    }
+                }
+
+                if (primarySkill != null)
+                {
+                    float skillMultiplier = primarySkill.DamageMultiplier;
+                    float skillFlat = primarySkill.AddedFlatDamage;
+
+                    // Stack support gem bonuses compatible with the primary skill
+                    foreach (var ab in allAbilitiesForDmg)
+                    {
+                        if (ab is SupportAbilityData support && support.IsCompatible(primarySkill))
+                        {
+                            skillMultiplier *= (1f + support.DamageMultiplierPercent / 100f);
+                            skillFlat += support.AddedFlatDamageBonus;
+                        }
+                    }
+
+                    totalDamage = (totalDamage + skillFlat) * skillMultiplier;
+                }
+            }
+
             // 4. Critical Hit Mechanic (Base 10% chance for a 1.5x damage critical hit)
             float critChance = 10f;
             if (Random.Range(0f, 100f) < critChance)
@@ -459,10 +532,11 @@ namespace STG.CurveDash
                 Debug.Log($"[Combat] Player dealt {totalDamage:F1} damage (Base: {baseDamage:F1} + Offhand: {offhandBonus:F1}) to enemy! HP left: {targetHealth.CurrentHealth:F1}");
             }
 
-            // 6. Handle Enemy Death — give gem XP
+            // 6. Handle Enemy Death — restore flask charges + give gem XP
             if (targetHealth.CurrentHealth <= 0)
             {
                 deadPool.Add(enemyEntity);
+                _beltFlaskService?.OnEnemyKilled();
 
                 if (_gemLevelService != null)
                 {

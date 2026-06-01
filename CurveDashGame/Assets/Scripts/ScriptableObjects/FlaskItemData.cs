@@ -30,8 +30,12 @@ namespace STG.CurveDash
         public int MaxCharges = 60;
         public int ChargesUsedPerUse = 20;
         
+        [Header("Charge Refill")]
+        [Tooltip("Charges restored each time the player kills an enemy (POE-style).")]
+        public int ChargesGainedOnKill = 3;
+
         [Header("Utility Buffs (Optional)")]
-        public float SpeedModifier = 1.0f; // e.g. 1.4f for Quicksilver Flask (40% speed boost)
+        public float SpeedModifier = 1.0f;
         public float AttackSpeedModifier = 1.0f;
 
         private void Reset()

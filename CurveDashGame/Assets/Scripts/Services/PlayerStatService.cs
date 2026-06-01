@@ -78,6 +78,19 @@ namespace STG.CurveDash
             SyncWithDevionGames(ref playerStatComponent, true);
         }
 
+        // Returns true and deducts mana if enough is available; returns false otherwise.
+        public bool TrySpendMana(float amount)
+        {
+            if (amount <= 0f) return true;
+            var playerStat = playerStatFilter.GetRawEntities()[0];
+            ref var comp = ref playerStatPool.Get(playerStat);
+            SyncWithDevionGames(ref comp, false);
+            if (comp.CurrentMana < amount) return false;
+            comp.CurrentMana -= amount;
+            SyncWithDevionGames(ref comp, true);
+            return true;
+        }
+
         public void AddEnergyShield(float amount)
         {
             var playerStat = playerStatFilter.GetRawEntities()[0];

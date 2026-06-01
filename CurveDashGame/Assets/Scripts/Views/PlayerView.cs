@@ -135,8 +135,8 @@ namespace STG.CurveDash
         public float MovementSpeed { get; set; } = 5f;
         public float AttackSpeed { get; set; } = 1f;
 
+        [Inject] private BeltFlaskService _beltFlaskService;
         private SmartEquipService _smartEquipService;
-        private readonly BeltFlaskService _beltFlaskService = new BeltFlaskService();
 
         private void EnsureSmartEquipService()
         {
@@ -524,9 +524,9 @@ namespace STG.CurveDash
                         if (_dataManager?.UserData?.EquippedItems != null)
                             _dataManager.UserData.EquippedItems[ring.Slot] = ring.name;
                     }
-                    else if (itemData is FlaskItemData)
+                    else if (itemData is FlaskItemData flask)
                     {
-                        // Reset to all 3 flask regions so future equips can target any slot
+                        _beltFlaskService.AddEquipmentFlask(flask);
                         ResetFlaskRegionToAll(adapter);
                     }
                     else if (itemData is EquippableData equippable)
@@ -642,6 +642,10 @@ namespace STG.CurveDash
                     {
                         _dataManager?.UserData?.EquippedItems?.Remove(ring.Slot);
                     }
+                    else if (itemData is FlaskItemData removedFlask)
+                    {
+                        _beltFlaskService.RemoveEquipmentFlask(removedFlask);
+                    }
                     else if (itemData is EquippableData equippable)
                     {
                         if (equippable is WeaponData)
@@ -749,17 +753,25 @@ namespace STG.CurveDash
                 Debug.Log($"[Debug] Range circle debug visualization toggled: {RangeCircleVisualizer.IsDebugEnabled}");
             }
 
-            // Belt flask auto-use tick (POE-style)
-            if (_beltFlaskService.HasActiveBelt && _playerStatService != null)
+            // Mana regeneration: 5 mana/sec
+            if (_playerStatService != null)
+                _playerStatService.AddMana(5f * Time.deltaTime);
+
+            // Flask auto-use tick (belt-linked and equipment-slot flasks)
+            if (_beltFlaskService.HasAnyFlask && _playerStatService != null)
             {
                 ref var playerStats = ref _playerStatService.GetPlayerStat();
-                float healing = _beltFlaskService.Tick(Time.deltaTime, playerStats.CurrentLife, playerStats.MaxLife);
-                if (healing > 0f)
-                {
-                    _playerStatService.AddLife(healing);
-                }
+                var (lifeHeal, manaRestore) = _beltFlaskService.Tick(
+                    Time.deltaTime,
+                    playerStats.CurrentLife, playerStats.MaxLife,
+                    playerStats.CurrentMana, playerStats.MaxMana);
 
-                // Apply flask modifiers to movement speed and attack speed
+                if (lifeHeal > 0f)
+                    _playerStatService.AddLife(lifeHeal);
+                if (manaRestore > 0f)
+                    _playerStatService.AddMana(manaRestore);
+
+                // Apply flask speed modifiers
                 float speedMod = _beltFlaskService.GetSpeedModifier();
                 float attackSpeedMod = _beltFlaskService.GetAttackSpeedModifier();
                 MovementSpeed *= speedMod;
@@ -772,6 +784,7 @@ namespace STG.CurveDash
         private void Init()
         {
             UpdateCharacter(_dataManager.UserData.CurrentCharacterId);
+            _beltFlaskService.RefillAll();
         }
 
         private void OnDestroy()

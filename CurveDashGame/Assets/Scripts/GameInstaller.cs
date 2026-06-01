@@ -38,6 +38,7 @@ namespace STG.CurveDash
             // systems
             Container.BindInterfacesAndSelfTo<GemSocketService>().AsSingle();
             Container.Bind<GemLevelService>().AsSingle();
+            Container.Bind<BeltFlaskService>().AsSingle();
 
 
             Container.BindInstance(Prefabs.GameAssetCatalog).AsSingle();

@@ -24,11 +24,12 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   Description: Grants +1000 Armor during effect.
   DevionAdapter: {fileID: 11400000, guid: 2e07237f39f303848b398cbea7340de2, type: 2}
-  AutoUseCondition: 2
+  AutoUseCondition: 1
   FlaskType: 2
   RecoveryAmount: 0
   Duration: 4
   MaxCharges: 60
   ChargesUsedPerUse: 30
+  ChargesGainedOnKill: 3
   SpeedModifier: 1
   AttackSpeedModifier: 1

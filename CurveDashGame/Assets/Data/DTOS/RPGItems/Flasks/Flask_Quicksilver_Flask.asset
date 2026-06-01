@@ -30,5 +30,6 @@ MonoBehaviour:
   Duration: 4
   MaxCharges: 60
   ChargesUsedPerUse: 20
+  ChargesGainedOnKill: 3
   SpeedModifier: 1.4
   AttackSpeedModifier: 1
