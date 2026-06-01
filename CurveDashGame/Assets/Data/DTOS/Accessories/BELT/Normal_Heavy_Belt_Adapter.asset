@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Heavy Belt
+  m_Name: Normal_Heavy_Belt_Adapter
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: 5f5a5bb8-fca1-4db4-a7e0-d7abb2d42c87
   m_ItemName: Heavy Belt

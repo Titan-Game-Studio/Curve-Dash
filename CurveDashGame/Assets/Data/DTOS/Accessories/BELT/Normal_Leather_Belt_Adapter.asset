@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99959c3a00e50e842a358db0d5e70a3e, type: 3}
-  m_Name: Leather Belt
+  m_Name: Normal_Leather_Belt_Adapter
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.CurveDashEquipmentAdapter
   m_Id: 7e8fe01c-5f1e-4773-b944-d97170ce9312
   m_ItemName: Leather Belt
@@ -95,7 +95,7 @@ MonoBehaviour:
   - name: Flask Slots
     typeIndex: 5
     stringValue: 
-    intValue: 0
+    intValue: 3
     floatValue: 0
     colorValue: {r: 0, g: 0, b: 0, a: 0}
     boolValue: 0

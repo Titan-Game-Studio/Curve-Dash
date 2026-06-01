@@ -2,6 +2,7 @@ namespace STG.CurveDash
 {
     public struct PlayerStatComponent
     {
+        // --- Core resources ---
         public int Score;
         public int HighScore;
         public int Level;
@@ -13,5 +14,30 @@ namespace STG.CurveDash
         public float CurrentEnergyShield;
         public float MaxEnergyShield;
         public float InvincibleTimer;
+
+        // --- PoE Attributes ---
+        public float Strength;
+        public float Dexterity;
+        public float Intelligence;
+
+        // --- PoE Defences ---
+        public float Armour;
+        public float EvasionRating;
+        public float AccuracyRating;
+
+        // --- PoE Resistances (0–75%, Chaos starts at -60%) ---
+        public float FireResistance;
+        public float ColdResistance;
+        public float LightningResistance;
+        public float ChaosResistance;
+
+        // --- PoE Offence ---
+        public float CritChance;        // %
+        public float CritMultiplier;    // % (default 150)
+        public float LifeRegen;         // flat HP/s
+
+        // --- Movement ---
+        public float MovementSpeed;     // base 100
+        public float BlockChance;       // % cap 75
     }
 }

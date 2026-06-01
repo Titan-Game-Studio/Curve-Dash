@@ -103,39 +103,49 @@ namespace STG.CurveDash
                     int minDmg = Mathf.RoundToInt(weaponData.BaseMinDamage);
                     int maxDmg = Mathf.RoundToInt(weaponData.BaseMaxDamage);
 
+                    // "Min Damage" / "Max Damage" match stat names in CurveDash_Character_Stats exactly
                     SetOrUpdateProperty("Min Damage", minDmg, Color.white);
                     SetOrUpdateProperty("Max Damage", maxDmg, Color.white);
                     SetOrUpdateProperty("Damage", new Vector2(minDmg, maxDmg), Color.yellow);
+                    // Attack Speed is consumed by CombatSystem via WeaponInstance — display only
                     SetOrUpdateProperty("Attack Speed", weaponData.BaseAttackSpeed, Color.cyan);
                     SetOrUpdateProperty("Attack Range", weaponData.BaseAttackRange, Color.cyan);
                 }
                 else if (m_OriginalEquipmentData is ArmorItemData armorItem)
                 {
-                    SetOrUpdateProperty("Defense", armorItem.Defense, new Color(0.6f, 0.8f, 1f));
-                    SetOrUpdateProperty("Health", armorItem.HealthBonus, Color.green);
+                    // "Armor" and "Heart" match CurveDash_Character_Stats stat names
+                    SetOrUpdateProperty("Armor", armorItem.Defense, new Color(0.6f, 0.8f, 1f));
+                    SetOrUpdateProperty("Heart", armorItem.HealthBonus, Color.green);
                     SetOrUpdateProperty("Armor Slot", armorItem.Slot.ToString(), Color.white);
                 }
                 else if (m_OriginalEquipmentData is BeltItemData beltData)
                 {
-                    SetOrUpdateProperty("Health", beltData.HealthBonus, Color.green);
-                    SetOrUpdateProperty("Life Regen", beltData.LifeRegeneration, new Color(0.5f, 1f, 0.5f));
+                    SetOrUpdateProperty("Heart", beltData.HealthBonus, Color.green);
+                    SetOrUpdateProperty("Life Regeneration", beltData.LifeRegeneration, new Color(0.5f, 1f, 0.5f));
                     SetOrUpdateProperty("Flask Slots", beltData.FlaskSlots.Count, Color.yellow);
                     SetOrUpdateProperty("Armor Slot", "Belt", Color.white);
                 }
                 else if (m_OriginalEquipmentData is AmuletItemData amuletData)
                 {
-                    SetOrUpdateProperty("Health", amuletData.HealthBonus, Color.green);
+                    SetOrUpdateProperty("Heart", amuletData.HealthBonus, Color.green);
                     SetOrUpdateProperty("Mana", amuletData.ManaBonus, new Color(0.4f, 0.6f, 1f));
-                    SetOrUpdateProperty("Crit Chance", amuletData.CritChanceBonus, Color.yellow);
-                    SetOrUpdateProperty("All Resistances", amuletData.AllResistances, new Color(1f, 0.6f, 0.2f));
+                    SetOrUpdateProperty("Critical Strike", amuletData.CritChanceBonus, Color.yellow);
+                    // "All Resistances" → 4 individual resistance stats so EquipmentHandler can apply each
+                    SyncAllResistances(amuletData.AllResistances);
                     SetOrUpdateProperty("Armor Slot", "Amulet", Color.white);
                 }
                 else if (m_OriginalEquipmentData is RingItemData ringData)
                 {
-                    SetOrUpdateProperty("Health", ringData.HealthBonus, Color.green);
-                    SetOrUpdateProperty("Added Damage", ringData.AddedFlatDamage, Color.yellow);
+                    SetOrUpdateProperty("Heart", ringData.HealthBonus, Color.green);
+                    // Added flat damage → both Min and Max Damage stats
+                    if (ringData.AddedFlatDamage != 0)
+                    {
+                        SetOrUpdateProperty("Min Damage", ringData.AddedFlatDamage, Color.yellow);
+                        SetOrUpdateProperty("Max Damage", ringData.AddedFlatDamage, Color.yellow);
+                    }
+                    // Attack Speed handled by CombatSystem — display only
                     SetOrUpdateProperty("Attack Speed", ringData.AttackSpeedBonus, Color.cyan);
-                    SetOrUpdateProperty("All Resistances", ringData.AllResistances, new Color(1f, 0.6f, 0.2f));
+                    SyncAllResistances(ringData.AllResistances);
                     SetOrUpdateProperty("Armor Slot", ringData.Slot.ToString(), Color.white);
                 }
             }
@@ -229,6 +239,17 @@ namespace STG.CurveDash
                 SetOrUpdateProperty(kvp.Key, percentAsDecimal, Color.cyan);
                 processed.Add(kvp.Key);
             }
+        }
+
+        // Splits "All Resistances" into the 4 individual resistance stats
+        // so Devion EquipmentHandler can apply them to CurveDash_Character_Stats
+        private void SyncAllResistances(float value)
+        {
+            if (value == 0) return;
+            SetOrUpdateProperty("Fire Resistance",      value, new Color(1f, 0.4f, 0f));
+            SetOrUpdateProperty("Cold Resistance",      value, new Color(0.4f, 0.8f, 1f));
+            SetOrUpdateProperty("Lightning Resistance", value, new Color(1f, 0.9f, 0.2f));
+            SetOrUpdateProperty("Chaos Resistance",     value, new Color(0.7f, 0.3f, 0.9f));
         }
 
         private void SetOrUpdateProperty(string name, object value, Color displayColor)

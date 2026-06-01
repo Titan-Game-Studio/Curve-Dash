@@ -478,6 +478,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3a70d4af727a2c249bf7e7b1de029a71, type: 2}
   - {fileID: 11400000, guid: 64d5956bdd914404cb93260d89e2cf06, type: 2}
   - {fileID: 11400000, guid: eb60b1fa5819853439556b4001df7b8c, type: 2}
+  - {fileID: 11400000, guid: 8a250cacd786fb542a82e7344afd4dbc, type: 2}
+  - {fileID: 11400000, guid: f04e128b3cad0494c8a6e6c83c68e7a8, type: 2}
+  - {fileID: 11400000, guid: 6c9db7e11958bf34faa6f9c6ca5736df, type: 2}
+  - {fileID: 11400000, guid: cc56675e2cb351d49942b084b868d4e4, type: 2}
+  - {fileID: 11400000, guid: 67490b14d66b3fe45839199d69d0c373, type: 2}
   currencies: []
   raritys: []
   categories:

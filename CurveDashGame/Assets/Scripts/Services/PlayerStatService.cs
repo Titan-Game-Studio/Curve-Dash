@@ -143,12 +143,31 @@ namespace STG.CurveDash
             playerStatComponent.Level = level;
             playerStatComponent.Score = 0;
             playerStatComponent.Gold = 0;
-            playerStatComponent.MaxLife = 500f;
-            playerStatComponent.CurrentLife = 500f;
-            playerStatComponent.MaxMana = 50f;
-            playerStatComponent.CurrentMana = 50f;
-            playerStatComponent.MaxEnergyShield = 0f; // Starting shield is 0 so health drops immediately on hit
-            playerStatComponent.CurrentEnergyShield = 0f;
+
+            // Read starting stats from CurveDash_Character_Stats asset; fall back to constants only if DB unavailable
+            float baseLife = 500f, baseMana = 50f, baseShield = 0f;
+            var db = DevionGames.StatSystem.StatsManager.Database;
+            if (db != null)
+            {
+                foreach (var stat in db.items)
+                {
+                    if (stat == null) continue;
+                    switch (stat.Name)
+                    {
+                        case "Heart":  baseLife   = stat.BaseValue; break;
+                        case "Mana":   baseMana   = stat.BaseValue; break;
+                        case "Shield": baseShield = stat.BaseValue; break;
+                    }
+                }
+                UnityEngine.Debug.Log($"<color=cyan>[PlayerStatService] GameStart: read from asset Heart={baseLife}, Mana={baseMana}, Shield={baseShield}</color>");
+            }
+
+            playerStatComponent.MaxLife = baseLife;
+            playerStatComponent.CurrentLife = baseLife;
+            playerStatComponent.MaxMana = baseMana;
+            playerStatComponent.CurrentMana = baseMana;
+            playerStatComponent.MaxEnergyShield = baseShield;
+            playerStatComponent.CurrentEnergyShield = baseShield;
             playerStatComponent.InvincibleTimer = 0f;
             RestoreResult(ref playerStatComponent);
 
@@ -171,117 +190,118 @@ namespace STG.CurveDash
         }
 
         private DevionGames.StatSystem.StatsHandler cachedHandler;
+        // Attributes (have CurrentValue)
         private DevionGames.StatSystem.Attribute cachedHeartStat;
         private DevionGames.StatSystem.Attribute cachedManaStat;
         private DevionGames.StatSystem.Attribute cachedShieldStat;
+        // Plain stats (value only)
+        private DevionGames.StatSystem.Stat cachedStrStat;
+        private DevionGames.StatSystem.Stat cachedDexStat;
+        private DevionGames.StatSystem.Stat cachedIntStat;
+        private DevionGames.StatSystem.Stat cachedArmourStat;
+        private DevionGames.StatSystem.Stat cachedEvasionStat;
+        private DevionGames.StatSystem.Stat cachedAccuracyStat;
+        private DevionGames.StatSystem.Stat cachedFireResStat;
+        private DevionGames.StatSystem.Stat cachedColdResStat;
+        private DevionGames.StatSystem.Stat cachedLightResStat;
+        private DevionGames.StatSystem.Stat cachedChaosResStat;
+        private DevionGames.StatSystem.Stat cachedCritChanceStat;
+        private DevionGames.StatSystem.Stat cachedCritMultStat;
+        private DevionGames.StatSystem.Stat cachedLifeRegenStat;
+        private DevionGames.StatSystem.Stat cachedMoveSpeedStat;
+        private DevionGames.StatSystem.Stat cachedBlockStat;
+
+        private void ClearStatCache()
+        {
+            cachedHandler = null;
+            cachedHeartStat = null; cachedManaStat = null; cachedShieldStat = null;
+            cachedStrStat = null; cachedDexStat = null; cachedIntStat = null;
+            cachedArmourStat = null; cachedEvasionStat = null; cachedAccuracyStat = null;
+            cachedFireResStat = null; cachedColdResStat = null; cachedLightResStat = null;
+            cachedChaosResStat = null; cachedCritChanceStat = null; cachedCritMultStat = null;
+            cachedLifeRegenStat = null; cachedMoveSpeedStat = null; cachedBlockStat = null;
+        }
 
         private void SyncWithDevionGames(ref PlayerStatComponent comp, bool pushToDevion = false)
         {
             try
             {
                 var handler = DevionGames.StatSystem.StatsManager.GetStatsHandler("Player Stats");
-                if (handler == null)
-                {
-                    cachedHandler = null;
-                    cachedHeartStat = null;
-                    cachedManaStat = null;
-                    cachedShieldStat = null;
-                    return;
-                }
+                if (handler == null) { ClearStatCache(); return; }
 
                 if (cachedHandler != handler)
                 {
                     cachedHandler = handler;
-                    cachedHeartStat = handler.GetStat("Heart") as DevionGames.StatSystem.Attribute;
-                    cachedManaStat = handler.GetStat("Mana") as DevionGames.StatSystem.Attribute;
-                    cachedShieldStat = handler.GetStat("Shield") as DevionGames.StatSystem.Attribute;
-                    
-                    UnityEngine.Debug.Log($"<color=green>[PlayerStatService] Caching new StatsHandler. Heart null? {cachedHeartStat == null}, Mana null? {cachedManaStat == null}, Shield null? {cachedShieldStat == null}</color>");
+                    cachedHeartStat    = handler.GetStat("Heart")                as DevionGames.StatSystem.Attribute;
+                    cachedManaStat     = handler.GetStat("Mana")                 as DevionGames.StatSystem.Attribute;
+                    cachedShieldStat   = handler.GetStat("Shield")               as DevionGames.StatSystem.Attribute;
+                    cachedStrStat      = handler.GetStat("Strength");
+                    cachedDexStat      = handler.GetStat("Dexterity");
+                    cachedIntStat      = handler.GetStat("Intelligence");
+                    cachedArmourStat   = handler.GetStat("Armor");
+                    cachedEvasionStat  = handler.GetStat("Evasion Rating");
+                    cachedAccuracyStat = handler.GetStat("Accuracy Rating");
+                    cachedFireResStat  = handler.GetStat("Fire Resistance");
+                    cachedColdResStat  = handler.GetStat("Cold Resistance");
+                    cachedLightResStat = handler.GetStat("Lightning Resistance");
+                    cachedChaosResStat = handler.GetStat("Chaos Resistance");
+                    cachedCritChanceStat = handler.GetStat("Critical Strike");
+                    cachedCritMultStat   = handler.GetStat("Critical Multiplier");
+                    cachedLifeRegenStat  = handler.GetStat("Life Regeneration");
+                    cachedMoveSpeedStat  = handler.GetStat("Movement Speed");
+                    cachedBlockStat      = handler.GetStat("Block Chance");
+                    UnityEngine.Debug.Log($"<color=green>[PlayerStatService] StatsHandler cached. Heart={cachedHeartStat != null}, Mana={cachedManaStat != null}, Shield={cachedShieldStat != null}, FireRes={cachedFireResStat != null}</color>");
                 }
 
-                // The first time the player spawns and the stats handler is detected, 
-                // we MUST initialize the BaseValues of the stats to our starting stats (100 Health / 30 Shield).
+                // First sync after player spawns: read configured values from the asset as source of truth.
                 if (!hasPushedInitialStats)
                 {
-                    UnityEngine.Debug.Log("<color=green>[PlayerStatService] FIRST TIME Sync: Initializing Devion Games BaseValues...</color>");
-                    
+                    UnityEngine.Debug.Log("<color=green>[PlayerStatService] FIRST TIME Sync: Reading from CurveDash_Character_Stats...</color>");
+
                     if (cachedHeartStat != null)
                     {
-                        cachedHeartStat.BaseValue = comp.MaxLife;
-                        cachedHeartStat.CurrentValue = comp.CurrentLife;
-                        UnityEngine.Debug.Log($"[PlayerStatService] Heart set to Base={cachedHeartStat.BaseValue}, Current={cachedHeartStat.CurrentValue}");
+                        float max = cachedHeartStat.Value > 0f ? cachedHeartStat.Value : cachedHeartStat.BaseValue;
+                        comp.MaxLife = max; comp.CurrentLife = max;
+                        cachedHeartStat.CurrentValue = max;
+                        UnityEngine.Debug.Log($"[PlayerStatService] Heart Value={cachedHeartStat.Value} Base={cachedHeartStat.BaseValue} → MaxLife={max}");
                     }
                     else
                     {
-                        string allStatNames = string.Join(", ", handler.m_Stats.Select(x => x != null ? $"'{x.Name}'" : "null"));
-                        UnityEngine.Debug.LogWarning($"[PlayerStatService] Heart stat NOT found in 'Player Stats' handler! Existing stats are: {allStatNames}");
+                        string all = string.Join(", ", handler.m_Stats.Select(x => x != null ? $"'{x.Name}'" : "null"));
+                        UnityEngine.Debug.LogWarning($"[PlayerStatService] Heart not found! Stats: {all}");
                     }
-                    
+
                     if (cachedManaStat != null)
                     {
-                        cachedManaStat.BaseValue = comp.MaxMana;
-                        cachedManaStat.CurrentValue = comp.CurrentMana;
+                        float max = cachedManaStat.Value > 0f ? cachedManaStat.Value : cachedManaStat.BaseValue;
+                        comp.MaxMana = max; comp.CurrentMana = max;
+                        cachedManaStat.CurrentValue = max;
                     }
 
                     if (cachedShieldStat != null)
                     {
-                        cachedShieldStat.BaseValue = comp.MaxEnergyShield;
-                        cachedShieldStat.CurrentValue = comp.CurrentEnergyShield;
+                        float max = cachedShieldStat.Value > 0f ? cachedShieldStat.Value : cachedShieldStat.BaseValue;
+                        comp.MaxEnergyShield = max; comp.CurrentEnergyShield = max;
+                        cachedShieldStat.CurrentValue = max;
                     }
 
+                    PullPlainStats(ref comp);
                     hasPushedInitialStats = true;
                     handler.onUpdate?.Invoke();
                 }
                 else if (pushToDevion)
                 {
-                    UnityEngine.Debug.Log($"<color=green>[PlayerStatService] PUSH to Devion Games: Heart.CurrentValue = {comp.CurrentLife}, Shield.CurrentValue = {comp.CurrentEnergyShield}</color>");
-                    // Standard gameplay push - ONLY update CurrentValue to prevent runaway BaseValue feedback loop!
-                    if (cachedHeartStat != null)
-                    {
-                        cachedHeartStat.CurrentValue = comp.CurrentLife;
-                    }
-                    
-                    if (cachedManaStat != null)
-                    {
-                        cachedManaStat.CurrentValue = comp.CurrentMana;
-                    }
-
-                    if (cachedShieldStat != null)
-                    {
-                        cachedShieldStat.CurrentValue = comp.CurrentEnergyShield;
-                    }
-
+                    if (cachedHeartStat  != null) cachedHeartStat.CurrentValue  = comp.CurrentLife;
+                    if (cachedManaStat   != null) cachedManaStat.CurrentValue   = comp.CurrentMana;
+                    if (cachedShieldStat != null) cachedShieldStat.CurrentValue = comp.CurrentEnergyShield;
                     handler.onUpdate?.Invoke();
                 }
                 else
                 {
-                    // Standard gameplay pull - read the calculated final Value and CurrentValue
-                    float oldLife = comp.CurrentLife;
-                    float oldShield = comp.CurrentEnergyShield;
-
-                    if (cachedHeartStat != null)
-                    {
-                        cachedHeartStat.BaseValue = 500f; // Force base max life to 500 to prevent clamping back to 48 from database/loaded values!
-                        comp.MaxLife = cachedHeartStat.Value;
-                        comp.CurrentLife = cachedHeartStat.CurrentValue;
-                    }
-
-                    if (cachedManaStat != null)
-                    {
-                        comp.MaxMana = cachedManaStat.Value;
-                        comp.CurrentMana = cachedManaStat.CurrentValue;
-                    }
-
-                    if (cachedShieldStat != null)
-                    {
-                        comp.MaxEnergyShield = cachedShieldStat.Value;
-                        comp.CurrentEnergyShield = cachedShieldStat.CurrentValue;
-                    }
-
-                    if (comp.CurrentLife != oldLife || comp.CurrentEnergyShield != oldShield)
-                    {
-                        UnityEngine.Debug.Log($"<color=yellow>[PlayerStatService] PULL - Stats changed in Devion! Heart: {oldLife} -> {comp.CurrentLife}, Shield: {oldShield} -> {comp.CurrentEnergyShield} (cachedHeart null? {cachedHeartStat == null}, cachedShield null? {cachedShieldStat == null})</color>");
-                    }
+                    if (cachedHeartStat  != null) { comp.MaxLife           = cachedHeartStat.Value;  comp.CurrentLife           = cachedHeartStat.CurrentValue; }
+                    if (cachedManaStat   != null) { comp.MaxMana            = cachedManaStat.Value;   comp.CurrentMana           = cachedManaStat.CurrentValue; }
+                    if (cachedShieldStat != null) { comp.MaxEnergyShield   = cachedShieldStat.Value; comp.CurrentEnergyShield   = cachedShieldStat.CurrentValue; }
+                    PullPlainStats(ref comp);
                 }
             }
             catch (System.Exception ex)
@@ -290,14 +310,30 @@ namespace STG.CurveDash
             }
         }
 
+        private void PullPlainStats(ref PlayerStatComponent comp)
+        {
+            if (cachedStrStat      != null) comp.Strength           = cachedStrStat.Value;
+            if (cachedDexStat      != null) comp.Dexterity          = cachedDexStat.Value;
+            if (cachedIntStat      != null) comp.Intelligence       = cachedIntStat.Value;
+            if (cachedArmourStat   != null) comp.Armour             = cachedArmourStat.Value;
+            if (cachedEvasionStat  != null) comp.EvasionRating      = cachedEvasionStat.Value;
+            if (cachedAccuracyStat != null) comp.AccuracyRating     = cachedAccuracyStat.Value;
+            if (cachedFireResStat  != null) comp.FireResistance      = cachedFireResStat.Value;
+            if (cachedColdResStat  != null) comp.ColdResistance      = cachedColdResStat.Value;
+            if (cachedLightResStat != null) comp.LightningResistance = cachedLightResStat.Value;
+            if (cachedChaosResStat != null) comp.ChaosResistance     = cachedChaosResStat.Value;
+            if (cachedCritChanceStat != null) comp.CritChance        = cachedCritChanceStat.Value;
+            if (cachedCritMultStat   != null) comp.CritMultiplier    = cachedCritMultStat.Value;
+            if (cachedLifeRegenStat  != null) comp.LifeRegen         = cachedLifeRegenStat.Value;
+            if (cachedMoveSpeedStat  != null) comp.MovementSpeed     = cachedMoveSpeedStat.Value;
+            if (cachedBlockStat      != null) comp.BlockChance       = cachedBlockStat.Value;
+        }
+
         public void Clear()
         {
             var playerStat = playerStatFilter.GetRawEntities()[0];
             world.DelEntity(playerStat);
-            cachedHandler = null;
-            cachedHeartStat = null;
-            cachedManaStat = null;
-            cachedShieldStat = null;
+            ClearStatCache();
         }
 
         private void StoreResult(in PlayerStatComponent playerStatComponent)
