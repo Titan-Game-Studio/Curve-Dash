@@ -126,6 +126,7 @@ namespace STG.CurveDash
             {
                 currentBgmClip = clip;
 
+                if (gameStateFilter.GetEntitiesCount() == 0) return;
                 var gameState = gameStateFilter.GetRawEntities()[0];
                 ref var gameStateComponent = ref gameStatePool.Get(gameState);
                 if (gameStateComponent.State == GameState.Playing)
@@ -165,6 +166,7 @@ namespace STG.CurveDash
 
         public void Tick()
         {
+            if (gameStateFilter.GetEntitiesCount() == 0) return;
             var gameState = gameStateFilter.GetRawEntities()[0];
             ref var gameStateComponent = ref gameStatePool.Get(gameState);
 
@@ -233,6 +235,7 @@ namespace STG.CurveDash
                     if (isInvincible)
                         psc.InvincibleTimer -= Time.deltaTime;
 
+                    if (playerFilter.GetEntitiesCount() == 0) break;
                     var ballEntity = playerFilter.GetRawEntities()[0];
                     ref var viewLink = ref viewLinkPool.Get(ballEntity);
                     var ballView = viewLink.Transform.GetComponent<PlayerView>();
