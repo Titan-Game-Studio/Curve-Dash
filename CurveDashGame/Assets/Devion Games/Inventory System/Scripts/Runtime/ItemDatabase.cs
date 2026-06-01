@@ -37,12 +37,12 @@ namespace DevionGames.InventorySystem{
 		}
 
 		public void Merge(ItemDatabase database) {
-			items.AddRange(database.items.Where(y => !items.Any(z => z.Name == y.Name)));
-			currencies.AddRange(database.currencies.Where(y => !currencies.Any(z => z.Name == y.Name)));
-			raritys.AddRange(database.raritys.Where(y => !raritys.Any(z => z.Name == y.Name)));
-			categories.AddRange(database.categories.Where(y => !categories.Any(z => z.Name == y.Name)));
-			equipments.AddRange(database.equipments.Where(y => !equipments.Any(z => z.Name == y.Name)));
-			itemGroups.AddRange(database.itemGroups.Where(y => !itemGroups.Any(z => z.Name == y.Name)));
+			items.AddRange(database.items.Where(y => y != null && !items.Any(z => z != null && z.Name == y.Name)));
+			currencies.AddRange(database.currencies.Where(y => y != null && !currencies.Any(z => z != null && z.Name == y.Name)));
+			raritys.AddRange(database.raritys.Where(y => y != null && !raritys.Any(z => z != null && z.Name == y.Name)));
+			categories.AddRange(database.categories.Where(y => y != null && !categories.Any(z => z != null && z.Name == y.Name)));
+			equipments.AddRange(database.equipments.Where(y => y != null && !equipments.Any(z => z != null && z.Name == y.Name)));
+			itemGroups.AddRange(database.itemGroups.Where(y => y != null && !itemGroups.Any(z => z != null && z.Name == y.Name)));
 		}
 	}
 }

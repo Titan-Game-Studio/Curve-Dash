@@ -355,6 +355,7 @@ namespace STG.CurveDash
                     _inventoryContainerRef = DevionGames.UIWidgets.WidgetUtility.Find<DevionGames.InventorySystem.ItemContainer>("Inventory");
                     if (_inventoryContainerRef != null)
                     {
+                        _inventoryContainerRef.OnTryUseItem += OnInventoryTryUseItem;
                         Debug.Log("<color=green>[PlayerView] Successfully located Devion Inventory container.</color>");
                     }
                 }
@@ -522,6 +523,11 @@ namespace STG.CurveDash
                     {
                         if (_dataManager?.UserData?.EquippedItems != null)
                             _dataManager.UserData.EquippedItems[ring.Slot] = ring.name;
+                    }
+                    else if (itemData is FlaskItemData)
+                    {
+                        // Reset to all 3 flask regions so future equips can target any slot
+                        ResetFlaskRegionToAll(adapter);
                     }
                     else if (itemData is EquippableData equippable)
                     {
@@ -774,6 +780,10 @@ namespace STG.CurveDash
             {
                 _equipmentContainer.OnAddItem -= OnDevionEquipmentAdded;
                 _equipmentContainer.OnRemoveItem -= OnDevionEquipmentRemoved;
+            }
+            if (_inventoryContainerRef != null)
+            {
+                _inventoryContainerRef.OnTryUseItem -= OnInventoryTryUseItem;
             }
 
             _skinCts?.Cancel();
@@ -1116,6 +1126,63 @@ namespace STG.CurveDash
         }
 
         #endregion
+
+        // Cycling index for when all 3 flask slots are occupied (4th flask → slot 1, 5th → slot 2, etc.)
+        private int _nextFlaskCycleIndex = 0;
+
+        private void OnInventoryTryUseItem(DevionGames.InventorySystem.Item item, DevionGames.InventorySystem.Slot slot)
+        {
+            if (item is CurveDashEquipmentAdapter adapter && adapter.OriginalEquipmentData is FlaskItemData)
+                PreAssignFlaskRegion(adapter);
+        }
+
+        private void PreAssignFlaskRegion(CurveDashEquipmentAdapter adapter)
+        {
+            if (_equipmentContainer == null) return;
+
+            var slotNames = new[] { "Flask Fist", "Flask Second", "Flask Third" };
+            var regionNames = new[] { "Flask 1", "Flask 2", "Flask 3" };
+
+            // Fill first empty flask slot
+            for (int i = 0; i < slotNames.Length; i++)
+            {
+                foreach (var s in _equipmentContainer.Slots)
+                {
+                    if (s != null && s.gameObject.name == slotNames[i] && s.IsEmpty)
+                    {
+                        SetFlaskRegion(adapter, regionNames[i]);
+                        return;
+                    }
+                }
+            }
+
+            // All slots occupied — cycle 1→2→3→1→2→3
+            SetFlaskRegion(adapter, regionNames[_nextFlaskCycleIndex % 3]);
+            _nextFlaskCycleIndex++;
+        }
+
+        private void SetFlaskRegion(CurveDashEquipmentAdapter adapter, string regionName)
+        {
+            var db = DevionGames.InventorySystem.InventoryManager.Database;
+            if (db?.equipments == null) return;
+            var region = db.equipments.Find(r => r != null && r.Name == regionName);
+            if (region != null)
+                adapter.Region = new List<DevionGames.InventorySystem.EquipmentRegion> { region };
+        }
+
+        private void ResetFlaskRegionToAll(CurveDashEquipmentAdapter adapter)
+        {
+            var db = DevionGames.InventorySystem.InventoryManager.Database;
+            if (db?.equipments == null) return;
+            var regions = new List<DevionGames.InventorySystem.EquipmentRegion>();
+            foreach (var regionName in new[] { "Flask 1", "Flask 2", "Flask 3" })
+            {
+                var r = db.equipments.Find(eq => eq != null && eq.Name == regionName);
+                if (r != null) regions.Add(r);
+            }
+            if (regions.Count > 0)
+                adapter.Region = regions;
+        }
 
         // Scans equipment container for Flask equipment items (Flask First, Flask Second, Flask Third regions)
         // and logs them for debugging - the actual flask functionality is in the belt's FlaskSlots

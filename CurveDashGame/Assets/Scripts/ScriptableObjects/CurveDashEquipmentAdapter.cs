@@ -262,58 +262,6 @@ namespace STG.CurveDash
             }
         }
 
-        private string FindNextFlaskRegion(DevionGames.InventorySystem.ItemDatabase db)
-        {
-            // Find the first Flask slot that's available (not occupied by another flask)
-            // Try Flask 1, Flask 2, Flask 3 in order
-            var flaskRegionNames = new[] { "Flask 1", "Flask 2", "Flask 3" };
-
-            try
-            {
-                var equipmentContainer = DevionGames.UIWidgets.WidgetUtility.Find<DevionGames.InventorySystem.ItemContainer>("Equipment");
-                if (equipmentContainer != null)
-                {
-                    // For each Flask slot, check if it already has a flask
-                    foreach (var regionName in flaskRegionNames)
-                    {
-                        bool regionOccupied = false;
-
-                        // Check if any slot with this region has a flask item
-                        foreach (var slot in equipmentContainer.Slots)
-                        {
-                            if (slot != null && !slot.IsEmpty && slot.ObservedItem != null)
-                            {
-                                // Try to get the slot's assigned region
-                                var itemAdapter = slot.ObservedItem as CurveDashEquipmentAdapter;
-                                if (itemAdapter != null && itemAdapter.OriginalEquipmentData is FlaskItemData)
-                                {
-                                    // Check if this adapter has the region we're looking for
-                                    if (itemAdapter.Region != null && itemAdapter.Region.Count > 0)
-                                    {
-                                        if (itemAdapter.Region[0].Name == regionName)
-                                        {
-                                            regionOccupied = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        // If this region is not occupied, use it
-                        if (!regionOccupied)
-                        {
-                            return regionName;
-                        }
-                    }
-                }
-            }
-            catch { }
-
-            // Fallback to Flask 1 if something goes wrong
-            return "Flask 1";
-        }
-
         private void SyncDatabaseReferences()
         {
             if (m_OriginalEquipmentData == null) return;
@@ -452,13 +400,15 @@ namespace STG.CurveDash
                     if (m_OriginalEquipmentData is WeaponData || m_OriginalEquipmentData is OffHandData)
                     {
                         var mainHandRegion = db.equipments.Find(r =>
-                            r.Name.IndexOf("MainHand", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
-                            r.Name.IndexOf("Main Hand", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
-                            r.Name.IndexOf("Right", System.StringComparison.OrdinalIgnoreCase) >= 0);
+                            r != null && (
+                                r.Name.IndexOf("MainHand", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                r.Name.IndexOf("Main Hand", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                r.Name.IndexOf("Right", System.StringComparison.OrdinalIgnoreCase) >= 0));
                         var offHandRegion = db.equipments.Find(r =>
-                            r.Name.IndexOf("OffHand", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
-                            r.Name.IndexOf("Off Hand", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
-                            r.Name.IndexOf("Left", System.StringComparison.OrdinalIgnoreCase) >= 0);
+                            r != null && (
+                                r.Name.IndexOf("OffHand", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                r.Name.IndexOf("Off Hand", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                r.Name.IndexOf("Left", System.StringComparison.OrdinalIgnoreCase) >= 0));
 
                         this.Region = new System.Collections.Generic.List<DevionGames.InventorySystem.EquipmentRegion>();
 
@@ -535,19 +485,19 @@ namespace STG.CurveDash
                     }
                     else if (m_OriginalEquipmentData is FlaskItemData)
                     {
-                        // Flask items - find next available Flask slot (1, 2, or 3)
-                        string targetRegionName = FindNextFlaskRegion(db);
-
-                        // Find and assign the region
-                        var targetRegion = db.equipments.Find(r => r != null && r.Name == targetRegionName);
-                        if (targetRegion != null)
+                        // Assign all 3 flask regions — PlayerView.PreAssignFlaskRegion narrows to one slot
+                        // just before the equip action, then resets back to all 3 after placement.
+                        var flaskRegions = new System.Collections.Generic.List<DevionGames.InventorySystem.EquipmentRegion>();
+                        foreach (var regionName in new[] { "Flask 1", "Flask 2", "Flask 3" })
                         {
-                            this.Region = new System.Collections.Generic.List<DevionGames.InventorySystem.EquipmentRegion> { targetRegion };
-                            UnityEngine.Debug.Log($"[CurveDashEquipmentAdapter] Flask '{this.Name}' → region='{targetRegion.Name}'");
+                            var r = db.equipments.Find(eq => eq != null && eq.Name == regionName);
+                            if (r != null) flaskRegions.Add(r);
+                        }
+                        if (flaskRegions.Count > 0)
+                        {
+                            this.Region = flaskRegions;
                             return;
                         }
-
-                        // Fallback to generic Flask region if numbered slots not found
                         searchKeywords.Add("Flask");
                     }
 
