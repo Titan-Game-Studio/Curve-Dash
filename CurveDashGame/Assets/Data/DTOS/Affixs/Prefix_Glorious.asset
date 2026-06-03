@@ -17,3 +17,21 @@ MonoBehaviour:
   Stat: 3
   MinValue: 40
   MaxValue: 80
+  AllowedTags:
+  - 0
+  Tiers:
+  - TierName: T3
+    RequiredItemLevel: 1
+    MinValue: 40
+    MaxValue: 80
+    Weight: 1000
+  - TierName: T2
+    RequiredItemLevel: 25
+    MinValue: 80
+    MaxValue: 110
+    Weight: 400
+  - TierName: T1
+    RequiredItemLevel: 45
+    MinValue: 110
+    MaxValue: 150
+    Weight: 120
