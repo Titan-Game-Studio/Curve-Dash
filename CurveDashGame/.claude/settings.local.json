@@ -30,7 +30,8 @@
       "Bash(git status *)",
       "mcp__unity-mcp__Unity_Camera_Capture",
       "mcp__unity-mcp__Unity_RunCommand",
-      "Bash(powershell -Command \"\\(Get-Content 'Assets/Scripts/ScriptableObjects/CurveDashEquipmentAdapter.cs' | Select-String -Pattern '\\(GetEquippedFlaskCount|FindEquippedBelt\\)' | Select-Object -First 5\\)\")"
+      "Bash(powershell -Command \"\\(Get-Content 'Assets/Scripts/ScriptableObjects/CurveDashEquipmentAdapter.cs' | Select-String -Pattern '\\(GetEquippedFlaskCount|FindEquippedBelt\\)' | Select-Object -First 5\\)\")",
+      "Bash(grep -n \"m_Name: Inventory$\" \"D:\\\\UNITY_PROJECTS\\\\Curve-Dash\\\\CurveDashGame\\\\Assets\\\\Scenes\\\\MainGame.unity\")"
     ],
     "additionalDirectories": [
       "D:\\UNITY_PROJECTS\\Curve-Dash\\CurveDashGame\\obsidian-unity\\02_Active_Tasks"

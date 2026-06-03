@@ -27,5 +27,6 @@ MonoBehaviour:
   AttackRange: 15
   ProjectileCount: 1
   Speed: 0
-  CastVFX: {fileID: 1235240895896398, guid: 3fdbf782d6900074fb425dbc4c92ba9c, type: 3}
+  Duration: 10
+  CastVFX: {fileID: 1385735905256476, guid: a1fb6dfef5308c846a976e080eed21b9, type: 3}
   ImpactVFX: {fileID: 0}

@@ -58,6 +58,7 @@ namespace STG.CurveDash
             Container.BindInterfacesAndSelfTo<BlockSystem>().AsSingle();
             Container.BindInterfacesTo<FallingSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<CombatSystem>().AsSingle();
+            Container.BindInterfacesAndSelfTo<AuraSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<ItemPickupSystem>().AsSingle();
             Container.BindInterfacesAndSelfTo<TGS.Core.IAP.UnityIapService>().AsSingle();
             Container.BindInterfacesAndSelfTo<LevelPlayAdService>().AsSingle();

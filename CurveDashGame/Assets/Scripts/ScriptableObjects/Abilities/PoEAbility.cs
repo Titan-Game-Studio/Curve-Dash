@@ -42,6 +42,10 @@ namespace STG.CurveDash
         public int ProjectileCount = 1;
         public float Speed = 10f;
 
+        [Header("Aura Settings")]
+        [Tooltip("Aura only: how long (seconds) the aura effect lasts before it is automatically recast. The AuraSystem casts the aura, waits this duration, then casts it again.")]
+        public float Duration = 5f;
+
 
         [Header("Visual Effects")]
         public GameObject CastVFX;
@@ -100,11 +104,25 @@ namespace STG.CurveDash
                       $"Proj Speed: {finalSpeed:F1} | " +
                       $"Supports Applied: <color=yellow>{supportsInfo}</color>");
             
+            if (SkillType == PoEAbilityType.Aura)
+            {
+                Vector3 auraPos = user.transform.position;
+                if (CastVFX != null)
+                    VfxSystem.RequestSpawn(CastVFX, auraPos, Quaternion.identity);
+                foreach (var extraVfx in extraCastVFXs)
+                    VfxSystem.RequestSpawn(extraVfx, auraPos, Quaternion.identity);
+                if (ImpactVFX != null)
+                    VfxSystem.RequestSpawn(ImpactVFX, auraPos, Quaternion.identity);
+                foreach (var extraVfx in extraImpactVFXs)
+                    VfxSystem.RequestSpawn(extraVfx, auraPos, Quaternion.identity);
+                return;
+            }
+
             // Calculate horizontal rotation towards target
             Vector3 direction = (targetPosition - user.transform.position);
             direction.y = 0; // Lock Y axis
-            Quaternion baseRotation = direction.sqrMagnitude > 0.001f 
-                ? Quaternion.LookRotation(direction.normalized) 
+            Quaternion baseRotation = direction.sqrMagnitude > 0.001f
+                ? Quaternion.LookRotation(direction.normalized)
                 : user.transform.rotation;
 
             // Spawn Cast VFX (supports shooting multiple projectiles in a gorgeous cone spread if count > 1)
@@ -134,7 +152,7 @@ namespace STG.CurveDash
             {
                 VfxSystem.RequestSpawn(extraVfx, user.transform.position + Vector3.up * 1.0f, baseRotation);
             }
-            
+
             // Spawn Impact VFX at target position
             if (ImpactVFX != null)
             {

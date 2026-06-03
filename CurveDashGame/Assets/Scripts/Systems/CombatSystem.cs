@@ -563,43 +563,8 @@ namespace STG.CurveDash
                 }
             }
 
-            // 7. Gather and Execute all Passive/Aura Abilities (Always active / trigger on hit)
-            if (triggerAbilities)
-            {
-                ref var enemyView = ref viewLinkPool.Get(enemyEntity);
-                if (enemyView.Transform != null)
-                {
-                    Vector3 targetFeetPosition = GetEnemyFeetPosition(enemyView.Transform);
-                    List<PoEAbility> auras = new List<PoEAbility>();
-
-                    if (combat.CurrentWeapon != null)
-                    {
-                        foreach (var ab in combat.CurrentWeapon.GetAbilities())
-                        {
-                            if (ab is PoEAbility active && active.SkillType == PoEAbilityType.Aura)
-                            {
-                                auras.Add(active);
-                            }
-                        }
-                    }
-
-                    if (playerViewComponent != null)
-                    {
-                        foreach (var ab in playerViewComponent.GetEquippedArmorAbilities())
-                        {
-                            if (ab is PoEAbility active && active.SkillType == PoEAbilityType.Aura)
-                            {
-                                auras.Add(active);
-                            }
-                        }
-                    }
-
-                    foreach (var aura in auras)
-                    {
-                        aura.Execute(playerView.Transform.gameObject, targetFeetPosition);
-                    }
-                }
-            }
+            // 7. Auras are NOT triggered on hit anymore. They are persistent, duration-based
+            //    self-buffs handled by AuraSystem (cast → last for Duration → recast).
 
             // 7.5. Gather all Active Offensive Skills across all gear
             List<AbilityData> activeOffensiveSkills = new List<AbilityData>();
