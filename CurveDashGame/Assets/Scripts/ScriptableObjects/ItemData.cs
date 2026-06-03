@@ -30,6 +30,10 @@ namespace STG.CurveDash
         [TextArea]
         public string Description;
 
+        [Header("Item Level")]
+        [Tooltip("Gates which affix tiers can roll on this item — higher item level unlocks stronger tiers.")]
+        public int ItemLevel = 1;
+
         [Header("Universal Stat Modifiers")]
         [Tooltip("Data-driven stats granted by this item while equipped. Add any StatType here instead of " +
                  "creating new typed fields — they are routed to the character sheet via AffixStatMapper. " +
@@ -51,5 +55,12 @@ namespace STG.CurveDash
             if (Modifiers != null) list.AddRange(Modifiers);
             return list;
         }
+
+        /// <summary>
+        /// Tags describing this item for affix spawning. An affix may roll on this item only if it is
+        /// unrestricted or shares one of these tags. Base returns none (matches unrestricted affixes only).
+        /// </summary>
+        public virtual System.Collections.Generic.List<ItemTag> GetAffixTags()
+            => new System.Collections.Generic.List<ItemTag>();
     }
 }

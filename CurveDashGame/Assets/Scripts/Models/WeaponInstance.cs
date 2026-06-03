@@ -91,33 +91,16 @@ namespace STG.CurveDash
                 numSuffixes = Random.Range(0, 2);
             }
 
-            var prefixes = templates.FindAll(t => t.TypeOfAffix == AffixType.Prefix);
-            var suffixes = templates.FindAll(t => t.TypeOfAffix == AffixType.Suffix);
+            // Weighted, tag- and item-level-gated generation. Existing affix assets (no tiers / no tags)
+            // behave like before: unrestricted, single open tier at weight 1000.
+            var itemTags  = BaseData != null ? BaseData.GetAffixTags() : null;
+            int itemLevel = BaseData != null ? BaseData.ItemLevel : 1;
 
-            int pCount = 0;
-            int iter = 0;
-            while (pCount < numPrefixes && prefixes.Count > 0 && iter < 50)
+            var rolled = AffixRoller.RollAffixes(templates, itemTags, itemLevel, numPrefixes, numSuffixes);
+            foreach (var mod in rolled)
             {
-                iter++;
-                var p = prefixes[Random.Range(0, prefixes.Count)];
-                if (p != null && !Affixes.Exists(a => a.AffixName == p.AffixName))
-                {
-                    Affixes.Add(p.Roll());
-                    pCount++;
-                }
-            }
-
-            int sCount = 0;
-            iter = 0;
-            while (sCount < numSuffixes && suffixes.Count > 0 && iter < 50)
-            {
-                iter++;
-                var s = suffixes[Random.Range(0, suffixes.Count)];
-                if (s != null && !Affixes.Exists(a => a.AffixName == s.AffixName))
-                {
-                    Affixes.Add(s.Roll());
-                    sCount++;
-                }
+                if (!Affixes.Exists(a => a.AffixName == mod.AffixName))
+                    Affixes.Add(mod);
             }
         }
 

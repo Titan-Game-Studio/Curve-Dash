@@ -69,6 +69,9 @@ namespace STG.CurveDash
             if (HealthBonus != 0) list.Add(new StatModifier(StatType.AddedLife, HealthBonus));
             return list;
         }
+
+        public override System.Collections.Generic.List<ItemTag> GetAffixTags()
+            => new System.Collections.Generic.List<ItemTag> { ItemTag.Armour };
     }
 }
 

@@ -33,6 +33,9 @@ namespace STG.CurveDash
             return list;
         }
 
+        public override List<ItemTag> GetAffixTags()
+            => new List<ItemTag> { ItemTag.Accessory, ItemTag.Belt };
+
 #if UNITY_EDITOR
         private void OnValidate()
         {

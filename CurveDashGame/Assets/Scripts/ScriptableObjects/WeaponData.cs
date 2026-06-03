@@ -22,6 +22,8 @@ namespace STG.CurveDash
         public List<AbilityData> Abilities = new List<AbilityData>();
         public virtual int MaxSockets => 3;
 
+        public override List<ItemTag> GetAffixTags() => new List<ItemTag> { ItemTag.Weapon };
+
 #if UNITY_EDITOR
         protected virtual void OnValidate()
         {

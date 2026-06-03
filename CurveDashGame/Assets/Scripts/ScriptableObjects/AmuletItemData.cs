@@ -26,5 +26,8 @@ namespace STG.CurveDash
             if (AllResistances != 0)  list.Add(new StatModifier(StatType.AddedAllResistances, AllResistances));
             return list;
         }
+
+        public override System.Collections.Generic.List<ItemTag> GetAffixTags()
+            => new System.Collections.Generic.List<ItemTag> { ItemTag.Accessory, ItemTag.Amulet };
     }
 }

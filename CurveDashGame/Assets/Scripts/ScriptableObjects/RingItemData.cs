@@ -30,5 +30,8 @@ namespace STG.CurveDash
             // AttackSpeedBonus stays display-only (consumed by CombatSystem, no Devion sheet mapping).
             return list;
         }
+
+        public override System.Collections.Generic.List<ItemTag> GetAffixTags()
+            => new System.Collections.Generic.List<ItemTag> { ItemTag.Accessory, ItemTag.Ring };
     }
 }
