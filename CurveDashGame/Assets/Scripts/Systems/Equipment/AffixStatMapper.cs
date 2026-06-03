@@ -64,6 +64,33 @@ namespace STG.CurveDash
                 }
             },
             // LifeStealPercentage and KnockbackForce are handled in ECS combat — no Devion stat mapping.
+
+            // --- Defensive / character-sheet stats (apply to CurveDash_Character_Stats via EquipmentHandler) ---
+            { StatType.AddedLife,               new[] { new StatMapping("Heart", ContributionType.FlatAdd) } },
+            { StatType.AddedMana,               new[] { new StatMapping("Mana", ContributionType.FlatAdd) } },
+            { StatType.AddedArmour,             new[] { new StatMapping("Armor", ContributionType.FlatAdd) } },
+            { StatType.AddedEvasion,            new[] { new StatMapping("Evasion Rating", ContributionType.FlatAdd) } },
+            { StatType.AddedAccuracy,           new[] { new StatMapping("Accuracy Rating", ContributionType.FlatAdd) } },
+            { StatType.AddedStrength,           new[] { new StatMapping("Strength", ContributionType.FlatAdd) } },
+            { StatType.AddedDexterity,          new[] { new StatMapping("Dexterity", ContributionType.FlatAdd) } },
+            { StatType.AddedIntelligence,       new[] { new StatMapping("Intelligence", ContributionType.FlatAdd) } },
+            { StatType.AddedCriticalMultiplier, new[] { new StatMapping("Critical Multiplier", ContributionType.FlatAdd) } },
+            { StatType.AddedMovementSpeed,      new[] { new StatMapping("Movement Speed", ContributionType.FlatAdd) } },
+            { StatType.AddedLifeRegen,          new[] { new StatMapping("Life Regeneration", ContributionType.FlatAdd) } },
+            { StatType.AddedBlockChance,        new[] { new StatMapping("Block Chance", ContributionType.FlatAdd) } },
+            { StatType.AddedFireResistance,     new[] { new StatMapping("Fire Resistance", ContributionType.FlatAdd) } },
+            { StatType.AddedColdResistance,     new[] { new StatMapping("Cold Resistance", ContributionType.FlatAdd) } },
+            { StatType.AddedLightningResistance,new[] { new StatMapping("Lightning Resistance", ContributionType.FlatAdd) } },
+            { StatType.AddedChaosResistance,    new[] { new StatMapping("Chaos Resistance", ContributionType.FlatAdd) } },
+            {
+                StatType.AddedAllResistances, new[]
+                {
+                    new StatMapping("Fire Resistance", ContributionType.FlatAdd),
+                    new StatMapping("Cold Resistance", ContributionType.FlatAdd),
+                    new StatMapping("Lightning Resistance", ContributionType.FlatAdd),
+                    new StatMapping("Chaos Resistance", ContributionType.FlatAdd),
+                }
+            },
         };
 
         public static IReadOnlyList<StatMapping> GetMappings(StatType statType)

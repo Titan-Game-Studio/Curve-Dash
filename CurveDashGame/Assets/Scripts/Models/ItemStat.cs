@@ -9,7 +9,26 @@ namespace STG.CurveDash
         IncreasedAttackSpeed,
         IncreasedCriticalChance,
         LifeStealPercentage,
-        KnockbackForce
+        KnockbackForce,
+
+        // --- Defensive / character-sheet stats (appended; DO NOT reorder — assets store these by index) ---
+        AddedLife,
+        AddedMana,
+        AddedArmour,
+        AddedEvasion,
+        AddedAccuracy,
+        AddedStrength,
+        AddedDexterity,
+        AddedIntelligence,
+        AddedCriticalMultiplier,
+        AddedMovementSpeed,
+        AddedLifeRegen,
+        AddedBlockChance,
+        AddedFireResistance,
+        AddedColdResistance,
+        AddedLightningResistance,
+        AddedChaosResistance,
+        AddedAllResistances,
     }
 
     [System.Serializable]

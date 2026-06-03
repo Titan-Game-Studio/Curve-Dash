@@ -20,5 +20,15 @@ namespace STG.CurveDash
         {
             Type = ItemType.Accessory;
         }
+
+        public override System.Collections.Generic.List<StatModifier> GetStatModifiers()
+        {
+            var list = base.GetStatModifiers();
+            if (HealthBonus != 0)     list.Add(new StatModifier(StatType.AddedLife, HealthBonus));
+            if (AddedFlatDamage != 0) list.Add(new StatModifier(StatType.AddedPhysicalDamage, AddedFlatDamage));
+            if (AllResistances != 0)  list.Add(new StatModifier(StatType.AddedAllResistances, AllResistances));
+            // AttackSpeedBonus stays display-only (consumed by CombatSystem, no Devion sheet mapping).
+            return list;
+        }
     }
 }

@@ -25,6 +25,14 @@ namespace STG.CurveDash
             Type = ItemType.Accessory;
         }
 
+        public override List<StatModifier> GetStatModifiers()
+        {
+            var list = base.GetStatModifiers();
+            if (HealthBonus != 0)      list.Add(new StatModifier(StatType.AddedLife, HealthBonus));
+            if (LifeRegeneration != 0) list.Add(new StatModifier(StatType.AddedLifeRegen, LifeRegeneration));
+            return list;
+        }
+
 #if UNITY_EDITOR
         private void OnValidate()
         {

@@ -61,6 +61,14 @@ namespace STG.CurveDash
         {
             Type = ItemType.Armor;
         }
+
+        public override System.Collections.Generic.List<StatModifier> GetStatModifiers()
+        {
+            var list = base.GetStatModifiers();
+            if (Defense != 0)     list.Add(new StatModifier(StatType.AddedArmour, Defense));
+            if (HealthBonus != 0) list.Add(new StatModifier(StatType.AddedLife, HealthBonus));
+            return list;
+        }
     }
 }
 

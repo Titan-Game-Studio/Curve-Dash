@@ -21,6 +21,11 @@ namespace STG.CurveDash
         private readonly PlayerStatService _playerStatService;
         private readonly BeltFlaskService _beltFlaskService;
 
+        // World units the enemy is shoved per point of KnockbackForce rolled on the weapon.
+        private const float KnockbackUnitsPerForce = 0.1f;
+        // Crit chance used when the character-stat system is unavailable (e.g. unarmed fallback path).
+        private const float FallbackCritChance = 10f;
+
         public CombatSystem(EcsWorld world, GemLevelService gemLevelService, PlayerStatService playerStatService, BeltFlaskService beltFlaskService)
         {
             this.world = world;
@@ -266,7 +271,7 @@ namespace STG.CurveDash
                                              {
                                                  if (subAb is SupportAbilityData support && support.IsCompatible(poeAb))
                                                  {
-                                                     finalProjectileCount += support.ExtraProjectiles;
+                                                     finalProjectileCount += support.GetExtraProjectiles();
                                                  }
                                              }
                                              break;
@@ -415,13 +420,19 @@ namespace STG.CurveDash
 
             float baseDamage = 0f;
             float offhandBonus = 0f;
+            float elementalDamage = 0f;
             float totalDamage = 0f;
             bool isCrit = false;
 
-            // 1. Calculate Base Weapon or Unarmed Damage
+            // Crit bonus contributed by the active skill + its support gems (filled in step 3.5).
+            float skillCritBonus = 0f;
+
+            // 1. Calculate Base Weapon or Unarmed Damage (physical)
             if (combat.CurrentWeapon != null)
             {
                 baseDamage = combat.CurrentWeapon.GetRandomDamage();
+                // 1b. Flat elemental damage (fire + cold) rolled on the weapon, added to the hit
+                elementalDamage = combat.CurrentWeapon.GetElementalDamage();
             }
             else
             {
@@ -442,7 +453,7 @@ namespace STG.CurveDash
                 }
             }
 
-            totalDamage = baseDamage + offhandBonus;
+            totalDamage = baseDamage + offhandBonus + elementalDamage;
 
             // 3. Apply socketed gem level multiplier (highest-level active gem wins)
             if (_gemLevelService != null && combat.CurrentWeapon != null)
@@ -496,14 +507,16 @@ namespace STG.CurveDash
                 {
                     float skillMultiplier = primarySkill.DamageMultiplier;
                     float skillFlat = primarySkill.AddedFlatDamage;
+                    skillCritBonus = primarySkill.CriticalChanceBonus;
 
                     // Stack support gem bonuses compatible with the primary skill
                     foreach (var ab in allAbilitiesForDmg)
                     {
                         if (ab is SupportAbilityData support && support.IsCompatible(primarySkill))
                         {
-                            skillMultiplier *= (1f + support.DamageMultiplierPercent / 100f);
-                            skillFlat += support.AddedFlatDamageBonus;
+                            skillMultiplier *= support.GetDamageMultiplier();
+                            skillFlat += support.GetAddedFlatDamage();
+                            skillCritBonus += support.GetCriticalChanceBonus();
                         }
                     }
 
@@ -511,25 +524,59 @@ namespace STG.CurveDash
                 }
             }
 
-            // 4. Critical Hit Mechanic (Base 10% chance for a 1.5x damage critical hit)
-            float critChance = 10f;
+            // 4. Critical Hit — driven by the character's stats (CurveDash_Character_Stats),
+            //    plus weapon crit affix and the active skill/support crit bonuses.
+            float critChance = FallbackCritChance;
+            float critMultiplier = 1.5f;
+            if (_playerStatService != null)
+            {
+                var pStat = _playerStatService.GetPlayerStat();
+                critChance = pStat.CritChance;                                   // base from character sheet
+                if (pStat.CritMultiplier > 0f) critMultiplier = pStat.CritMultiplier / 100f; // 150 → 1.5x
+            }
+            if (combat.CurrentWeapon != null) critChance += combat.CurrentWeapon.BonusCritChance; // IncreasedCriticalChance affix
+            critChance += skillCritBonus;                                        // active skill + support gems
+
             if (Random.Range(0f, 100f) < critChance)
             {
                 isCrit = true;
-                totalDamage *= 1.5f;
+                totalDamage *= critMultiplier;
             }
 
             // 5. Subtract Health
             targetHealth.CurrentHealth -= totalDamage;
 
+            // 5.5. Life Steal — return a % of damage dealt as life to the player
+            if (_playerStatService != null && combat.CurrentWeapon != null && combat.CurrentWeapon.LifeStealPercent > 0f)
+            {
+                float heal = totalDamage * combat.CurrentWeapon.LifeStealPercent / 100f;
+                if (heal > 0f) _playerStatService.AddLife(heal);
+            }
+
+            // 5.6. Knockback — shove the enemy away from the player along the ground plane
+            if (combat.CurrentWeapon != null && combat.CurrentWeapon.KnockbackForce > 0f)
+            {
+                ref var kbEnemyView = ref viewLinkPool.Get(enemyEntity);
+                if (kbEnemyView.Transform != null && playerView.Transform != null)
+                {
+                    Vector3 kbDir = kbEnemyView.Transform.position - playerView.Transform.position;
+                    kbDir.y = 0f;
+                    if (kbDir.sqrMagnitude > 0.0001f)
+                    {
+                        kbDir.Normalize();
+                        kbEnemyView.Transform.position += kbDir * (combat.CurrentWeapon.KnockbackForce * KnockbackUnitsPerForce);
+                    }
+                }
+            }
+
             // Log damage with rich info
             if (isCrit)
             {
-                Debug.Log($"<color=orange>[Combat] CRITICAL HIT! Player dealt {totalDamage:F1} damage (Base: {baseDamage:F1} + Offhand: {offhandBonus:F1}) to enemy! HP left: {targetHealth.CurrentHealth:F1}</color>");
+                Debug.Log($"<color=orange>[Combat] CRITICAL HIT! Player dealt {totalDamage:F1} damage (Phys: {baseDamage:F1} + Offhand: {offhandBonus:F1} + Elem: {elementalDamage:F1}) to enemy! HP left: {targetHealth.CurrentHealth:F1}</color>");
             }
             else
             {
-                Debug.Log($"[Combat] Player dealt {totalDamage:F1} damage (Base: {baseDamage:F1} + Offhand: {offhandBonus:F1}) to enemy! HP left: {targetHealth.CurrentHealth:F1}");
+                Debug.Log($"[Combat] Player dealt {totalDamage:F1} damage (Phys: {baseDamage:F1} + Offhand: {offhandBonus:F1} + Elem: {elementalDamage:F1}) to enemy! HP left: {targetHealth.CurrentHealth:F1}");
             }
 
             // 6. Handle Enemy Death — restore flask charges + give gem XP

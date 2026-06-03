@@ -46,6 +46,11 @@ namespace STG.CurveDash
         [Tooltip("Aura only: how long (seconds) the aura effect lasts before it is automatically recast. The AuraSystem casts the aura, waits this duration, then casts it again.")]
         public float Duration = 5f;
 
+        [Header("Self Modifiers (data-driven — extend the skill without new fields)")]
+        [Tooltip("Built-in modifiers this skill always applies to itself, same vocabulary as support gems. " +
+                 "Use this to express extra stats (more damage, extra projectiles, etc.) as data instead of code.")]
+        public System.Collections.Generic.List<SupportModifier> SelfModifiers = new System.Collections.Generic.List<SupportModifier>();
+
 
         [Header("Visual Effects")]
         public GameObject CastVFX;
@@ -59,6 +64,13 @@ namespace STG.CurveDash
             float finalCritBonus = CriticalChanceBonus;
             int finalProjectileCount = ProjectileCount;
             float finalSpeed = Speed;
+
+            // Apply this skill's own data-driven SelfModifiers (same vocabulary as support gems).
+            finalDamageMultiplier *= SupportAbilityData.Multiplier(SelfModifiers, SupportStat.Damage);
+            finalAddedFlatDamage  += SupportAbilityData.Flat(SelfModifiers, SupportStat.AddedFlatDamage);
+            finalCritBonus        += SupportAbilityData.Flat(SelfModifiers, SupportStat.CriticalChance);
+            finalProjectileCount  += Mathf.RoundToInt(SupportAbilityData.Flat(SelfModifiers, SupportStat.ExtraProjectiles));
+            finalSpeed            *= SupportAbilityData.Multiplier(SelfModifiers, SupportStat.Speed);
 
             System.Collections.Generic.List<string> appliedSupportsList = new System.Collections.Generic.List<string>();
             System.Collections.Generic.List<GameObject> extraCastVFXs = new System.Collections.Generic.List<GameObject>();
@@ -79,11 +91,11 @@ namespace STG.CurveDash
                 {
                     if (ab is SupportAbilityData support && support.IsCompatible(this))
                     {
-                        finalDamageMultiplier *= (1f + support.DamageMultiplierPercent / 100f);
-                        finalAddedFlatDamage += support.AddedFlatDamageBonus;
-                        finalCritBonus += support.CriticalChanceBonus;
-                        finalProjectileCount += support.ExtraProjectiles;
-                        finalSpeed *= (1f + support.SpeedMultiplierPercent / 100f);
+                        finalDamageMultiplier *= support.GetDamageMultiplier();
+                        finalAddedFlatDamage += support.GetAddedFlatDamage();
+                        finalCritBonus += support.GetCriticalChanceBonus();
+                        finalProjectileCount += support.GetExtraProjectiles();
+                        finalSpeed *= support.GetSpeedMultiplier();
 
                         appliedSupportsList.Add(support.AbilityName);
 

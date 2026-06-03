@@ -27,6 +27,13 @@ namespace STG.CurveDash
         public float FinalMaxDamage { get; private set; }
         public float FinalAttackSpeed { get; private set; }
 
+        // --- Extended damage profile (all StatTypes now feed combat) ---
+        public float AddedFireDamage { get; private set; }   // flat fire added to the hit
+        public float AddedColdDamage { get; private set; }   // flat cold added to the hit
+        public float BonusCritChance { get; private set; }   // % added on top of the character's crit chance
+        public float LifeStealPercent { get; private set; }  // % of damage dealt returned as life
+        public float KnockbackForce { get; private set; }    // shove strength applied to the enemy on hit
+
         public WeaponInstance(WeaponData baseData, ItemRarity rarity = ItemRarity.Normal, bool autoRoll = true)
         {
             BaseData = baseData;
@@ -148,24 +155,39 @@ namespace STG.CurveDash
             float flatAddedDamage = 0;
             float increasedDamagePercent = 0;
             float increasedSpeedPercent = 0;
+            float fire = 0, cold = 0, critChance = 0, lifeSteal = 0, knockback = 0;
 
             foreach (var affix in Affixes)
             {
                 switch (affix.Type)
                 {
-                    case StatType.AddedPhysicalDamage: flatAddedDamage += affix.Value; break;
+                    case StatType.AddedPhysicalDamage:     flatAddedDamage       += affix.Value; break;
                     case StatType.IncreasedPhysicalDamage: increasedDamagePercent += affix.Value; break;
-                    case StatType.IncreasedAttackSpeed: increasedSpeedPercent += affix.Value; break;
+                    case StatType.IncreasedAttackSpeed:    increasedSpeedPercent  += affix.Value; break;
+                    case StatType.AddedFireDamage:         fire                   += affix.Value; break;
+                    case StatType.AddedColdDamage:         cold                   += affix.Value; break;
+                    case StatType.IncreasedCriticalChance: critChance             += affix.Value; break;
+                    case StatType.LifeStealPercentage:     lifeSteal              += affix.Value; break;
+                    case StatType.KnockbackForce:          knockback              += affix.Value; break;
                 }
             }
 
             FinalMinDamage = (BaseData.BaseMinDamage + flatAddedDamage) * (1 + increasedDamagePercent / 100f);
             FinalMaxDamage = (BaseData.BaseMaxDamage + flatAddedDamage) * (1 + increasedDamagePercent / 100f);
-            
+
             float baseSpeed = BaseData.BaseAttackSpeed > 0.05f ? BaseData.BaseAttackSpeed : 1.0f;
             FinalAttackSpeed = baseSpeed * (1 + increasedSpeedPercent / 100f);
             if (FinalAttackSpeed < 0.1f) FinalAttackSpeed = 0.1f;
+
+            AddedFireDamage  = fire;
+            AddedColdDamage  = cold;
+            BonusCritChance  = critChance;
+            LifeStealPercent = lifeSteal;
+            KnockbackForce   = knockback;
         }
+
+        /// <summary>Flat elemental damage (fire + cold) rolled on this weapon, added to every hit.</summary>
+        public float GetElementalDamage() => AddedFireDamage + AddedColdDamage;
 
         public string GetDisplayName()
         {

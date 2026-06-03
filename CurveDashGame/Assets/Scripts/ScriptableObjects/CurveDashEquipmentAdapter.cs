@@ -97,7 +97,8 @@ namespace STG.CurveDash
                 SetOrUpdateProperty("Equipment Type", m_OriginalEquipmentData.Type.ToString(), Color.white);
                 SetOrUpdateProperty("Rarity", m_OriginalEquipmentData.Rarity.ToString(), GetRarityColor(m_OriginalEquipmentData.Rarity));
 
-                // Subtype Specific Properties
+                // Subtype-specific DISPLAY / metadata only. Character-sheet stats are NOT mapped here
+                // anymore — they all flow through GetStatModifiers() + the shared mapper below.
                 if (m_OriginalEquipmentData is WeaponData weaponData)
                 {
                     int minDmg = Mathf.RoundToInt(weaponData.BaseMinDamage);
@@ -113,41 +114,28 @@ namespace STG.CurveDash
                 }
                 else if (m_OriginalEquipmentData is ArmorItemData armorItem)
                 {
-                    // "Armor" and "Heart" match CurveDash_Character_Stats stat names
-                    SetOrUpdateProperty("Armor", armorItem.Defense, new Color(0.6f, 0.8f, 1f));
-                    SetOrUpdateProperty("Heart", armorItem.HealthBonus, Color.green);
                     SetOrUpdateProperty("Armor Slot", armorItem.Slot.ToString(), Color.white);
                 }
                 else if (m_OriginalEquipmentData is BeltItemData beltData)
                 {
-                    SetOrUpdateProperty("Heart", beltData.HealthBonus, Color.green);
-                    SetOrUpdateProperty("Life Regeneration", beltData.LifeRegeneration, new Color(0.5f, 1f, 0.5f));
                     SetOrUpdateProperty("Flask Slots", beltData.FlaskSlots.Count, Color.yellow);
                     SetOrUpdateProperty("Armor Slot", "Belt", Color.white);
                 }
-                else if (m_OriginalEquipmentData is AmuletItemData amuletData)
+                else if (m_OriginalEquipmentData is AmuletItemData)
                 {
-                    SetOrUpdateProperty("Heart", amuletData.HealthBonus, Color.green);
-                    SetOrUpdateProperty("Mana", amuletData.ManaBonus, new Color(0.4f, 0.6f, 1f));
-                    SetOrUpdateProperty("Critical Strike", amuletData.CritChanceBonus, Color.yellow);
-                    // "All Resistances" → 4 individual resistance stats so EquipmentHandler can apply each
-                    SyncAllResistances(amuletData.AllResistances);
                     SetOrUpdateProperty("Armor Slot", "Amulet", Color.white);
                 }
                 else if (m_OriginalEquipmentData is RingItemData ringData)
                 {
-                    SetOrUpdateProperty("Heart", ringData.HealthBonus, Color.green);
-                    // Added flat damage → both Min and Max Damage stats
-                    if (ringData.AddedFlatDamage != 0)
-                    {
-                        SetOrUpdateProperty("Min Damage", ringData.AddedFlatDamage, Color.yellow);
-                        SetOrUpdateProperty("Max Damage", ringData.AddedFlatDamage, Color.yellow);
-                    }
                     // Attack Speed handled by CombatSystem — display only
                     SetOrUpdateProperty("Attack Speed", ringData.AttackSpeedBonus, Color.cyan);
-                    SyncAllResistances(ringData.AllResistances);
                     SetOrUpdateProperty("Armor Slot", ringData.Slot.ToString(), Color.white);
                 }
+
+                // ALL character-sheet stats — each item's typed fields (projected by GetStatModifiers)
+                // PLUS its universal Modifiers list — flow through one mapper-driven path. Adding a new
+                // stat to any item never requires touching this adapter again.
+                ApplyUniversalModifiers(m_OriginalEquipmentData.GetStatModifiers());
             }
             else
             {
@@ -164,26 +152,40 @@ namespace STG.CurveDash
 
             if (affixes == null || affixes.Count == 0) return;
 
-            // Accumulate flat and percent contributions per Devion stat name.
-            var flatSums    = new System.Collections.Generic.Dictionary<string, float>();
-            var percentSums = new System.Collections.Generic.Dictionary<string, float>();
+            // Route affixes through the shared mapper, then merge onto Devion properties.
+            AccumulateSums(affixes, out var flatSums, out var percentSums);
+            MergeIntoProperties(flatSums, percentSums);
+        }
 
-            foreach (var affix in affixes)
+        // Maps every modifier's StatType to Devion stat name(s) and sums flat / percent contributions.
+        private static void AccumulateSums(
+            System.Collections.Generic.IEnumerable<StatModifier> mods,
+            out System.Collections.Generic.Dictionary<string, float> flatSums,
+            out System.Collections.Generic.Dictionary<string, float> percentSums)
+        {
+            flatSums    = new System.Collections.Generic.Dictionary<string, float>();
+            percentSums = new System.Collections.Generic.Dictionary<string, float>();
+            if (mods == null) return;
+
+            foreach (var mod in mods)
             {
-                foreach (var mapping in AffixStatMapper.GetMappings(affix.Type))
+                if (mod == null) continue;
+                foreach (var mapping in AffixStatMapper.GetMappings(mod.Type))
                 {
                     string key = mapping.DevionStatName;
                     if (mapping.Contribution == AffixStatMapper.ContributionType.FlatAdd)
-                    {
-                        flatSums[key] = (flatSums.TryGetValue(key, out float fv) ? fv : 0f) + affix.Value;
-                    }
+                        flatSums[key]    = (flatSums.TryGetValue(key, out float fv) ? fv : 0f) + mod.Value;
                     else
-                    {
-                        percentSums[key] = (percentSums.TryGetValue(key, out float pv) ? pv : 0f) + affix.Value;
-                    }
+                        percentSums[key] = (percentSums.TryGetValue(key, out float pv) ? pv : 0f) + mod.Value;
                 }
             }
+        }
 
+        // Writes the resolved flat/percent sums onto Devion properties so EquipmentHandler applies them.
+        private void MergeIntoProperties(
+            System.Collections.Generic.Dictionary<string, float> flatSums,
+            System.Collections.Generic.Dictionary<string, float> percentSums)
+        {
             // Track which stat names have already been processed.
             var processed = new System.Collections.Generic.HashSet<string>();
 
@@ -241,15 +243,13 @@ namespace STG.CurveDash
             }
         }
 
-        // Splits "All Resistances" into the 4 individual resistance stats
-        // so Devion EquipmentHandler can apply them to CurveDash_Character_Stats
-        private void SyncAllResistances(float value)
+        // Applies the item's universal Modifiers list (authored on the base ItemData) to the character sheet.
+        // This is what makes EVERY item type extensible without new typed fields or new if/else branches.
+        private void ApplyUniversalModifiers(System.Collections.Generic.List<StatModifier> mods)
         {
-            if (value == 0) return;
-            SetOrUpdateProperty("Fire Resistance",      value, new Color(1f, 0.4f, 0f));
-            SetOrUpdateProperty("Cold Resistance",      value, new Color(0.4f, 0.8f, 1f));
-            SetOrUpdateProperty("Lightning Resistance", value, new Color(1f, 0.9f, 0.2f));
-            SetOrUpdateProperty("Chaos Resistance",     value, new Color(0.7f, 0.3f, 0.9f));
+            if (mods == null || mods.Count == 0) return;
+            AccumulateSums(mods, out var flatSums, out var percentSums);
+            MergeIntoProperties(flatSums, percentSums);
         }
 
         private void SetOrUpdateProperty(string name, object value, Color displayColor)
