@@ -55,8 +55,9 @@ namespace STG.CurveDash
                             float roll = Random.value;
                             if (roll < 0.25f)
                             {
-                                spawner.SpawnWeaponPickup(deathPos, parentTransform);
-                                Debug.Log("<color=yellow>[EnemyDrop] Enemy dropped a WEAPON!</color>");
+                                // Weapon rolls affixes at the monster's level (deeper = stronger tiers).
+                                spawner.SpawnWeaponPickup(deathPos, parentTransform, enemy.Level);
+                                Debug.Log($"<color=yellow>[EnemyDrop] Enemy (lvl {enemy.Level}) dropped a WEAPON!</color>");
                             }
                             else if (roll < 0.50f)
                             {

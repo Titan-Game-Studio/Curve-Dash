@@ -7,12 +7,30 @@ namespace STG.CurveDash
     {
         [HideInInspector]
         public ItemData ItemToGive;
-        
+
+        // Rolled loot payload (weapons dropped by monsters). Empty for plain/base pickups.
+        [HideInInspector] public System.Collections.Generic.List<StatModifier> RolledAffixes;
+        [HideInInspector] public ItemRarity RolledRarity = ItemRarity.Normal;
+        [HideInInspector] public int RolledItemLevel;
+
         private GameObject spawnedVisual;
+
+        /// <summary>Attach pre-rolled affixes so they persist into the inventory/equipment on pickup.</summary>
+        public void SetRolledLoot(ItemRarity rarity, int itemLevel, System.Collections.Generic.List<StatModifier> affixes)
+        {
+            RolledRarity = rarity;
+            RolledItemLevel = itemLevel;
+            RolledAffixes = affixes != null ? new System.Collections.Generic.List<StatModifier>(affixes) : null;
+        }
 
         public void Setup(ItemData data)
         {
             ItemToGive = data;
+
+            // Clear any stale rolled payload from a previous pooled use.
+            RolledAffixes = null;
+            RolledRarity = ItemRarity.Normal;
+            RolledItemLevel = 0;
 
             if (spawnedVisual != null)
             {

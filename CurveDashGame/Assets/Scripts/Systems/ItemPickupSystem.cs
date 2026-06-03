@@ -76,8 +76,21 @@ namespace STG.CurveDash
                                             // Force explicit synchronization of properties (including Icon) on the newly cloned instance
                                             if (devionInstance is CurveDashEquipmentAdapter equipAdapter)
                                             {
-                                                equipAdapter.SyncData();
-                                                Debug.Log($"[ItemPickupSystem] Forced SyncData on equipment instance. Name: {equipAdapter.Name}, Icon: {(equipAdapter.Icon != null ? equipAdapter.Icon.name : "NULL")}");
+                                                // If this was a monster-dropped weapon, carry the rolled affixes onto
+                                                // the inventory instance so they persist (and apply on equip).
+                                                if (itemView.RolledAffixes != null && itemView.RolledAffixes.Count > 0)
+                                                {
+                                                    equipAdapter.RolledAffixes = new List<StatModifier>(itemView.RolledAffixes);
+                                                    equipAdapter.RolledRarity = itemView.RolledRarity;
+                                                    equipAdapter.RolledItemLevel = itemView.RolledItemLevel;
+                                                    equipAdapter.SyncAffixes(itemView.RolledAffixes);
+                                                    Debug.Log($"<color=yellow>[ItemPickupSystem] Looted {equipAdapter.RolledRarity} '{equipAdapter.Name}' iLvl {itemView.RolledItemLevel} with {itemView.RolledAffixes.Count} affix(es).</color>");
+                                                }
+                                                else
+                                                {
+                                                    equipAdapter.SyncData();
+                                                }
+                                                Debug.Log($"[ItemPickupSystem] Forced sync on equipment instance. Name: {equipAdapter.Name}, Icon: {(equipAdapter.Icon != null ? equipAdapter.Icon.name : "NULL")}");
                                             }
                                             else if (devionInstance is CurveDashItemAdapter itemAdapter)
                                             {

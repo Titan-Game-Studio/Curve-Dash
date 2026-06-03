@@ -265,7 +265,7 @@ namespace STG.CurveDash
                     }
                     else if (adapter.OriginalEquipmentData is WeaponData weaponBase && CurrentWeaponInstance == null)
                     {
-                        var instance = new WeaponInstance(weaponBase, weaponBase.Rarity);
+                        var instance = BuildWeaponInstance(adapter, weaponBase);
                         ItemPickupSystem.AutoLinkTestingAbilities(instance, weaponBase, _assetManager?.MasterItemCatalog);
                         CurrentWeaponInstance = instance;
                         adapter.SyncAffixes(instance.Affixes);
@@ -533,7 +533,7 @@ namespace STG.CurveDash
                     {
                         if (equippable is WeaponData weaponBase)
                         {
-                            var instance = new WeaponInstance(weaponBase, weaponBase.Rarity);
+                            var instance = BuildWeaponInstance(adapter, weaponBase);
                             ItemPickupSystem.AutoLinkTestingAbilities(instance, weaponBase, _assetManager?.MasterItemCatalog);
                             this.CurrentWeaponInstance = instance;
 
@@ -858,6 +858,18 @@ namespace STG.CurveDash
         }
 
         #region SMART EQUIPMENT SYSTEM (Rule Based)
+
+        /// <summary>
+        /// Builds the runtime WeaponInstance for an equipped weapon. If the Devion adapter carries
+        /// affixes rolled at drop time (looted gear), those persist instead of being re-rolled;
+        /// otherwise (starter/base items) it rolls fresh as before.
+        /// </summary>
+        private WeaponInstance BuildWeaponInstance(CurveDashEquipmentAdapter adapter, WeaponData weaponBase)
+        {
+            if (adapter != null && adapter.HasRolledAffixes)
+                return WeaponInstance.FromRolled(weaponBase, adapter.RolledRarity, adapter.RolledItemLevel, adapter.RolledAffixes);
+            return new WeaponInstance(weaponBase, weaponBase.Rarity);
+        }
 
         public void Equip(EquippableData item)
         {
@@ -1606,7 +1618,7 @@ namespace STG.CurveDash
                                 // Prefer CurrentWeaponInstance when it matches (preserves gem modifiers).
                                 weaponInSlot = (CurrentWeaponInstance?.BaseData == weaponBase)
                                     ? CurrentWeaponInstance
-                                    : new WeaponInstance(weaponBase, weaponBase.Rarity);
+                                    : BuildWeaponInstance(adapter, weaponBase);
                                 Debug.Log($"<color=lime>[PlayerView] Sync: slot[{i}] weapon '{weaponBase.name}' min={weaponInSlot.FinalMinDamage} max={weaponInSlot.FinalMaxDamage}</color>");
                             }
                         }

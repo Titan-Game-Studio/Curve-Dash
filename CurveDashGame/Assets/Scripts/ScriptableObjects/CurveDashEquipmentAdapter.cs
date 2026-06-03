@@ -19,6 +19,17 @@ namespace STG.CurveDash
             }
         }
 
+        [Header("Rolled Loot (per-instance, set at drop/pickup time)")]
+        public System.Collections.Generic.List<StatModifier> RolledAffixes = new System.Collections.Generic.List<StatModifier>();
+        public ItemRarity RolledRarity = ItemRarity.Normal;
+        public int RolledItemLevel = 0;
+
+        public bool HasRolledAffixes => RolledAffixes != null && RolledAffixes.Count > 0;
+
+        /// <summary>Rarity to display: the rolled rarity when this is looted gear, else the base asset's.</summary>
+        public ItemRarity EffectiveRarity =>
+            HasRolledAffixes ? RolledRarity : (m_OriginalEquipmentData != null ? m_OriginalEquipmentData.Rarity : ItemRarity.Normal);
+
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -95,7 +106,7 @@ namespace STG.CurveDash
 
                 // General Metadata Properties
                 SetOrUpdateProperty("Equipment Type", m_OriginalEquipmentData.Type.ToString(), Color.white);
-                SetOrUpdateProperty("Rarity", m_OriginalEquipmentData.Rarity.ToString(), GetRarityColor(m_OriginalEquipmentData.Rarity));
+                SetOrUpdateProperty("Rarity", EffectiveRarity.ToString(), GetRarityColor(EffectiveRarity));
 
                 // Subtype-specific DISPLAY / metadata only. Character-sheet stats are NOT mapped here
                 // anymore — they all flow through GetStatModifiers() + the shared mapper below.

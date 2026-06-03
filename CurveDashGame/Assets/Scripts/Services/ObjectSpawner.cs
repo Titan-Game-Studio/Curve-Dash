@@ -702,15 +702,36 @@ namespace STG.CurveDash
             return -1;
         }
 
-        public int SpawnWeaponPickup(Vector3 blockPosition, Transform parent = null)
+        public int SpawnWeaponPickup(Vector3 blockPosition, Transform parent = null, int itemLevel = 1)
         {
             var weapons = GetAllItemsOfType<WeaponData>();
-            if (weapons.Count > 0)
+            if (weapons.Count == 0) return -1;
+
+            var baseWeapon = weapons[Random.Range(0, weapons.Count)];
+
+            // Roll the weapon at the dropping monster's level: rarity decides affix count,
+            // item level decides which affix tiers are reachable.
+            var rarity = RollDropRarity();
+            var rolled = new WeaponInstance(baseWeapon, rarity, true, Mathf.Max(1, itemLevel));
+
+            int entity = SpawnItemPickup(blockPosition, baseWeapon, parent);
+            if (entity >= 0 && viewLinkPool.Has(entity))
             {
-                var randomWeapon = weapons[Random.Range(0, weapons.Count)];
-                return SpawnItemPickup(blockPosition, randomWeapon, parent);
+                ref var vl = ref viewLinkPool.Get(entity);
+                var view = vl.View != null ? vl.View.GetComponent<ItemPickupView>() : null;
+                if (view != null) view.SetRolledLoot(rarity, rolled.ItemLevel, rolled.Affixes);
             }
-            return -1;
+            return entity;
+        }
+
+        // Drop-rarity weights. Tune freely; affix counts follow rarity in WeaponInstance.RollRandomAffixes.
+        private ItemRarity RollDropRarity()
+        {
+            float r = Random.value;
+            if (r < 0.45f) return ItemRarity.Normal;
+            if (r < 0.80f) return ItemRarity.Magic;
+            if (r < 0.97f) return ItemRarity.Rare;
+            return ItemRarity.Unique;
         }
 
         public int SpawnArmorPickup(Vector3 blockPosition, Transform parent = null)

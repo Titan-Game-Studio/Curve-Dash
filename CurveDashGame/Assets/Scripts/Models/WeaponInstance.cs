@@ -48,6 +48,18 @@ namespace STG.CurveDash
             CalculateFinalStats();
         }
 
+        /// <summary>
+        /// Builds an instance from a pre-rolled affix list (no fresh roll) — used when equipping a
+        /// looted weapon so its dropped affixes/rarity/item level persist instead of being re-rolled.
+        /// </summary>
+        public static WeaponInstance FromRolled(WeaponData baseData, ItemRarity rarity, int itemLevel, List<StatModifier> affixes)
+        {
+            var instance = new WeaponInstance(baseData, rarity, autoRoll: false, itemLevel);
+            if (affixes != null) instance.Affixes.AddRange(affixes);
+            instance.CalculateFinalStats();
+            return instance;
+        }
+
         private void RollRandomAffixes()
         {
             if (Rarity == ItemRarity.Normal) return;
