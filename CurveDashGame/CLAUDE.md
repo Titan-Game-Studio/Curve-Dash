@@ -13,7 +13,7 @@ Curve-Dash is an action RPG dungeon crawler (Path of Exile-inspired) built in **
 All real-time gameplay lives in ECS systems. `EcsStartup.cs` owns the `EcsWorld` and `EcsSystems` and ticks in LateUpdate.
 
 - **Components** (`Assets/Scripts/Components/`) — pure data structs: `PlayerComponent`, `PlayerStatComponent`, `PlayerCombatComponent`, `EnemyComponent`, `GameStateComponent`, `ViewLinkComponent`, event components (`PlayerHitCrystalEvent`, `EnemyDeadEvent`, etc.)
-- **Systems** (`Assets/Scripts/Systems/`) — one concern per system: `CameraFollowSystem`, `MonsterSpawnSystem`, `CombatSystem`, `BlockSystem`, `FallingSystem`, `VfxSystem`, `DeleteEventsSystem`, etc.
+- **Systems** (`Assets/Scripts/Systems/`) — one concern per system: `CameraFollowSystem`, `CombatSystem`, `BlockSystem` (also spawns monsters), `FallingSystem`, `VfxSystem`, `DeleteEventsSystem`, etc.
 - **Event pattern**: create a temporary entity with an event component, process it in the same frame, delete it via `DeleteEventsSystem`.
 - **View bridging**: `ViewLinkComponent` holds GameObject/Transform refs; `EntityLinkView` (MonoBehaviour) stores the packed entity so Unity callbacks can find ECS entities.
 
