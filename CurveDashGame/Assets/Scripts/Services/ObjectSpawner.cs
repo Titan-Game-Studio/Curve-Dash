@@ -782,26 +782,32 @@ namespace STG.CurveDash
             return pool != null ? pool.transform : null;
         }
 
-        public int SpawnMonster(MonsterData data, Vector3 position)
+        // Additional max-health fraction granted per area level above 1 (e.g. 0.12 = +12% HP per level).
+        private const float MonsterHpPerLevel = 0.12f;
+
+        public int SpawnMonster(MonsterData data, Vector3 position, int level = 1)
         {
             if (data == null) return -1;
-            
+
             var monsterView = monsterViewPool.Spawn();
             monsterView.transform.position = position;
             monsterView.Setup(data);
-            
+
             var entity = CreateEntity<EnemyComponent>(monsterView.gameObject);
 
+            int areaLevel = Mathf.Max(1, level);
 
-
-            
             ref var enemy = ref enemyPool.Get(entity);
             enemy.Data = data;
+            enemy.Level = areaLevel;
             enemy.MoveSpeed = data.MovementSpeed;
 
+            // Scale max health with the area level so deeper runs feel tougher.
+            float scaledMaxHealth = data.MaxHealth * (1f + (areaLevel - 1) * MonsterHpPerLevel);
+
             ref var health = ref enemyHealthPool.Add(entity);
-            health.MaxHealth = data.MaxHealth;
-            health.CurrentHealth = data.MaxHealth;
+            health.MaxHealth = scaledMaxHealth;
+            health.CurrentHealth = scaledMaxHealth;
 
             return entity;
         }

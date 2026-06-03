@@ -9,6 +9,7 @@ namespace STG.CurveDash
     {
         public WeaponData BaseData;
         public ItemRarity Rarity;
+        public int ItemLevel;
         public List<StatModifier> Affixes = new List<StatModifier>();
         public List<AbilityData> DynamicAbilities = new List<AbilityData>();
 
@@ -34,10 +35,12 @@ namespace STG.CurveDash
         public float LifeStealPercent { get; private set; }  // % of damage dealt returned as life
         public float KnockbackForce { get; private set; }    // shove strength applied to the enemy on hit
 
-        public WeaponInstance(WeaponData baseData, ItemRarity rarity = ItemRarity.Normal, bool autoRoll = true)
+        public WeaponInstance(WeaponData baseData, ItemRarity rarity = ItemRarity.Normal, bool autoRoll = true, int itemLevel = -1)
         {
             BaseData = baseData;
             Rarity = rarity;
+            // Per-instance item level: explicit value wins, else fall back to the base asset's ItemLevel.
+            ItemLevel = itemLevel >= 0 ? itemLevel : (baseData != null ? baseData.ItemLevel : 1);
             if (autoRoll)
             {
                 RollRandomAffixes();
@@ -93,10 +96,9 @@ namespace STG.CurveDash
 
             // Weighted, tag- and item-level-gated generation. Existing affix assets (no tiers / no tags)
             // behave like before: unrestricted, single open tier at weight 1000.
-            var itemTags  = BaseData != null ? BaseData.GetAffixTags() : null;
-            int itemLevel = BaseData != null ? BaseData.ItemLevel : 1;
+            var itemTags = BaseData != null ? BaseData.GetAffixTags() : null;
 
-            var rolled = AffixRoller.RollAffixes(templates, itemTags, itemLevel, numPrefixes, numSuffixes);
+            var rolled = AffixRoller.RollAffixes(templates, itemTags, ItemLevel, numPrefixes, numSuffixes);
             foreach (var mod in rolled)
             {
                 if (!Affixes.Exists(a => a.AffixName == mod.AffixName))

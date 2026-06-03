@@ -16,6 +16,7 @@ namespace STG.CurveDash
      
         private readonly GameSettings gameSettings;
         private readonly MonsterCatalog monsterCatalog;
+        private readonly AreaLevelService areaLevelService;
 
         private Vector3 lastSpawnPos;
         private readonly Queue<int> liveBlocksEntities = new Queue<int>();
@@ -30,13 +31,15 @@ namespace STG.CurveDash
         private int BlockPartsCount = 1;
 
         public BlockSystem(EcsWorld world, ObjectSpawner spawner,
-            GameplayStrategiesProvider gameplayStrategies, GameSettings gameSettings, MonsterCatalog monsterCatalog)
+            GameplayStrategiesProvider gameplayStrategies, GameSettings gameSettings, MonsterCatalog monsterCatalog,
+            AreaLevelService areaLevelService)
         {
             this.world = world;
             this.spawner = spawner;
             this.gameplayStrategies = gameplayStrategies;
             this.gameSettings = gameSettings;
             this.monsterCatalog = monsterCatalog;
+            this.areaLevelService = areaLevelService;
 
 
             blockPool = world.GetPool<BlockComponent>();
@@ -231,8 +234,10 @@ namespace STG.CurveDash
                 var data = monsterCatalog.GetRandomMonster();
                 if (data != null)
                 {
-                    // Sinh quái vật làm con của ô đường đi (child) để nó không bị "trôi"
-                    int monster = spawner.SpawnMonster(data, child.position);
+                    // Sinh quái vật làm con của ô đường đi (child) để nó không bị "trôi".
+                    // Quái mang Area Level hiện tại → HP scale theo độ sâu, và loot (tương lai) theo cấp quái.
+                    int areaLevel = areaLevelService != null ? areaLevelService.CurrentAreaLevel : 1;
+                    int monster = spawner.SpawnMonster(data, child.position, areaLevel);
                     
                     // Cập nhật: Tìm GameObject vừa sinh và gán Parent
                     ref var monsterLink = ref world.GetPool<ViewLinkComponent>().Get(monster);

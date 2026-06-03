@@ -3,6 +3,7 @@ namespace STG.CurveDash
     public struct EnemyComponent
     {
         public MonsterData Data;
+        public int Level;        // area level at spawn — scales HP and (future) loot item level
         public float MoveSpeed;
 
         public float AttackTimer;
