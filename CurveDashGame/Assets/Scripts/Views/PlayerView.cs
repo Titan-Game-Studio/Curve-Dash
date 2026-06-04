@@ -1593,11 +1593,13 @@ namespace STG.CurveDash
                     return;
                 }
 
-                // Scan Equipment container slots directly — the source of truth.
-                // Do NOT rely on _dataManager.UserData.EquippedItems or CurrentWeaponInstance:
-                // Devion can fire OnAddItem for previously-saved items at unpredictable times,
-                // which corrupts both caches. Reading slots gives the actual equipped state.
-                int totalArmor = 0;
+                // Scan the Equipment container slots directly — the source of truth. (Devion can fire
+                // OnAddItem for previously-saved items at unpredictable times, which corrupts caches.)
+                // The runtime player has NO Devion EquipmentHandler wired, so item stat modifiers are
+                // never applied automatically. We aggregate every equipped item's contribution here and
+                // push it onto the character sheet ourselves — this is what makes resistances, crit,
+                // attributes, etc. update on equip, not just damage/armor.
+                var statBonuses = new Dictionary<string, float>(); // Devion stat name → summed flat bonus
                 WeaponInstance weaponInSlot = null;
 
                 if (_equipmentContainer != null)
@@ -1606,22 +1608,21 @@ namespace STG.CurveDash
                     {
                         var s = _equipmentContainer.Slots[i];
                         if (s.IsEmpty || s.ObservedItem == null) continue;
-                        if (s.ObservedItem is CurveDashEquipmentAdapter adapter && adapter.OriginalEquipmentData != null)
+                        if (!(s.ObservedItem is CurveDashEquipmentAdapter adapter) || adapter.OriginalEquipmentData == null) continue;
+
+                        // Damage comes from the weapon instance below (Final Min/Max), not leaf stats.
+                        if (adapter.OriginalEquipmentData is WeaponData weaponBase && weaponInSlot == null)
                         {
-                            if (adapter.OriginalEquipmentData is ArmorItemData armor)
-                            {
-                                totalArmor += armor.Defense;
-                                Debug.Log($"<color=lime>[PlayerView] Sync: slot[{i}] armor '{armor.name}' +{armor.Defense} (total={totalArmor})</color>");
-                            }
-                            else if (adapter.OriginalEquipmentData is WeaponData weaponBase && weaponInSlot == null)
-                            {
-                                // Prefer CurrentWeaponInstance when it matches (preserves gem modifiers).
-                                weaponInSlot = (CurrentWeaponInstance?.BaseData == weaponBase)
-                                    ? CurrentWeaponInstance
-                                    : BuildWeaponInstance(adapter, weaponBase);
-                                Debug.Log($"<color=lime>[PlayerView] Sync: slot[{i}] weapon '{weaponBase.name}' min={weaponInSlot.FinalMinDamage} max={weaponInSlot.FinalMaxDamage}</color>");
-                            }
+                            // Prefer CurrentWeaponInstance when it matches (preserves gem modifiers).
+                            weaponInSlot = (CurrentWeaponInstance?.BaseData == weaponBase)
+                                ? CurrentWeaponInstance
+                                : BuildWeaponInstance(adapter, weaponBase);
                         }
+
+                        // Typed fields (projected via GetStatModifiers) + rolled affixes → Devion stats.
+                        var contrib = adapter.OriginalEquipmentData.GetStatModifiers() ?? new List<StatModifier>();
+                        if (adapter.RolledAffixes != null) contrib.AddRange(adapter.RolledAffixes);
+                        AccumulateCharacterSheetStats(contrib, statBonuses);
                     }
                 }
                 else
@@ -1629,20 +1630,13 @@ namespace STG.CurveDash
                     Debug.LogWarning("[PlayerView] SyncCharacterInfoStats: _equipmentContainer is null, stats will be zero.");
                 }
 
-                Debug.Log($"<color=lime>[PlayerView] SyncCharacterInfoStats → Armor={totalArmor}, Weapon={weaponInSlot?.BaseData?.name ?? "none"}</color>");
-                TrySetStatBase(handler, "Armor", totalArmor);
-
+                // Damage: bypass the Min/Max Damage leaf stats — the Devion Melee/Ranged Attack formula
+                // reads them and would double-count. Set the display stats straight from the weapon's
+                // average damage instead (Value = BaseValue + formula(0,0) = BaseValue).
                 if (weaponInSlot?.BaseData != null)
                 {
-                    float minDmg = weaponInSlot.FinalMinDamage;
-                    float maxDmg = weaponInSlot.FinalMaxDamage;
-                    float avgDmg = (minDmg + maxDmg) / 2f;
+                    float avgDmg = (weaponInSlot.FinalMinDamage + weaponInSlot.FinalMaxDamage) / 2f;
                     bool isRanged = weaponInSlot.BaseData is BowData;
-
-                    // Do NOT set Min/Max Damage here — the Devion formula for Melee/Ranged Attack
-                    // reads Min Damage + Max Damage and would double-count if those leaf stats are
-                    // non-zero. We bypass the formula entirely by setting the display stats directly,
-                    // which produces Value = BaseValue + formula(0,0) = BaseValue.
                     TrySetStatBase(handler, "Melee Attack",  isRanged ? 0f : avgDmg);
                     TrySetStatBase(handler, "Ranged Attack", isRanged ? avgDmg : 0f);
                 }
@@ -1652,23 +1646,69 @@ namespace STG.CurveDash
                     TrySetStatBase(handler, "Ranged Attack", 0f);
                 }
 
-                // Sync affix stats that are not derivable from base weapon data alone.
-                float critBonus = 0f;
-                if (weaponInSlot?.Affixes != null)
+                // Push every mapped character-sheet stat as innate base + equipment bonus. Iterating the
+                // full name set means a stat with no current contributor resets to its innate base when
+                // gear is removed. Innate bases are captured once so authored values (Critical Multiplier
+                // = 150, Movement Speed = 100, Chaos Resistance = -60, …) are preserved, not overwritten.
+                CacheInnateStatBases(handler);
+                foreach (var statName in AffixStatMapper.AllDevionStatNames)
                 {
-                    foreach (var affix in weaponInSlot.Affixes)
-                    {
-                        if (affix.Type == StatType.IncreasedCriticalChance)
-                            critBonus += affix.Value;
-                    }
+                    if (CharSheetStatSkip.Contains(statName)) continue;
+                    float innate = _innateStatBase.TryGetValue(statName, out float b) ? b : 0f;
+                    float bonus  = statBonuses.TryGetValue(statName, out float v) ? v : 0f;
+                    TrySetStatBase(handler, statName, innate + bonus);
                 }
-                TrySetStatBase(handler, "Critical Strike", critBonus);
 
+                Debug.Log($"<color=lime>[PlayerView] SyncCharacterInfoStats → Weapon={weaponInSlot?.BaseData?.name ?? "none"}, bonuses={statBonuses.Count}</color>");
                 handler.onUpdate?.Invoke();
             }
             catch (Exception ex)
             {
                 Debug.LogWarning($"[PlayerView] SyncCharacterInfoStats failed: {ex.Message}\n{ex.StackTrace}");
+            }
+        }
+
+        // Devion stats NOT driven by the generic equipment aggregation: "Shield" (a resource pool owned
+        // by PlayerStatService, with no affix mapping) and the weapon-owned damage leaves (Min/Max
+        // Damage, fed into Melee/Ranged Attack above). Heart/Mana ARE aggregated: gear +Life/+Mana adds
+        // to their BaseValue (= max), while PlayerStatService independently owns their CurrentValue, so
+        // growing the max never resets current life/mana. Everything else is gear-aggregated.
+        private static readonly System.Collections.Generic.HashSet<string> CharSheetStatSkip =
+            new System.Collections.Generic.HashSet<string> { "Shield", "Min Damage", "Max Damage" };
+
+        // Innate (gear-free) base values, captured once so equipment bonuses ADD on top instead of
+        // overwriting authored bases (e.g. Critical Multiplier = 150, Movement Speed = 100).
+        private System.Collections.Generic.Dictionary<string, float> _innateStatBase;
+
+        private void CacheInnateStatBases(DevionGames.StatSystem.StatsHandler handler)
+        {
+            if (_innateStatBase != null) return;
+            _innateStatBase = new System.Collections.Generic.Dictionary<string, float>();
+            foreach (var statName in AffixStatMapper.AllDevionStatNames)
+            {
+                if (CharSheetStatSkip.Contains(statName)) continue;
+                var stat = handler.GetStat(statName);
+                if (stat != null) _innateStatBase[statName] = stat.BaseValue;
+            }
+        }
+
+        // Maps each modifier to its Devion stat name(s) and sums the FlatAdd contributions for the
+        // character sheet. Percent-mult mappings and the damage leaves are skipped (weapon path owns them).
+        private static void AccumulateCharacterSheetStats(
+            System.Collections.Generic.List<StatModifier> mods,
+            System.Collections.Generic.Dictionary<string, float> statBonuses)
+        {
+            if (mods == null) return;
+            foreach (var mod in mods)
+            {
+                if (mod == null) continue;
+                foreach (var mapping in AffixStatMapper.GetMappings(mod.Type))
+                {
+                    if (mapping.Contribution != AffixStatMapper.ContributionType.FlatAdd) continue;
+                    if (CharSheetStatSkip.Contains(mapping.DevionStatName)) continue;
+                    statBonuses[mapping.DevionStatName] =
+                        (statBonuses.TryGetValue(mapping.DevionStatName, out float cur) ? cur : 0f) + mod.Value;
+                }
             }
         }
 
