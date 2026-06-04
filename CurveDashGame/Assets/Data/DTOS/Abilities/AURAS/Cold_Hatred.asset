@@ -28,5 +28,6 @@ MonoBehaviour:
   ProjectileCount: 1
   Speed: 0
   Duration: 10
+  SelfModifiers: []
   CastVFX: {fileID: 1741568361362846, guid: 4db85d1e064bd874cbfb92849ed76f3e, type: 3}
   ImpactVFX: {fileID: 0}

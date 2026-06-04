@@ -23,6 +23,8 @@ MonoBehaviour:
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
   Description: Balanced elemental amulet.
+  ItemLevel: 1
+  Modifiers: []
   DevionAdapter: {fileID: 11400000, guid: 79733f815b42c5a4ea49e5131f19fe31, type: 2}
   HealthBonus: 30
   ManaBonus: 20

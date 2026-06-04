@@ -2449,6 +2449,9 @@ MonoBehaviour:
   m_OverrideEquipPrefab: {fileID: 0}
   m_Region: []
   m_OriginalEquipmentData: {fileID: 0}
+  RolledAffixes: []
+  RolledRarity: 0
+  RolledItemLevel: 0
   references:
     version: 2
     RefIds: []
