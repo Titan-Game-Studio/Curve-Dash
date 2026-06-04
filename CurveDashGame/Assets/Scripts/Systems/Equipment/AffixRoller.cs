@@ -74,9 +74,43 @@ namespace STG.CurveDash
             if (templates == null || templates.Count == 0) return result;
 
             var usedNames = new HashSet<string>();
-            RollGroup(templates, itemTags, itemLevel, AffixType.Prefix, numPrefixes, usedNames, result);
-            RollGroup(templates, itemTags, itemLevel, AffixType.Suffix, numSuffixes, usedNames, result);
+            float targetPower = 0f; // sum of each rolled tier's MIDPOINT power (the "expected" total)
+            float actualPower = 0f; // sum of the actually-rolled values' power
+            RollGroup(templates, itemTags, itemLevel, AffixType.Prefix, numPrefixes, usedNames, result, ref targetPower, ref actualPower);
+            RollGroup(templates, itemTags, itemLevel, AffixType.Suffix, numSuffixes, usedNames, result, ref targetPower, ref actualPower);
+
+            NormalizeToBudget(result, targetPower, actualPower);
             return result;
+        }
+
+        // --- Power budget (Step 4) --------------------------------------------------------------
+        // Keeps same-iLvl/same-composition items at ~equal total power by nudging the rolled values
+        // toward the tier-midpoint total. A band leaves moderate variety intact and only reins in
+        // unusually lucky/unlucky rolls. Toggle off to get raw uniform rolls.
+        public static bool PowerBudgetEnabled = true;
+        private const float MinBand = 0.90f; // weak rolls boosted up to 90% of the expected total
+        private const float MaxBand = 1.10f; // lucky rolls capped at 110% of the expected total
+
+        private static void NormalizeToBudget(List<StatModifier> result, float targetPower, float actualPower)
+        {
+            if (!PowerBudgetEnabled || result.Count == 0) return;
+            if (targetPower <= 0.0001f || actualPower <= 0.0001f) return;
+
+            float ratio = actualPower / targetPower;              // how far this roll is from expected
+            float clamped = Mathf.Clamp(ratio, MinBand, MaxBand); // allowed deviation band
+            float factor = clamped / ratio;                       // scale needed to land inside the band
+            if (Mathf.Abs(factor - 1f) <= 0.0005f) return;        // already in-band — keep the variety
+
+            foreach (var mod in result)
+                mod.Value = RoundForStat(mod.Type, mod.Value * factor);
+        }
+
+        private static float RoundForStat(StatType stat, float value)
+        {
+            // Mirror AffixData.RollTier: integer-only stats stay integers after scaling.
+            if (stat == StatType.IncreasedPhysicalDamage || stat == StatType.IncreasedAttackSpeed)
+                return Mathf.Round(value);
+            return value;
         }
 
         private static void RollGroup(
@@ -86,7 +120,9 @@ namespace STG.CurveDash
             AffixType type,
             int count,
             HashSet<string> usedNames,
-            List<StatModifier> result)
+            List<StatModifier> result,
+            ref float targetPower,
+            ref float actualPower)
         {
             var entries = new List<(AffixData affix, AffixTier tier, int weight)>();
 
@@ -119,8 +155,13 @@ namespace STG.CurveDash
                     acc += e.weight;
                     if (roll < acc)
                     {
-                        result.Add(e.affix.RollTier(e.tier));
+                        var mod = e.affix.RollTier(e.tier);
+                        result.Add(mod);
                         usedNames.Add(e.affix.AffixName);
+
+                        float midpoint = (e.tier.MinValue + e.tier.MaxValue) * 0.5f;
+                        targetPower += StatPowerTable.Power(e.affix.Stat, midpoint);
+                        actualPower += StatPowerTable.Power(e.affix.Stat, mod.Value);
                         break;
                     }
                 }
