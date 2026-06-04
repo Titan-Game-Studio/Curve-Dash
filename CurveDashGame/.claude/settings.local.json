@@ -35,7 +35,8 @@
       "Bash(git commit -m 'feat: auras as duration-based self-buffs that auto-recast *)",
       "Bash(git commit *)",
       "Bash(git rm *)",
-      "Bash(git stat *)"
+      "Bash(git stat *)",
+      "Bash(git *)"
     ],
     "additionalDirectories": [
       "D:\\UNITY_PROJECTS\\Curve-Dash\\CurveDashGame\\obsidian-unity\\02_Active_Tasks"
