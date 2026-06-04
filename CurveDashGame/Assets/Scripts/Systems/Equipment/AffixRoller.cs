@@ -73,11 +73,11 @@ namespace STG.CurveDash
             var result = new List<StatModifier>();
             if (templates == null || templates.Count == 0) return result;
 
-            var usedNames = new HashSet<string>();
+            var usedGroups = new HashSet<string>();
             float targetPower = 0f; // sum of each rolled tier's MIDPOINT power (the "expected" total)
             float actualPower = 0f; // sum of the actually-rolled values' power
-            RollGroup(templates, itemTags, itemLevel, AffixType.Prefix, numPrefixes, usedNames, result, ref targetPower, ref actualPower);
-            RollGroup(templates, itemTags, itemLevel, AffixType.Suffix, numSuffixes, usedNames, result, ref targetPower, ref actualPower);
+            RollGroup(templates, itemTags, itemLevel, AffixType.Prefix, numPrefixes, usedGroups, result, ref targetPower, ref actualPower);
+            RollGroup(templates, itemTags, itemLevel, AffixType.Suffix, numSuffixes, usedGroups, result, ref targetPower, ref actualPower);
 
             NormalizeToBudget(result, targetPower, actualPower);
             return result;
@@ -119,7 +119,7 @@ namespace STG.CurveDash
             int itemLevel,
             AffixType type,
             int count,
-            HashSet<string> usedNames,
+            HashSet<string> usedGroups,
             List<StatModifier> result,
             ref float targetPower,
             ref float actualPower)
@@ -128,14 +128,14 @@ namespace STG.CurveDash
 
             for (int picked = 0; picked < count; picked++)
             {
-                // Rebuild the eligible pool each pick so already-used affixes are excluded.
+                // Rebuild the eligible pool each pick so already-used mod groups are excluded.
                 entries.Clear();
                 int totalWeight = 0;
 
                 foreach (var affix in templates)
                 {
                     if (affix == null || affix.TypeOfAffix != type) continue;
-                    if (usedNames.Contains(affix.AffixName)) continue;
+                    if (usedGroups.Contains(affix.GroupKey)) continue;
                     if (!affix.CanRollOn(itemTags)) continue;
 
                     foreach (var tier in affix.GetEligibleTiers(itemLevel))
@@ -155,13 +155,16 @@ namespace STG.CurveDash
                     acc += e.weight;
                     if (roll < acc)
                     {
-                        var mod = e.affix.RollTier(e.tier);
-                        result.Add(mod);
-                        usedNames.Add(e.affix.AffixName);
+                        // A hybrid affix yields several modifiers but occupies one prefix/suffix slot
+                        // (shared GroupKey), and its power sums across every stat it grants.
+                        var mods = e.affix.RollTierMods(e.tier);
+                        result.AddRange(mods);
+                        usedGroups.Add(e.affix.GroupKey);
 
-                        float midpoint = (e.tier.MinValue + e.tier.MaxValue) * 0.5f;
-                        targetPower += StatPowerTable.Power(e.affix.Stat, midpoint);
-                        actualPower += StatPowerTable.Power(e.affix.Stat, mod.Value);
+                        foreach (var (stat, midpoint) in e.affix.TierMidpoints(e.tier))
+                            targetPower += StatPowerTable.Power(stat, midpoint);
+                        foreach (var m in mods)
+                            actualPower += StatPowerTable.Power(m.Type, m.Value);
                         break;
                     }
                 }

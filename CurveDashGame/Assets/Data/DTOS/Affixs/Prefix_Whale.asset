@@ -10,31 +10,41 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 15c7d6bc34ba828419063e65abde3eb1, type: 3}
-  m_Name: Prefix_Hale
+  m_Name: Prefix_Whale
   m_EditorClassIdentifier: Assembly-CSharp::STG.CurveDash.AffixData
-  AffixName: Hale
+  AffixName: Whale
   TypeOfAffix: 0
   Stat: 8
   ModGroup: Life
-  ExtraStats: []
+  ExtraStats:
+  - 9
   AllowedTags:
   - 1
   - 2
   Tiers:
   - TierName: T3
     RequiredItemLevel: 1
-    MinValue: 20
-    MaxValue: 40
-    Weight: 1000
+    MinValue: 15
+    MaxValue: 30
+    Weight: 800
+    ExtraRanges:
+    - MinValue: 10
+      MaxValue: 20
   - TierName: T2
-    RequiredItemLevel: 25
-    MinValue: 40
-    MaxValue: 65
-    Weight: 400
+    RequiredItemLevel: 30
+    MinValue: 30
+    MaxValue: 50
+    Weight: 320
+    ExtraRanges:
+    - MinValue: 20
+      MaxValue: 35
   - TierName: T1
-    RequiredItemLevel: 45
-    MinValue: 65
-    MaxValue: 100
-    Weight: 120
+    RequiredItemLevel: 50
+    MinValue: 50
+    MaxValue: 75
+    Weight: 100
+    ExtraRanges:
+    - MinValue: 35
+      MaxValue: 55
   MinValue: 0
   MaxValue: 0
