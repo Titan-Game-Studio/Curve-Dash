@@ -14,11 +14,10 @@ namespace STG.CurveDash
         CriticalChance,    // crit chance % added (Flat)
         ExtraProjectiles,  // +N projectiles (Flat)
         Speed,             // projectile / attack speed (Increased / More)
-        // --- Data-ready, not yet applied by combat (future systems can query via GetMultiplier/GetFlat) ---
-        AreaOfEffect,
-        Pierce,
-        Chain,
-        Duration,
+        AreaOfEffect,      // scales the skill's AoE radius (Increased / More) — CombatSystem targeting
+        Pierce,            // +N extra enemies a hit reaches (Flat) — CombatSystem targeting
+        Chain,             // +N extra enemies a hit reaches (Flat) — CombatSystem targeting
+        Duration,          // scales aura effect duration (Increased / More) — AuraSystem
     }
 
     /// <summary>
@@ -166,5 +165,11 @@ namespace STG.CurveDash
         public float GetAddedFlatDamage()     => GetFlat(SupportStat.AddedFlatDamage, AddedFlatDamageBonus);
         public float GetCriticalChanceBonus() => GetFlat(SupportStat.CriticalChance, CriticalChanceBonus);
         public int   GetExtraProjectiles()    => Mathf.RoundToInt(GetFlat(SupportStat.ExtraProjectiles, ExtraProjectiles));
+
+        // Previously data-ready-only — now consumed by combat (AoE radius, extra targets) and AuraSystem.
+        public float GetAreaMultiplier()      => GetMultiplier(SupportStat.AreaOfEffect);
+        public float GetDurationMultiplier()  => GetMultiplier(SupportStat.Duration);
+        public int   GetPierceCount()         => Mathf.RoundToInt(GetFlat(SupportStat.Pierce));
+        public int   GetChainCount()          => Mathf.RoundToInt(GetFlat(SupportStat.Chain));
     }
 }

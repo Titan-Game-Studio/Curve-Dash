@@ -65,7 +65,8 @@ namespace STG.CurveDash
                     {
                         // Effect expired (or first time) → recast at the player's position.
                         aura.Execute(playerGo, playerView.Transform.position);
-                        timeLeft = Mathf.Max(0.1f, aura.Duration);
+                        // Duration modifiers (the aura's own SelfModifiers + compatible support gems) extend it.
+                        timeLeft = Mathf.Max(0.1f, aura.Duration * EffectiveDurationMultiplier(aura, playerViewComponent));
                     }
 
                     _remaining[aura] = timeLeft;
@@ -81,6 +82,28 @@ namespace STG.CurveDash
                 foreach (var stale in _staleAuras)
                     _remaining.Remove(stale);
             }
+        }
+
+        // Combined Duration multiplier: the aura's own SelfModifiers plus every compatible socketed
+        // support gem (weapon + armor). 1.0 when nothing modifies duration.
+        private float EffectiveDurationMultiplier(PoEAbility aura, PlayerView pv)
+        {
+            float mult = SupportAbilityData.Multiplier(aura.SelfModifiers, SupportStat.Duration);
+            if (pv == null) return mult;
+
+            if (pv.CurrentWeaponInstance != null)
+            {
+                var weaponAbilities = pv.CurrentWeaponInstance.GetAbilities();
+                if (weaponAbilities != null)
+                {
+                    foreach (var ab in weaponAbilities)
+                        if (ab is SupportAbilityData s && s.IsCompatible(aura)) mult *= s.GetDurationMultiplier();
+                }
+            }
+            foreach (var ab in pv.GetEquippedArmorAbilities())
+                if (ab is SupportAbilityData s && s.IsCompatible(aura)) mult *= s.GetDurationMultiplier();
+
+            return mult;
         }
 
         private void CollectAuras(PlayerView playerViewComponent, List<PoEAbility> result)

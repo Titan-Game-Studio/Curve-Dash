@@ -251,6 +251,8 @@ namespace STG.CurveDash
 
                                  PoEAbility activeSkill = null;
                                  int finalProjectileCount = 1;
+                                 float areaMult = 1f;   // AreaOfEffect modifiers (self + supports) scale the AoE radius
+                                 int bonusTargets = 0;  // Pierce + Chain add extra enemies a single hit can reach
 
                                  if (combatPool.Has(capturedPlayerEntity))
                                  {
@@ -273,18 +275,29 @@ namespace STG.CurveDash
                                              activeSkill = poeAb;
                                              finalProjectileCount = poeAb.ProjectileCount;
 
-                                             // Read support gems socketed to scale projectile counts
+                                             // The skill's own SelfModifiers may carry AoE / Pierce / Chain too.
+                                             areaMult     *= SupportAbilityData.Multiplier(poeAb.SelfModifiers, SupportStat.AreaOfEffect);
+                                             bonusTargets += Mathf.RoundToInt(SupportAbilityData.Flat(poeAb.SelfModifiers, SupportStat.Pierce))
+                                                          +  Mathf.RoundToInt(SupportAbilityData.Flat(poeAb.SelfModifiers, SupportStat.Chain));
+
+                                             // Read socketed support gems: extra projectiles, AoE radius and extra targets.
                                              foreach (var subAb in allHitAbilities)
                                              {
                                                  if (subAb is SupportAbilityData support && support.IsCompatible(poeAb))
                                                  {
                                                      finalProjectileCount += support.GetExtraProjectiles();
+                                                     areaMult     *= support.GetAreaMultiplier();
+                                                     bonusTargets += support.GetPierceCount() + support.GetChainCount();
                                                  }
                                              }
                                              break;
                                          }
                                      }
                                  }
+
+                                 // Effective AoE radius and target cap after AreaOfEffect / Pierce / Chain.
+                                 float aoeRange = capturedAttackRange * areaMult;
+                                 int effectiveTargets = finalProjectileCount + bonusTargets;
 
                                  if (currentPlayerView.Transform != null)
                                  {
@@ -300,15 +313,15 @@ namespace STG.CurveDash
                                              if (enemyView.Transform == null) continue;
 
                                              float distSq = (enemyView.Transform.position - playerPos).sqrMagnitude;
-                                             if (distSq <= capturedAttackRange * capturedAttackRange)
+                                             if (distSq <= aoeRange * aoeRange)
                                              {
                                                  targetsToHit.Add(enemyEntity);
                                              }
                                          }
                                      }
-                                     else if (finalProjectileCount > 1)
+                                     else if (effectiveTargets > 1)
                                       {
-                                         // 2. Multi-Projectile (LMP/GMP or Split Arrow): Hit multiple unique enemies in a frontal cone!
+                                         // 2. Multi-Projectile (LMP/GMP or Split Arrow) + Pierce/Chain: hit several enemies in a frontal cone!
                                          Vector3 lookDir = currentPlayerView.Transform.forward;
                                          if (finalTargetEnemy != -1 && viewLinkPool.Has(finalTargetEnemy))
                                          {
@@ -322,7 +335,7 @@ namespace STG.CurveDash
                                          }
 
                                          System.Collections.Generic.List<(int entity, float distSq)> enemiesInCone = new System.Collections.Generic.List<(int, float)>();
-                                         float coneAngle = 60f + (finalProjectileCount * 10f); // wider angle for more projectiles
+                                         float coneAngle = 60f + (effectiveTargets * 10f); // wider angle for more projectiles / extra targets
 
                                          foreach (var enemyEntity in enemyFilter)
                                          {
@@ -334,7 +347,7 @@ namespace STG.CurveDash
                                              toEnemy.y = 0;
                                              float distSq = toEnemy.sqrMagnitude;
 
-                                             if (distSq <= capturedAttackRange * capturedAttackRange)
+                                             if (distSq <= aoeRange * aoeRange)
                                              {
                                                  float angle = Vector3.Angle(lookDir, toEnemy.normalized);
                                                  if (angle <= coneAngle / 2f)
@@ -347,7 +360,7 @@ namespace STG.CurveDash
                                          // Sort enemies by distance to hit closest targets first
                                          enemiesInCone.Sort((a, b) => a.distSq.CompareTo(b.distSq));
 
-                                         int hitCount = Mathf.Min(enemiesInCone.Count, finalProjectileCount);
+                                         int hitCount = Mathf.Min(enemiesInCone.Count, effectiveTargets);
                                          for (int i = 0; i < hitCount; i++)
                                          {
                                              targetsToHit.Add(enemiesInCone[i].entity);
