@@ -8,29 +8,31 @@ using DevionGames.InventorySystem;
 namespace STG.CurveDash
 {
     /// <summary>
-    /// Runtime debug viewer that shows the equipped gear and its socketed gems/abilities as a collapsible
-    /// dropdown tree. Each item is a clickable header row ([-] expanded / [+] collapsed); clicking folds
-    /// its gem children in/out. Per-item expand state persists, and the rows are only rebuilt when the
-    /// equipped set actually changes (no per-frame flicker).
+    /// Runtime debug viewer of equipped gear as a nested, collapsible dropdown tree:
     ///
     ///   [-] Iron Sword (Weapon)
-    ///       |_ [Active] Cleave (Melee/Physical)
-    ///       |_ [Support] Melee Physical Damage
-    ///   [+] Iron Helm (Head)
+    ///       [-] Stats (3)
+    ///           • +5–12 Phys
+    ///           • +8 Fire
+    ///       [+] Gems (2)
     ///
-    /// Self-instantiates (sibling to <see cref="CharacterStatsPanel"/>), docks top-left so it never
-    /// overlaps the stats panel. Pure uGUI so it shares the game's EventSystem/input path.
+    /// Every foldout (item, and the Stats / Gems sub-groups) toggles independently; stat lines are kept
+    /// terse (short stat label + value, rolled affixes tinted). Rows are rebuilt only when the equipped
+    /// set/affixes change. Self-instantiates top-left (never overlaps <see cref="CharacterStatsPanel"/>).
     /// </summary>
     public class GemTreePanel : MonoBehaviour
     {
-        // One equipped item plus the runtime objects that render it, so a toggle needn't rebuild the tree.
-        private class TreeItem
+        // A row in the tree: a clickable foldout (item / Stats / Gems) or a plain leaf line.
+        private class Node
         {
             public string key;
-            public Text headerText;
-            public string headerLabel; // header text without the [+]/[-] prefix
-            public readonly List<GameObject> children = new List<GameObject>();
+            public GameObject go;
+            public Text headerText;   // foldouts only
+            public string headerLabel;
+            public bool isFoldout;
             public bool expanded;
+            public int depth;
+            public readonly List<Node> children = new List<Node>();
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -51,9 +53,8 @@ namespace STG.CurveDash
         private PlayerView _cachedPlayer;
         private string _lastSignature;
 
-        private readonly List<TreeItem> _items = new List<TreeItem>();
-        // Expand state survives rebuilds (keyed by item identity). Default = expanded.
-        private readonly Dictionary<string, bool> _expanded = new Dictionary<string, bool>();
+        private readonly List<Node> _roots = new List<Node>();
+        private readonly Dictionary<string, bool> _expanded = new Dictionary<string, bool>(); // by node key, default expanded
         private readonly StringBuilder _sig = new StringBuilder(256);
 
         private void Awake()
@@ -94,7 +95,6 @@ namespace STG.CurveDash
             scaler.referenceResolution = new Vector2(1080f, 1920f);
             scaler.matchWidthOrHeight = 0.5f;
 
-            // Toggle button — top-LEFT (the stats button lives top-right).
             var btn = CreateButton(canvas.transform, "☰ Gems", new Color(0.55f, 0.35f, 0.85f, 0.95f), Toggle);
             var brt = btn.GetComponent<RectTransform>();
             brt.anchorMin = brt.anchorMax = new Vector2(0f, 1f);
@@ -103,7 +103,6 @@ namespace STG.CurveDash
             brt.anchoredPosition = new Vector2(24f, -24f);
             _buttonLabel = btn.GetComponentInChildren<Text>();
 
-            // Panel — top-LEFT, top edge at 1/5 of screen height from the top (anchor y = 0.8).
             _panel = new GameObject("GemTreePanel", typeof(RectTransform), typeof(Image), typeof(ScrollRect));
             _panel.transform.SetParent(canvas.transform, false);
             var prt = _panel.GetComponent<RectTransform>();
@@ -146,8 +145,7 @@ namespace STG.CurveDash
             scroll.movementType = ScrollRect.MovementType.Clamped;
             scroll.scrollSensitivity = 30f;
 
-            // A persistent title row at the top.
-            var title = CreateText(_content, "<size=30><b>Gems / Abilities</b></size>", 26);
+            var title = NewText(_content, "<size=30><b>Gems / Abilities</b></size>", 26, TextAnchor.UpperLeft);
             title.raycastTarget = false;
         }
 
@@ -169,14 +167,19 @@ namespace STG.CurveDash
             return go.GetComponent<Button>();
         }
 
-        private Text CreateText(Transform parent, string text, int size)
+        private void ConfigText(Text t, int size, TextAnchor anchor)
+        {
+            t.font = _font; t.fontSize = size; t.color = Color.white; t.supportRichText = true;
+            t.alignment = anchor; t.horizontalOverflow = HorizontalWrapMode.Wrap; t.verticalOverflow = VerticalWrapMode.Overflow;
+        }
+
+        private Text NewText(Transform parent, string text, int size, TextAnchor anchor)
         {
             var go = new GameObject("Row", typeof(RectTransform), typeof(Text));
             go.transform.SetParent(parent, false);
             var t = go.GetComponent<Text>();
-            t.font = _font; t.text = text; t.fontSize = size; t.color = Color.white;
-            t.supportRichText = true; t.alignment = TextAnchor.UpperLeft;
-            t.horizontalOverflow = HorizontalWrapMode.Wrap; t.verticalOverflow = VerticalWrapMode.Overflow;
+            ConfigText(t, size, anchor);
+            t.text = text;
             return t;
         }
 
@@ -206,12 +209,13 @@ namespace STG.CurveDash
 
         private bool GetExpanded(string key) => !_expanded.TryGetValue(key, out bool v) || v; // default expanded
 
+        // ---------------------------------------------------------------- tree build / refresh
+
         private void RefreshTree()
         {
             var pv = GetPlayerView();
             var container = pv != null ? FindEquipmentContainer() : null;
 
-            // Build a signature of the equipped items + their gems; only rebuild when it changes.
             string signature = BuildSignature(pv, container);
             if (signature == _lastSignature) return;
             _lastSignature = signature;
@@ -220,7 +224,7 @@ namespace STG.CurveDash
 
             if (pv == null || container == null)
             {
-                var msg = CreateText(_content, "\n<color=#bbbbbb>Start a game and equip gear to view sockets.</color>", 24);
+                var msg = NewText(_content, "\n<color=#bbbbbb>Start a game and equip gear to view sockets.</color>", 24, TextAnchor.UpperLeft);
                 msg.raycastTarget = false;
                 return;
             }
@@ -230,99 +234,124 @@ namespace STG.CurveDash
             {
                 if (slot == null || slot.IsEmpty || slot.ObservedItem == null) continue;
                 if (!(slot.ObservedItem is CurveDashEquipmentAdapter adapter) || adapter.OriginalEquipmentData == null) continue;
-
-                var data = adapter.OriginalEquipmentData;
-                BuildItemRows(pv, $"{SlotLabel(data)}::{data.name}", adapter);
+                BuildItemNode(pv, adapter);
                 any = true;
             }
 
             if (!any)
             {
-                var msg = CreateText(_content, "\n<color=#bbbbbb>No equipment found in the Equipment container.</color>", 24);
+                var msg = NewText(_content, "\n<color=#bbbbbb>No equipment found in the Equipment container.</color>", 24, TextAnchor.UpperLeft);
                 msg.raycastTarget = false;
             }
+
+            ApplyVisibility();
         }
 
         private void ClearRows()
         {
-            _items.Clear();
-            // Keep the title row (index 0); destroy everything created afterwards.
-            for (int i = _content.childCount - 1; i >= 1; i--)
+            _roots.Clear();
+            for (int i = _content.childCount - 1; i >= 1; i--) // keep the title (index 0)
                 Destroy(_content.GetChild(i).gameObject);
         }
 
-        private void BuildItemRows(PlayerView pv, string key, CurveDashEquipmentAdapter adapter)
+        private void BuildItemNode(PlayerView pv, CurveDashEquipmentAdapter adapter)
         {
             var data = adapter.OriginalEquipmentData;
-            var abilities = ResolveAbilities(pv, data);
             var stats = ResolveStats(adapter);
+            var abilities = ResolveAbilities(pv, data);
             int gemCount = abilities != null ? abilities.Count : 0;
+            string baseKey = $"{SlotLabel(data)}::{data.name}";
 
-            var item = new TreeItem { key = key, expanded = GetExpanded(key) };
-            item.headerLabel = $"<color=#ffd24d><b>{EscapeRich(data.ItemName)}</b></color>" +
-                               $" <size=20><color=#8a8f9c>({SlotLabel(data)} · {stats.Count} stat{(stats.Count == 1 ? "" : "s")} · {gemCount} gem{(gemCount == 1 ? "" : "s")})</color></size>";
+            string itemLabel = $"<color=#ffd24d><b>{EscapeRich(data.ItemName)}</b></color>" +
+                               $" <size=20><color=#8a8f9c>({SlotLabel(data)})</color></size>";
+            var itemNode = CreateFoldout(baseKey, itemLabel, 0, boxed: true);
+            _roots.Add(itemNode);
 
-            // Header (clickable dropdown row).
-            var headerGO = new GameObject("ItemHeader", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
-            headerGO.transform.SetParent(_content, false);
-            headerGO.GetComponent<Image>().color = new Color(0.16f, 0.18f, 0.26f, 0.95f);
-            headerGO.GetComponent<LayoutElement>().minHeight = 46f;
+            // Stats sub-dropdown.
+            var statsNode = CreateFoldout(baseKey + "/stats", $"Stats <color=#8a8f9c>({stats.Count})</color>", 1, boxed: false);
+            itemNode.children.Add(statsNode);
+            if (stats.Count == 0) statsNode.children.Add(CreateLeaf("<color=#777777>(none)</color>", 2));
+            else foreach (var line in stats) statsNode.children.Add(CreateLeaf(line, 2));
 
-            var htGO = new GameObject("Text", typeof(RectTransform), typeof(Text));
-            htGO.transform.SetParent(headerGO.transform, false);
-            var hrt = htGO.GetComponent<RectTransform>();
-            hrt.anchorMin = Vector2.zero; hrt.anchorMax = Vector2.one;
-            hrt.offsetMin = new Vector2(12f, 0f); hrt.offsetMax = new Vector2(-8f, 0f);
-            item.headerText = htGO.GetComponent<Text>();
-            item.headerText.font = _font; item.headerText.fontSize = 25; item.headerText.color = Color.white;
-            item.headerText.supportRichText = true; item.headerText.alignment = TextAnchor.MiddleLeft;
-            item.headerText.horizontalOverflow = HorizontalWrapMode.Wrap; item.headerText.verticalOverflow = VerticalWrapMode.Overflow;
-            item.headerText.raycastTarget = false;
-
-            headerGO.GetComponent<Button>().onClick.AddListener(() => ToggleItem(item));
-
-            // --- Stats section ---
-            item.children.Add(CreateChild("   <b><color=#cfd2dc>Stats</color></b>"));
-            if (stats.Count == 0)
-                item.children.Add(CreateChild("       • <color=#777777>(none)</color>"));
-            else
-                foreach (var line in stats)
-                    item.children.Add(CreateChild("       • " + line));
-
-            // --- Gems section ---
-            item.children.Add(CreateChild("   <b><color=#cfd2dc>Gems</color></b>"));
-            if (gemCount == 0)
-                item.children.Add(CreateChild("       • <color=#777777>(none socketed)</color>"));
-            else
-                foreach (var ab in abilities)
-                    item.children.Add(CreateChild("       • " + AbilityLabel(ab)));
-
-            _items.Add(item);
-            ApplyItemState(item);
+            // Gems sub-dropdown.
+            var gemsNode = CreateFoldout(baseKey + "/gems", $"Gems <color=#8a8f9c>({gemCount})</color>", 1, boxed: false);
+            itemNode.children.Add(gemsNode);
+            if (gemCount == 0) gemsNode.children.Add(CreateLeaf("<color=#777777>(none)</color>", 2));
+            else foreach (var ab in abilities) gemsNode.children.Add(CreateLeaf(AbilityLabel(ab), 2));
         }
 
-        private GameObject CreateChild(string text)
+        private Node CreateFoldout(string key, string label, int depth, bool boxed)
         {
-            var t = CreateText(_content, text, 23);
+            var node = new Node { key = key, isFoldout = true, headerLabel = label, depth = depth, expanded = GetExpanded(key) };
+
+            if (boxed)
+            {
+                var go = new GameObject("Foldout", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+                go.transform.SetParent(_content, false);
+                go.GetComponent<Image>().color = new Color(0.16f, 0.18f, 0.26f, 0.95f);
+                go.GetComponent<LayoutElement>().minHeight = 46f;
+
+                var txtGO = new GameObject("Text", typeof(RectTransform), typeof(Text));
+                txtGO.transform.SetParent(go.transform, false);
+                var rt = txtGO.GetComponent<RectTransform>();
+                rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+                rt.offsetMin = new Vector2(12f, 0f); rt.offsetMax = new Vector2(-8f, 0f);
+                node.headerText = txtGO.GetComponent<Text>();
+                ConfigText(node.headerText, 25, TextAnchor.MiddleLeft);
+                node.headerText.raycastTarget = false;
+                node.go = go;
+                go.GetComponent<Button>().onClick.AddListener(() => ToggleNode(node));
+            }
+            else
+            {
+                var go = new GameObject("Foldout", typeof(RectTransform), typeof(Text), typeof(Button), typeof(LayoutElement));
+                go.transform.SetParent(_content, false);
+                go.GetComponent<LayoutElement>().minHeight = 36f;
+                node.headerText = go.GetComponent<Text>();
+                ConfigText(node.headerText, 24, TextAnchor.MiddleLeft);
+                node.headerText.raycastTarget = true; // the Button uses this graphic to receive clicks
+                node.go = go;
+                go.GetComponent<Button>().onClick.AddListener(() => ToggleNode(node));
+            }
+            return node;
+        }
+
+        private Node CreateLeaf(string text, int depth)
+        {
+            var go = new GameObject("Leaf", typeof(RectTransform), typeof(Text));
+            go.transform.SetParent(_content, false);
+            var t = go.GetComponent<Text>();
+            ConfigText(t, 23, TextAnchor.UpperLeft);
             t.raycastTarget = false;
-            return t.gameObject;
+            t.text = Indent(depth) + "• " + text;
+            return new Node { go = go, isFoldout = false, depth = depth };
         }
 
-        private void ToggleItem(TreeItem item)
+        private void ToggleNode(Node node)
         {
-            item.expanded = !item.expanded;
-            _expanded[item.key] = item.expanded;
-            ApplyItemState(item);
+            node.expanded = !node.expanded;
+            _expanded[node.key] = node.expanded;
+            ApplyVisibility();
         }
 
-        // Reflects an item's expand state onto its header arrow and child visibility.
-        private void ApplyItemState(TreeItem item)
+        private void ApplyVisibility()
         {
-            string arrow = item.expanded ? "<color=#9bff9b>[-]</color> " : "<color=#ffb37f>[+]</color> ";
-            if (item.headerText != null) item.headerText.text = arrow + item.headerLabel;
-            foreach (var child in item.children)
-                if (child != null) child.SetActive(item.expanded);
+            foreach (var root in _roots) ApplyNode(root, true);
         }
+
+        private void ApplyNode(Node n, bool parentVisible)
+        {
+            if (n.go != null) n.go.SetActive(parentVisible);
+            if (n.isFoldout && n.headerText != null)
+            {
+                string arrow = n.expanded ? "<color=#9bff9b>[-]</color> " : "<color=#ffb37f>[+]</color> ";
+                n.headerText.text = Indent(n.depth) + arrow + n.headerLabel;
+            }
+            bool childVisible = parentVisible && (!n.isFoldout || n.expanded);
+            foreach (var c in n.children) ApplyNode(c, childVisible);
+        }
+
+        private static string Indent(int depth) => depth <= 0 ? "" : new string(' ', depth * 4);
 
         // ---------------------------------------------------------------- data
 
@@ -338,7 +367,6 @@ namespace STG.CurveDash
                 _sig.Append(data.name).Append('{');
                 foreach (var ab in ResolveAbilities(pv, data))
                     _sig.Append(ab != null ? ab.AbilityName : "?").Append(',');
-                // Rolled affixes affect the displayed stats → include them so the tree rebuilds on change.
                 if (adapter.RolledAffixes != null)
                     foreach (var m in adapter.RolledAffixes)
                         if (m != null) _sig.Append(m.Type).Append(m.Value).Append(';');
@@ -347,14 +375,14 @@ namespace STG.CurveDash
             return _sig.ToString();
         }
 
-        // Item stats for display: base weapon damage, projected typed/universal stats, and rolled affixes.
+        // Concise item stats: base weapon damage, projected typed/universal stats, and rolled affixes.
         private static List<string> ResolveStats(CurveDashEquipmentAdapter adapter)
         {
             var lines = new List<string>();
             var data = adapter.OriginalEquipmentData;
 
             if (data is WeaponData w)
-                lines.Add($"+{Mathf.RoundToInt(w.BaseMinDamage)}–{Mathf.RoundToInt(w.BaseMaxDamage)} Base Damage");
+                lines.Add($"<color=#cdd6e0>+{Mathf.RoundToInt(w.BaseMinDamage)}–{Mathf.RoundToInt(w.BaseMaxDamage)} Dmg</color>");
 
             var baseMods = data.GetStatModifiers();
             if (baseMods != null)
@@ -368,27 +396,45 @@ namespace STG.CurveDash
             return lines;
         }
 
+        // Terse line: "+8 Fire" (rolled affixes tinted, no verbose affix name / stat wording).
         private static string FormatStatMod(StatModifier m, bool rolled)
         {
             string v = (m.Value >= 0 ? "+" : "") + m.Value.ToString("0.#");
-            string label = $"<color=#cdd6e0>{v} {PrettyStat(m.Type)}</color>";
-            // Rolled loot affixes also show their affix name in a magic-ish colour.
-            return (rolled && !string.IsNullOrEmpty(m.AffixName))
-                ? $"<color=#b99cff>{EscapeRich(m.AffixName)}</color> {label}"
-                : label;
+            string col = rolled ? "#b99cff" : "#cdd6e0";
+            return $"<color={col}>{v} {ShortStat(m.Type)}</color>";
         }
 
-        // "AddedPhysicalDamage" -> "Added Physical Damage" (spaces before capitals).
-        private static string PrettyStat(StatType t)
+        private static string ShortStat(StatType t)
         {
-            string s = t.ToString();
-            var sb = new StringBuilder(s.Length + 6);
-            for (int i = 0; i < s.Length; i++)
+            switch (t)
             {
-                if (i > 0 && char.IsUpper(s[i])) sb.Append(' ');
-                sb.Append(s[i]);
+                case StatType.AddedPhysicalDamage:      return "Phys";
+                case StatType.AddedFireDamage:          return "Fire";
+                case StatType.AddedColdDamage:          return "Cold";
+                case StatType.IncreasedPhysicalDamage:  return "Phys%";
+                case StatType.IncreasedAttackSpeed:     return "AtkSpd%";
+                case StatType.IncreasedCriticalChance:  return "Crit%";
+                case StatType.AddedCriticalMultiplier:  return "CritMulti";
+                case StatType.LifeStealPercentage:      return "LifeSteal%";
+                case StatType.KnockbackForce:           return "Knockback";
+                case StatType.AddedLife:                return "Life";
+                case StatType.AddedMana:                return "Mana";
+                case StatType.AddedArmour:              return "Armour";
+                case StatType.AddedEvasion:             return "Evasion";
+                case StatType.AddedAccuracy:            return "Accuracy";
+                case StatType.AddedStrength:            return "Str";
+                case StatType.AddedDexterity:           return "Dex";
+                case StatType.AddedIntelligence:        return "Int";
+                case StatType.AddedMovementSpeed:       return "MoveSpd%";
+                case StatType.AddedLifeRegen:           return "LifeRegen";
+                case StatType.AddedBlockChance:         return "Block%";
+                case StatType.AddedFireResistance:      return "FireRes";
+                case StatType.AddedColdResistance:      return "ColdRes";
+                case StatType.AddedLightningResistance: return "LightRes";
+                case StatType.AddedChaosResistance:     return "ChaosRes";
+                case StatType.AddedAllResistances:      return "AllRes";
+                default:                                return t.ToString();
             }
-            return sb.ToString();
         }
 
         private static List<AbilityData> ResolveAbilities(PlayerView pv, ItemData data)
@@ -422,16 +468,15 @@ namespace STG.CurveDash
 
         private static string AbilityLabel(AbilityData ab)
         {
-            if (ab == null) return "<color=#777777>(empty socket)</color>";
+            if (ab == null) return "<color=#777777>(empty)</color>";
             if (ab is SupportAbilityData support)
-                return "<color=#7fd1ff>[Support]</color> " + EscapeRich(support.AbilityName);
+                return "<color=#7fd1ff>[S]</color> " + EscapeRich(support.AbilityName);
             if (ab is PoEAbility poe)
             {
                 bool aura = poe.SkillType == PoEAbilityType.Aura;
-                string tag = aura ? "[Aura]" : "[Active]";
+                string tag = aura ? "[Aura]" : "[A]";
                 string col = aura ? "#c79bff" : "#9bff9b";
-                return $"<color={col}>{tag}</color> {EscapeRich(poe.AbilityName)} " +
-                       $"<size=18><color=#8a8f9c>({poe.SkillType}/{poe.Element})</color></size>";
+                return $"<color={col}>{tag}</color> {EscapeRich(poe.AbilityName)}";
             }
             return EscapeRich(ab.AbilityName);
         }
