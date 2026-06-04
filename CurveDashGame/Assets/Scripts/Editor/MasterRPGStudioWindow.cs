@@ -87,6 +87,11 @@ namespace STG.CurveDash.Editor
         private AffixType _affixType = AffixType.Prefix;
         private StatType _statType = StatType.AddedPhysicalDamage;
         private float _affixMin = 5f, _affixMax = 15f;
+        private string _affixModGroup = "";
+        private bool _affixUseTiers = false;
+        private readonly List<AffixTier> _affixTiers = new List<AffixTier>();
+        private readonly List<ItemTag> _affixTags = new List<ItemTag>();
+        private readonly List<StatType> _affixExtraStats = new List<StatType>();
 
         [MenuItem("Curve-Dash/Tools/Master RPG Studio (All-in-One Generator)", false, 0)]
         public static void ShowWindow()
@@ -677,25 +682,126 @@ namespace STG.CurveDash.Editor
 
             _affixName = EditorGUILayout.TextField("Affix Name", _affixName);
             _affixType = (AffixType)EditorGUILayout.EnumPopup("Affix Type", _affixType);
-            _statType = (StatType)EditorGUILayout.EnumPopup("Stat Type", _statType);
-            _affixMin = EditorGUILayout.FloatField("Min Value", _affixMin);
-            _affixMax = EditorGUILayout.FloatField("Max Value", _affixMax);
+            _statType = (StatType)EditorGUILayout.EnumPopup("Primary Stat", _statType);
+            _affixModGroup = EditorGUILayout.TextField(
+                new GUIContent("Mod Group", "Affixes sharing a non-empty group are mutually exclusive on one item. Empty = grouped by name."),
+                _affixModGroup);
+
+            EditorGUILayout.Space();
+            GUILayout.Label("Allowed Item Tags (none = rolls on ANY item)", EditorStyles.miniBoldLabel);
+            DrawEnumList(_affixTags, ItemTag.Weapon, "Tag");
+
+            EditorGUILayout.Space();
+            GUILayout.Label("Hybrid Extra Stats (optional — each rolls from the same tier band)", EditorStyles.miniBoldLabel);
+            DrawEnumList(_affixExtraStats, StatType.AddedLife, "Stat");
+
+            EditorGUILayout.Space();
+            _affixUseTiers = EditorGUILayout.ToggleLeft(
+                "Use item-level tiers (uncheck for a single Min/Max range)", _affixUseTiers);
+            if (_affixUseTiers) DrawTierList();
+            else
+            {
+                _affixMin = EditorGUILayout.FloatField("Min Value", _affixMin);
+                _affixMax = EditorGUILayout.FloatField("Max Value", _affixMax);
+            }
 
             EditorGUILayout.Space();
             GUI.backgroundColor = new Color(0.2f, 0.8f, 0.9f);
             if (GUILayout.Button("Create Single Affix", GUILayout.Height(35)))
-            {
-                string targetFolder = EnsureDirectory(AFFIXES_PATH);
-                string fullPath = Path.Combine(targetFolder, $"{_affixType}_{_affixName.Replace(" ", "_")}.asset").Replace("\\", "/");
-
-                var asset = ScriptableObject.CreateInstance<AffixData>();
-                asset.AffixName = _affixName; asset.TypeOfAffix = _affixType; asset.Stat = _statType; asset.MinValue = _affixMin; asset.MaxValue = _affixMax;
-
-                AssetDatabase.CreateAsset(asset, fullPath); AssetDatabase.SaveAssets(); Selection.activeObject = asset;
-                Debug.Log($"[Studio] Created Affix: {fullPath}");
-            }
+                CreateAffixAsset();
             GUI.backgroundColor = Color.white;
             EditorGUILayout.EndVertical();
+        }
+
+        // Generic add/remove editor for a list of enum values (used for tags and hybrid extra stats).
+        private void DrawEnumList<T>(List<T> list, T defaultValue, string label) where T : System.Enum
+        {
+            EditorGUILayout.BeginVertical("helpbox");
+            int removeAt = -1;
+            for (int i = 0; i < list.Count; i++)
+            {
+                EditorGUILayout.BeginHorizontal();
+                list[i] = (T)EditorGUILayout.EnumPopup($"{label} {i + 1}", list[i]);
+                if (GUILayout.Button("✕", GUILayout.Width(24))) removeAt = i;
+                EditorGUILayout.EndHorizontal();
+            }
+            if (removeAt >= 0) list.RemoveAt(removeAt);
+            if (GUILayout.Button($"+ Add {label}", GUILayout.Width(120))) list.Add(defaultValue);
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawTierList()
+        {
+            EditorGUILayout.BeginVertical("helpbox");
+            int removeAt = -1;
+            for (int i = 0; i < _affixTiers.Count; i++)
+            {
+                var t = _affixTiers[i]; // AffixTier is a class — edits mutate the list entry in place.
+                EditorGUILayout.BeginVertical("box");
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Label($"Tier {i + 1}", EditorStyles.boldLabel, GUILayout.Width(60));
+                if (GUILayout.Button("✕ Remove", GUILayout.Width(80))) removeAt = i;
+                EditorGUILayout.EndHorizontal();
+                t.TierName = EditorGUILayout.TextField("Name", t.TierName);
+                t.RequiredItemLevel = EditorGUILayout.IntField("Req. Item Level", t.RequiredItemLevel);
+                t.MinValue = EditorGUILayout.FloatField("Min Value", t.MinValue);
+                t.MaxValue = EditorGUILayout.FloatField("Max Value", t.MaxValue);
+                t.Weight = EditorGUILayout.IntField("Weight", t.Weight);
+                EditorGUILayout.EndVertical();
+            }
+            if (removeAt >= 0) _affixTiers.RemoveAt(removeAt);
+            if (GUILayout.Button("+ Add Tier"))
+                _affixTiers.Add(new AffixTier
+                {
+                    TierName = $"T{_affixTiers.Count + 1}",
+                    RequiredItemLevel = _affixTiers.Count == 0 ? 0 : (_affixTiers[_affixTiers.Count - 1].RequiredItemLevel + 20),
+                    MinValue = _affixMin,
+                    MaxValue = _affixMax,
+                    Weight = 1000,
+                });
+            EditorGUILayout.EndVertical();
+        }
+
+        private void CreateAffixAsset()
+        {
+            string targetFolder = EnsureDirectory(AFFIXES_PATH);
+            string fullPath = Path.Combine(targetFolder, $"{_affixType}_{_affixName.Replace(" ", "_")}.asset").Replace("\\", "/");
+
+            var asset = ScriptableObject.CreateInstance<AffixData>();
+            asset.AffixName = _affixName;
+            asset.TypeOfAffix = _affixType;
+            asset.Stat = _statType;
+            asset.ModGroup = _affixModGroup;
+            asset.AllowedTags = new List<ItemTag>(_affixTags);
+            asset.ExtraStats = new List<StatType>(_affixExtraStats);
+
+            if (_affixUseTiers && _affixTiers.Count > 0)
+            {
+                asset.Tiers = new List<AffixTier>();
+                foreach (var t in _affixTiers)
+                    asset.Tiers.Add(new AffixTier
+                    {
+                        TierName = t.TierName,
+                        RequiredItemLevel = t.RequiredItemLevel,
+                        MinValue = t.MinValue,
+                        MaxValue = t.MaxValue,
+                        Weight = t.Weight,
+                        ExtraRanges = new List<ValueRange>(),
+                    });
+                // Keep the legacy range in sync (first tier) so older readers still get a sane band.
+                asset.MinValue = _affixTiers[0].MinValue;
+                asset.MaxValue = _affixTiers[0].MaxValue;
+            }
+            else
+            {
+                asset.Tiers = new List<AffixTier>();
+                asset.MinValue = _affixMin;
+                asset.MaxValue = _affixMax;
+            }
+
+            AssetDatabase.CreateAsset(asset, fullPath); AssetDatabase.SaveAssets(); Selection.activeObject = asset;
+            Debug.Log($"[Studio] Created Affix: {fullPath} ({(_affixUseTiers ? _affixTiers.Count + " tier(s)" : "single range")}" +
+                      $"{(_affixExtraStats.Count > 0 ? ", hybrid x" + (_affixExtraStats.Count + 1) : "")})");
         }
 
         // ====================================================================
