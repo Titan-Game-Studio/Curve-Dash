@@ -324,6 +324,17 @@ namespace STG.CurveDash
             }
         }
 
+        // Sums a single stat across the item's projected modifiers (typed fields + universal Modifiers,
+        // via GetStatModifiers). Lets callers read derived stats through one path instead of typed fields.
+        private float SumStatModifier(StatType type)
+        {
+            if (m_OriginalEquipmentData == null) return 0f;
+            float sum = 0f;
+            foreach (var m in m_OriginalEquipmentData.GetStatModifiers())
+                if (m != null && m.Type == type) sum += m.Value;
+            return sum;
+        }
+
         // Applies the item's universal Modifiers list (authored on the base ItemData) to the character sheet.
         // This is what makes EVERY item type extensible without new typed fields or new if/else branches.
         private void ApplyUniversalModifiers(System.Collections.Generic.List<StatModifier> mods)
@@ -472,9 +483,11 @@ namespace STG.CurveDash
                     float avgDmg = (weapon.BaseMinDamage + weapon.BaseMaxDamage) / 2f;
                     baseValue = avgDmg * 1.5f * weapon.BaseAttackSpeed;
                 }
-                else if (m_OriginalEquipmentData is ArmorItemData armor)
+                else if (m_OriginalEquipmentData is ArmorItemData)
                 {
-                    baseValue = armor.Defense * 1.2f + armor.HealthBonus * 0.5f;
+                    // Price from the item's PROJECTED stats (single read path) rather than the typed
+                    // Defense/HealthBonus fields directly — so it also reflects any universal Modifiers.
+                    baseValue = SumStatModifier(StatType.AddedArmour) * 1.2f + SumStatModifier(StatType.AddedLife) * 0.5f;
                 }
 
                 int baseBuyPrice = Mathf.Max(1, Mathf.RoundToInt(baseValue));
