@@ -15,6 +15,7 @@ namespace STG.CurveDash
         private readonly EcsPool<PlayerCombatComponent> combatPool;
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
         private readonly EcsPool<EnemyHealthComponent> healthPool;
+        private readonly EcsPool<EnemyComponent> enemyPool;
         private readonly EcsPool<EnemyDeadEvent> deadPool;
 
         private readonly GemLevelService _gemLevelService;
@@ -25,6 +26,11 @@ namespace STG.CurveDash
         private const float KnockbackUnitsPerForce = 0.1f;
         // Crit chance used when the character-stat system is unavailable (e.g. unarmed fallback path).
         private const float FallbackCritChance = 10f;
+        // PoE-style elemental resistance cap: resistance above this is wasted; negative resist amplifies.
+        private const float MaxResistance = 75f;
+
+        // Fraction of elemental damage that lands after a resistance %. 30 res → 0.7; -20 res → 1.2.
+        private static float ResistMultiplier(float resistPercent) => 1f - Mathf.Min(resistPercent, MaxResistance) / 100f;
 
         public CombatSystem(EcsWorld world, GemLevelService gemLevelService, PlayerStatService playerStatService, BeltFlaskService beltFlaskService)
         {
@@ -40,6 +46,7 @@ namespace STG.CurveDash
             combatPool = world.GetPool<PlayerCombatComponent>();
             viewLinkPool = world.GetPool<ViewLinkComponent>();
             healthPool = world.GetPool<EnemyHealthComponent>();
+            enemyPool = world.GetPool<EnemyComponent>();
             deadPool = world.GetPool<EnemyDeadEvent>();
         }
 
@@ -431,8 +438,13 @@ namespace STG.CurveDash
             if (combat.CurrentWeapon != null)
             {
                 baseDamage = combat.CurrentWeapon.GetRandomDamage();
-                // 1b. Flat elemental damage (fire + cold) rolled on the weapon, added to the hit
-                elementalDamage = combat.CurrentWeapon.GetElementalDamage();
+                // 1b. Flat elemental damage (fire + cold) rolled on the weapon, mitigated per-type by
+                //     the enemy's elemental resistances (physical is unaffected).
+                MonsterData enemyData = enemyPool.Has(enemyEntity) ? enemyPool.Get(enemyEntity).Data : null;
+                float fireRes = enemyData != null ? enemyData.FireResistance : 0f;
+                float coldRes = enemyData != null ? enemyData.ColdResistance : 0f;
+                elementalDamage = combat.CurrentWeapon.AddedFireDamage * ResistMultiplier(fireRes)
+                                + combat.CurrentWeapon.AddedColdDamage * ResistMultiplier(coldRes);
             }
             else
             {
