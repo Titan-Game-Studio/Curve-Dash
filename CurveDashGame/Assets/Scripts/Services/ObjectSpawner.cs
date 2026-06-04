@@ -736,6 +736,27 @@ namespace STG.CurveDash
             return entity;
         }
 
+        public int SpawnAccessoryPickup(Vector3 blockPosition, Transform parent = null, int itemLevel = 1)
+        {
+            // Accessories have no shared base type — gather amulets, rings and belts into one pool.
+            var accessories = new List<ItemData>();
+            accessories.AddRange(GetAllItemsOfType<AmuletItemData>());
+            accessories.AddRange(GetAllItemsOfType<RingItemData>());
+            accessories.AddRange(GetAllItemsOfType<BeltItemData>());
+            if (accessories.Count == 0) return -1;
+
+            var baseAccessory = accessories[Random.Range(0, accessories.Count)];
+            int lvl = Mathf.Max(1, itemLevel);
+
+            // Accessories roll affixes gated by their Accessory(/Ring/Amulet/Belt) tags + item level.
+            var rarity = RollDropRarity();
+            var affixes = AffixRoller.RollFor(baseAccessory, lvl, rarity);
+
+            int entity = SpawnItemPickup(blockPosition, baseAccessory, parent);
+            AttachRolledLoot(entity, rarity, lvl, affixes);
+            return entity;
+        }
+
         // Attaches a rolled-loot payload (rarity + item level + affixes) to the spawned pickup's view.
         private void AttachRolledLoot(int entity, ItemRarity rarity, int itemLevel, List<StatModifier> affixes)
         {

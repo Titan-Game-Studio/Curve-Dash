@@ -53,24 +53,30 @@ namespace STG.CurveDash
                         if (Random.value <= 1.0f)
                         {
                             float roll = Random.value;
-                            if (roll < 0.25f)
+                            if (roll < 0.22f)
                             {
                                 // Weapon rolls affixes at the monster's level (deeper = stronger tiers).
                                 spawner.SpawnWeaponPickup(deathPos, parentTransform, enemy.Level);
                                 Debug.Log($"<color=yellow>[EnemyDrop] Enemy (lvl {enemy.Level}) dropped a WEAPON!</color>");
                             }
-                            else if (roll < 0.50f)
+                            else if (roll < 0.44f)
                             {
                                 // Armor rolls affixes at the monster's level too.
                                 spawner.SpawnArmorPickup(deathPos, parentTransform, enemy.Level);
                                 Debug.Log($"<color=yellow>[EnemyDrop] Enemy (lvl {enemy.Level}) dropped an ARMOR piece!</color>");
                             }
-                            else if (roll < 0.70f)
+                            else if (roll < 0.60f)
+                            {
+                                // Accessory (amulet/ring/belt) rolls affixes at the monster's level.
+                                spawner.SpawnAccessoryPickup(deathPos, parentTransform, enemy.Level);
+                                Debug.Log($"<color=yellow>[EnemyDrop] Enemy (lvl {enemy.Level}) dropped an ACCESSORY!</color>");
+                            }
+                            else if (roll < 0.74f)
                             {
                                 spawner.SpawnGemPickup(deathPos, parentTransform);
                                 Debug.Log("<color=yellow>[EnemyDrop] Enemy dropped a GEM!</color>");
                             }
-                            else if (roll < 0.85f)
+                            else if (roll < 0.87f)
                             {
                                 spawner.SpawnFlaskPickup(deathPos, parentTransform);
                                 Debug.Log("<color=yellow>[EnemyDrop] Enemy dropped a FLASK!</color>");
