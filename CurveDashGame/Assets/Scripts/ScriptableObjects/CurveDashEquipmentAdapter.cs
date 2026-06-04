@@ -36,6 +36,62 @@ namespace STG.CurveDash
             SyncData();
         }
 
+        // --- Save/Load round-trip for rolled loot ---
+        // Devion's base Item.GetObjectData/SetObjectData only persist Name/Stack/Rarity/Properties/refs,
+        // NOT subclass fields. Without this, RolledAffixes is empty after a reload and the very next
+        // SyncData (OnEnable/equip) zeroes the restored stat properties → looted affixes & rarity reset.
+        // We persist the payload and rebuild the item from it on load.
+        public override void GetObjectData(System.Collections.Generic.Dictionary<string, object> data)
+        {
+            base.GetObjectData(data);
+            data["RolledRarity"] = (int)RolledRarity;
+            data["RolledItemLevel"] = RolledItemLevel;
+
+            if (HasRolledAffixes)
+            {
+                var affixes = new System.Collections.Generic.List<object>();
+                foreach (var a in RolledAffixes)
+                {
+                    if (a == null) continue;
+                    affixes.Add(new System.Collections.Generic.Dictionary<string, object>
+                    {
+                        { "Type", (int)a.Type },
+                        { "Value", a.Value },
+                        { "Name", a.AffixName },
+                        { "AffixType", (int)a.AffixType },
+                    });
+                }
+                data["RolledAffixes"] = affixes;
+            }
+        }
+
+        public override void SetObjectData(System.Collections.Generic.Dictionary<string, object> data)
+        {
+            base.SetObjectData(data);
+
+            if (data.ContainsKey("RolledRarity"))
+                RolledRarity = (ItemRarity)System.Convert.ToInt32(data["RolledRarity"]);
+            if (data.ContainsKey("RolledItemLevel"))
+                RolledItemLevel = System.Convert.ToInt32(data["RolledItemLevel"]);
+
+            RolledAffixes = new System.Collections.Generic.List<StatModifier>();
+            if (data.ContainsKey("RolledAffixes") && data["RolledAffixes"] is System.Collections.Generic.List<object> affixes)
+            {
+                foreach (var entry in affixes)
+                {
+                    if (!(entry is System.Collections.Generic.Dictionary<string, object> d)) continue;
+                    var type = (StatType)System.Convert.ToInt32(d["Type"]);
+                    float value = System.Convert.ToSingle(d["Value"]);
+                    string name = d.ContainsKey("Name") && d["Name"] != null ? d["Name"].ToString() : "";
+                    var affixType = d.ContainsKey("AffixType") ? (AffixType)System.Convert.ToInt32(d["AffixType"]) : AffixType.Prefix;
+                    RolledAffixes.Add(new StatModifier(type, value, name, affixType));
+                }
+            }
+
+            // Rebuild every stat property from the restored payload so it survives later SyncData calls.
+            SyncData();
+        }
+
         public void SyncData()
         {
             if (m_OriginalEquipmentData != null)
