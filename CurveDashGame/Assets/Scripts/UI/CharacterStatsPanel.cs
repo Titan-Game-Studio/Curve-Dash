@@ -233,8 +233,8 @@ namespace STG.CurveDash
         {
             string value;
             if (stat.Name == "Exp")
-                // Exp is stored as a running total (not a current/max attribute) — show the total.
-                value = Mathf.RoundToInt(stat.Value).ToString();
+                // Exp holds progress into the current level — show it as "x / threshold".
+                value = Mathf.RoundToInt(stat.Value) + " / " + PlayerStatService.ScoreForNextLevel;
             else if (stat is DevionGames.StatSystem.Attribute attr)
                 value = Mathf.RoundToInt(attr.CurrentValue) + " / " + Mathf.RoundToInt(attr.Value);
             else

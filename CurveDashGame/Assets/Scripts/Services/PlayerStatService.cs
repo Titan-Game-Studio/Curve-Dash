@@ -14,7 +14,12 @@ namespace STG.CurveDash
         public const int Damege = 1;
         public const int MaxHeart = 5;
         public const int ScoreForStep = 1;
-        private const int ScoreForNextLevel = 300;
+        public const int ScoreForNextLevel = 300; // Score (exp) needed to advance one level.
+
+        // Exp earned into the CURRENT level: cumulative Score minus everything spent reaching this level.
+        // Clamped to [0, ScoreForNextLevel] so the "x / threshold" bar never shows a negative or overflow.
+        private static int ExpIntoCurrentLevel(in PlayerStatComponent c) =>
+            Mathf.Clamp(c.Score - (c.Level - 1) * ScoreForNextLevel, 0, ScoreForNextLevel);
         private bool hasPushedInitialStats = false;
 
         private readonly EcsPool<PlayerStatComponent> playerStatPool;
@@ -43,7 +48,6 @@ namespace STG.CurveDash
             var playerStat = playerStatFilter.GetRawEntities()[0];
             ref var playerStatComponent = ref playerStatPool.Get(playerStat);
             playerStatComponent.Score += score;
-            if (cachedExpStat != null) cachedExpStat.BaseValue = playerStatComponent.Score;
             if (playerStatComponent.Score > playerStatComponent.Level * ScoreForNextLevel)
             {
                 playerStatComponent.Level++;
@@ -55,6 +59,8 @@ namespace STG.CurveDash
                 // shows the real level (its built-in Exp→Level system is not used here).
                 PushLevelToDevion(playerStatComponent.Level);
             }
+            // Push AFTER any level-up so the bar shows progress into the NEW level (resets on ding).
+            if (cachedExpStat != null) cachedExpStat.BaseValue = ExpIntoCurrentLevel(playerStatComponent);
         }
 
         private void PushLevelToDevion(int level)
@@ -332,7 +338,7 @@ namespace STG.CurveDash
                         cachedShieldStat.CurrentValue = max;
                     }
 
-                    if (cachedExpStat != null) cachedExpStat.BaseValue = 0;
+                    if (cachedExpStat != null) cachedExpStat.BaseValue = ExpIntoCurrentLevel(comp);
                     PullPlainStats(ref comp);
                     PushLevelToDevion(comp.Level);
                     hasPushedInitialStats = true;
