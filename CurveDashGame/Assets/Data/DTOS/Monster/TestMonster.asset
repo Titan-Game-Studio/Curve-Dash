@@ -18,3 +18,7 @@ MonoBehaviour:
   MovementSpeed: 2
   ExperienceReward: 10
   AttackRange: 1.5
+  FireResistance: 50
+  ColdResistance: -30
+  LightningResistance: 0
+  ChaosResistance: 0
