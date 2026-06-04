@@ -232,7 +232,7 @@ namespace STG.CurveDash
                 if (!(slot.ObservedItem is CurveDashEquipmentAdapter adapter) || adapter.OriginalEquipmentData == null) continue;
 
                 var data = adapter.OriginalEquipmentData;
-                BuildItemRows($"{SlotLabel(data)}::{data.name}", data, ResolveAbilities(pv, data));
+                BuildItemRows(pv, $"{SlotLabel(data)}::{data.name}", adapter);
                 any = true;
             }
 
@@ -251,12 +251,16 @@ namespace STG.CurveDash
                 Destroy(_content.GetChild(i).gameObject);
         }
 
-        private void BuildItemRows(string key, ItemData data, List<AbilityData> abilities)
+        private void BuildItemRows(PlayerView pv, string key, CurveDashEquipmentAdapter adapter)
         {
-            var item = new TreeItem { key = key, expanded = GetExpanded(key) };
+            var data = adapter.OriginalEquipmentData;
+            var abilities = ResolveAbilities(pv, data);
+            var stats = ResolveStats(adapter);
             int gemCount = abilities != null ? abilities.Count : 0;
+
+            var item = new TreeItem { key = key, expanded = GetExpanded(key) };
             item.headerLabel = $"<color=#ffd24d><b>{EscapeRich(data.ItemName)}</b></color>" +
-                               $" <size=20><color=#8a8f9c>({SlotLabel(data)} · {gemCount} gem{(gemCount == 1 ? "" : "s")})</color></size>";
+                               $" <size=20><color=#8a8f9c>({SlotLabel(data)} · {stats.Count} stat{(stats.Count == 1 ? "" : "s")} · {gemCount} gem{(gemCount == 1 ? "" : "s")})</color></size>";
 
             // Header (clickable dropdown row).
             var headerGO = new GameObject("ItemHeader", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
@@ -277,23 +281,31 @@ namespace STG.CurveDash
 
             headerGO.GetComponent<Button>().onClick.AddListener(() => ToggleItem(item));
 
-            // Children (gem rows).
-            if (gemCount == 0)
-            {
-                item.children.Add(CreateText(_content, "      |_ <color=#777777>(no gems socketed)</color>", 23).gameObject);
-            }
+            // --- Stats section ---
+            item.children.Add(CreateChild("   <b><color=#cfd2dc>Stats</color></b>"));
+            if (stats.Count == 0)
+                item.children.Add(CreateChild("       • <color=#777777>(none)</color>"));
             else
-            {
+                foreach (var line in stats)
+                    item.children.Add(CreateChild("       • " + line));
+
+            // --- Gems section ---
+            item.children.Add(CreateChild("   <b><color=#cfd2dc>Gems</color></b>"));
+            if (gemCount == 0)
+                item.children.Add(CreateChild("       • <color=#777777>(none socketed)</color>"));
+            else
                 foreach (var ab in abilities)
-                {
-                    var row = CreateText(_content, "      |_ " + AbilityLabel(ab), 23);
-                    row.raycastTarget = false;
-                    item.children.Add(row.gameObject);
-                }
-            }
+                    item.children.Add(CreateChild("       • " + AbilityLabel(ab)));
 
             _items.Add(item);
             ApplyItemState(item);
+        }
+
+        private GameObject CreateChild(string text)
+        {
+            var t = CreateText(_content, text, 23);
+            t.raycastTarget = false;
+            return t.gameObject;
         }
 
         private void ToggleItem(TreeItem item)
@@ -326,9 +338,57 @@ namespace STG.CurveDash
                 _sig.Append(data.name).Append('{');
                 foreach (var ab in ResolveAbilities(pv, data))
                     _sig.Append(ab != null ? ab.AbilityName : "?").Append(',');
+                // Rolled affixes affect the displayed stats → include them so the tree rebuilds on change.
+                if (adapter.RolledAffixes != null)
+                    foreach (var m in adapter.RolledAffixes)
+                        if (m != null) _sig.Append(m.Type).Append(m.Value).Append(';');
                 _sig.Append("}|");
             }
             return _sig.ToString();
+        }
+
+        // Item stats for display: base weapon damage, projected typed/universal stats, and rolled affixes.
+        private static List<string> ResolveStats(CurveDashEquipmentAdapter adapter)
+        {
+            var lines = new List<string>();
+            var data = adapter.OriginalEquipmentData;
+
+            if (data is WeaponData w)
+                lines.Add($"+{Mathf.RoundToInt(w.BaseMinDamage)}–{Mathf.RoundToInt(w.BaseMaxDamage)} Base Damage");
+
+            var baseMods = data.GetStatModifiers();
+            if (baseMods != null)
+                foreach (var m in baseMods)
+                    if (m != null) lines.Add(FormatStatMod(m, false));
+
+            if (adapter.RolledAffixes != null)
+                foreach (var m in adapter.RolledAffixes)
+                    if (m != null) lines.Add(FormatStatMod(m, true));
+
+            return lines;
+        }
+
+        private static string FormatStatMod(StatModifier m, bool rolled)
+        {
+            string v = (m.Value >= 0 ? "+" : "") + m.Value.ToString("0.#");
+            string label = $"<color=#cdd6e0>{v} {PrettyStat(m.Type)}</color>";
+            // Rolled loot affixes also show their affix name in a magic-ish colour.
+            return (rolled && !string.IsNullOrEmpty(m.AffixName))
+                ? $"<color=#b99cff>{EscapeRich(m.AffixName)}</color> {label}"
+                : label;
+        }
+
+        // "AddedPhysicalDamage" -> "Added Physical Damage" (spaces before capitals).
+        private static string PrettyStat(StatType t)
+        {
+            string s = t.ToString();
+            var sb = new StringBuilder(s.Length + 6);
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (i > 0 && char.IsUpper(s[i])) sb.Append(' ');
+                sb.Append(s[i]);
+            }
+            return sb.ToString();
         }
 
         private static List<AbilityData> ResolveAbilities(PlayerView pv, ItemData data)
