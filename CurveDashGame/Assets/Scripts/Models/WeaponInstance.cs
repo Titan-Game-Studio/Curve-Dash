@@ -64,47 +64,10 @@ namespace STG.CurveDash
         {
             if (Rarity == ItemRarity.Normal) return;
 
-            var templates = new List<AffixData>();
-#if UNITY_EDITOR
-            string[] guids = UnityEditor.AssetDatabase.FindAssets("t:AffixData");
-            foreach (string guid in guids)
-            {
-                string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
-                var affix = UnityEditor.AssetDatabase.LoadAssetAtPath<AffixData>(path);
-                if (affix != null) templates.Add(affix);
-            }
-#endif
-            if (templates.Count == 0)
-            {
-                var loaded = Resources.LoadAll<AffixData>("");
-                templates.AddRange(loaded);
-            }
-
+            var templates = AffixRoller.LoadAllTemplates();
             if (templates.Count == 0) return;
 
-            int numPrefixes = 0;
-            int numSuffixes = 0;
-
-            if (Rarity == ItemRarity.Magic)
-            {
-                numPrefixes = Random.Range(0, 2);
-                numSuffixes = Random.Range(0, 2);
-                if (numPrefixes == 0 && numSuffixes == 0)
-                {
-                    if (Random.value > 0.5f) numPrefixes = 1;
-                    else numSuffixes = 1;
-                }
-            }
-            else if (Rarity == ItemRarity.Rare)
-            {
-                numPrefixes = Random.Range(1, 4);
-                numSuffixes = Random.Range(1, 4);
-            }
-            else if (Rarity == ItemRarity.Unique)
-            {
-                numPrefixes = Random.Range(0, 2);
-                numSuffixes = Random.Range(0, 2);
-            }
+            AffixRoller.GetAffixCounts(Rarity, out int numPrefixes, out int numSuffixes);
 
             // Weighted, tag- and item-level-gated generation. Existing affix assets (no tiers / no tags)
             // behave like before: unrestricted, single open tier at weight 1000.

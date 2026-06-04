@@ -61,8 +61,9 @@ namespace STG.CurveDash
                             }
                             else if (roll < 0.50f)
                             {
-                                spawner.SpawnArmorPickup(deathPos, parentTransform);
-                                Debug.Log("<color=yellow>[EnemyDrop] Enemy dropped an ARMOR piece!</color>");
+                                // Armor rolls affixes at the monster's level too.
+                                spawner.SpawnArmorPickup(deathPos, parentTransform, enemy.Level);
+                                Debug.Log($"<color=yellow>[EnemyDrop] Enemy (lvl {enemy.Level}) dropped an ARMOR piece!</color>");
                             }
                             else if (roll < 0.70f)
                             {

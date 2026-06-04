@@ -11,6 +11,58 @@ namespace STG.CurveDash
     /// </summary>
     public static class AffixRoller
     {
+        /// <summary>Loads every AffixData template (editor: AssetDatabase; runtime: Resources).</summary>
+        public static List<AffixData> LoadAllTemplates()
+        {
+            var templates = new List<AffixData>();
+#if UNITY_EDITOR
+            foreach (var guid in UnityEditor.AssetDatabase.FindAssets("t:AffixData"))
+            {
+                var affix = UnityEditor.AssetDatabase.LoadAssetAtPath<AffixData>(UnityEditor.AssetDatabase.GUIDToAssetPath(guid));
+                if (affix != null) templates.Add(affix);
+            }
+#endif
+            if (templates.Count == 0)
+                templates.AddRange(Resources.LoadAll<AffixData>(""));
+            return templates;
+        }
+
+        /// <summary>Number of prefixes/suffixes to roll for a given rarity (Normal = none).</summary>
+        public static void GetAffixCounts(ItemRarity rarity, out int numPrefixes, out int numSuffixes)
+        {
+            numPrefixes = 0;
+            numSuffixes = 0;
+            switch (rarity)
+            {
+                case ItemRarity.Magic:
+                    numPrefixes = Random.Range(0, 2);
+                    numSuffixes = Random.Range(0, 2);
+                    if (numPrefixes == 0 && numSuffixes == 0)
+                    {
+                        if (Random.value > 0.5f) numPrefixes = 1;
+                        else numSuffixes = 1;
+                    }
+                    break;
+                case ItemRarity.Rare:
+                    numPrefixes = Random.Range(1, 4);
+                    numSuffixes = Random.Range(1, 4);
+                    break;
+                case ItemRarity.Unique:
+                    numPrefixes = Random.Range(0, 2);
+                    numSuffixes = Random.Range(0, 2);
+                    break;
+            }
+        }
+
+        /// <summary>Convenience: rolls a full affix set for any item at the given level and rarity.</summary>
+        public static List<StatModifier> RollFor(ItemData item, int itemLevel, ItemRarity rarity)
+        {
+            if (item == null || rarity == ItemRarity.Normal) return new List<StatModifier>();
+            var templates = LoadAllTemplates();
+            GetAffixCounts(rarity, out int numPrefixes, out int numSuffixes);
+            return RollAffixes(templates, item.GetAffixTags(), itemLevel, numPrefixes, numSuffixes);
+        }
+
         public static List<StatModifier> RollAffixes(
             IReadOnlyList<AffixData> templates,
             IReadOnlyList<ItemTag> itemTags,

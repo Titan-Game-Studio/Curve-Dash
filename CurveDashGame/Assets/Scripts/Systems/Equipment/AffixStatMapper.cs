@@ -99,5 +99,27 @@ namespace STG.CurveDash
                 ? result
                 : System.Array.Empty<StatMapping>();
         }
+
+        private static List<string> _allNames;
+
+        /// <summary>
+        /// Every distinct Devion stat name any affix can write to. The equipment adapter resets these
+        /// to zero before re-applying so repeated SyncData calls stay idempotent (no stat accumulation).
+        /// </summary>
+        public static IReadOnlyList<string> AllDevionStatNames
+        {
+            get
+            {
+                if (_allNames == null)
+                {
+                    _allNames = new List<string>();
+                    foreach (var kv in Map)
+                        foreach (var mapping in kv.Value)
+                            if (!_allNames.Contains(mapping.DevionStatName))
+                                _allNames.Add(mapping.DevionStatName);
+                }
+                return _allNames;
+            }
+        }
     }
 }

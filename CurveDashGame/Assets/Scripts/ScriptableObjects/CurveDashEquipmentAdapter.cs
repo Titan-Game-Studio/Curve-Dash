@@ -40,6 +40,10 @@ namespace STG.CurveDash
         {
             if (m_OriginalEquipmentData != null)
             {
+                // Reset every affix-driven stat property to zero first so SyncData is idempotent —
+                // otherwise repeated calls (OnEnable, equip, pickup) accumulate the same bonuses.
+                ResetStatProperties();
+
                 this.Name = m_OriginalEquipmentData.ItemName;
 
 #if UNITY_EDITOR
@@ -144,9 +148,12 @@ namespace STG.CurveDash
                 }
 
                 // ALL character-sheet stats — each item's typed fields (projected by GetStatModifiers)
-                // PLUS its universal Modifiers list — flow through one mapper-driven path. Adding a new
-                // stat to any item never requires touching this adapter again.
-                ApplyUniversalModifiers(m_OriginalEquipmentData.GetStatModifiers());
+                // PLUS its universal Modifiers list PLUS any affixes rolled at drop time — flow through
+                // one mapper-driven path. Adding a new stat to any item never touches this adapter again.
+                var stats = m_OriginalEquipmentData.GetStatModifiers();
+                if (RolledAffixes != null && RolledAffixes.Count > 0)
+                    stats.AddRange(RolledAffixes);
+                ApplyUniversalModifiers(stats);
             }
             else
             {
@@ -155,17 +162,24 @@ namespace STG.CurveDash
         }
 
         // Call this BEFORE the item enters Devion's equipment container so EquipmentHandler
-        // picks up the updated properties when it applies stat modifiers.
+        // picks up the updated properties when it applies stat modifiers. The affixes are stored
+        // as RolledAffixes and re-applied by every subsequent SyncData (so they persist on equip).
         public void SyncAffixes(System.Collections.Generic.List<StatModifier> affixes)
         {
-            // Reset all properties to base values before applying new affix set.
+            RolledAffixes = affixes != null
+                ? new System.Collections.Generic.List<StatModifier>(affixes)
+                : new System.Collections.Generic.List<StatModifier>();
             SyncData();
+        }
 
-            if (affixes == null || affixes.Count == 0) return;
-
-            // Route affixes through the shared mapper, then merge onto Devion properties.
-            AccumulateSums(affixes, out var flatSums, out var percentSums);
-            MergeIntoProperties(flatSums, percentSums);
+        // Zeroes every affix-driven stat property so SyncData can rebuild them from scratch each call.
+        private void ResetStatProperties()
+        {
+            foreach (var name in AffixStatMapper.AllDevionStatNames)
+            {
+                var prop = FindProperty(name);
+                if (prop != null) prop.SetValue(0);
+            }
         }
 
         // Maps every modifier's StatType to Devion stat name(s) and sums flat / percent contributions.

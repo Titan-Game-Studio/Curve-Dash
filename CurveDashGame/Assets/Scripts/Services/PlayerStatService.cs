@@ -51,6 +51,26 @@ namespace STG.CurveDash
                 AddLife(20f);
                 AddMana(10f);
                 GrantFreePoints();
+                // Mirror the authoritative level onto the Devion "Level" stat so the character sheet
+                // shows the real level (its built-in Exp→Level system is not used here).
+                PushLevelToDevion(playerStatComponent.Level);
+            }
+        }
+
+        private void PushLevelToDevion(int level)
+        {
+            try
+            {
+                if (cachedLevelStat == null)
+                {
+                    var handler = DevionGames.StatSystem.StatsManager.GetStatsHandler("Player Stats");
+                    cachedLevelStat = handler?.GetStat("Level");
+                }
+                if (cachedLevelStat != null) cachedLevelStat.BaseValue = level;
+            }
+            catch (System.Exception ex)
+            {
+                UnityEngine.Debug.LogWarning($"[PlayerStatService] PushLevelToDevion failed: {ex.Message}");
             }
         }
 
@@ -218,6 +238,7 @@ namespace STG.CurveDash
         // Plain stats (value only)
         private DevionGames.StatSystem.Stat cachedExpStat;
         private DevionGames.StatSystem.Stat cachedFreePointsStat;
+        private DevionGames.StatSystem.Stat cachedLevelStat;
         private DevionGames.StatSystem.Stat cachedStrStat;
         private DevionGames.StatSystem.Stat cachedDexStat;
         private DevionGames.StatSystem.Stat cachedIntStat;
@@ -238,7 +259,7 @@ namespace STG.CurveDash
         {
             cachedHandler = null;
             cachedHeartStat = null; cachedManaStat = null; cachedShieldStat = null;
-            cachedExpStat = null; cachedFreePointsStat = null;
+            cachedExpStat = null; cachedFreePointsStat = null; cachedLevelStat = null;
             cachedStrStat = null; cachedDexStat = null; cachedIntStat = null;
             cachedArmourStat = null; cachedEvasionStat = null; cachedAccuracyStat = null;
             cachedFireResStat = null; cachedColdResStat = null; cachedLightResStat = null;
@@ -313,6 +334,7 @@ namespace STG.CurveDash
 
                     if (cachedExpStat != null) cachedExpStat.BaseValue = 0;
                     PullPlainStats(ref comp);
+                    PushLevelToDevion(comp.Level);
                     hasPushedInitialStats = true;
                     handler.onUpdate?.Invoke();
                 }

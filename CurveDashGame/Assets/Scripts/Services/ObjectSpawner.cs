@@ -715,16 +715,37 @@ namespace STG.CurveDash
             var rolled = new WeaponInstance(baseWeapon, rarity, true, Mathf.Max(1, itemLevel));
 
             int entity = SpawnItemPickup(blockPosition, baseWeapon, parent);
-            if (entity >= 0 && viewLinkPool.Has(entity))
-            {
-                ref var vl = ref viewLinkPool.Get(entity);
-                var view = vl.View != null ? vl.View.GetComponent<ItemPickupView>() : null;
-                if (view != null) view.SetRolledLoot(rarity, rolled.ItemLevel, rolled.Affixes);
-            }
+            AttachRolledLoot(entity, rarity, rolled.ItemLevel, rolled.Affixes);
             return entity;
         }
 
-        // Drop-rarity weights. Tune freely; affix counts follow rarity in WeaponInstance.RollRandomAffixes.
+        public int SpawnArmorPickup(Vector3 blockPosition, Transform parent = null, int itemLevel = 1)
+        {
+            var armors = GetAllItemsOfType<ArmorItemData>();
+            if (armors.Count == 0) return -1;
+
+            var baseArmor = armors[Random.Range(0, armors.Count)];
+            int lvl = Mathf.Max(1, itemLevel);
+
+            // Armor rolls affixes too — gated by its Armour tag + item level (no WeaponInstance needed).
+            var rarity = RollDropRarity();
+            var affixes = AffixRoller.RollFor(baseArmor, lvl, rarity);
+
+            int entity = SpawnItemPickup(blockPosition, baseArmor, parent);
+            AttachRolledLoot(entity, rarity, lvl, affixes);
+            return entity;
+        }
+
+        // Attaches a rolled-loot payload (rarity + item level + affixes) to the spawned pickup's view.
+        private void AttachRolledLoot(int entity, ItemRarity rarity, int itemLevel, List<StatModifier> affixes)
+        {
+            if (entity < 0 || !viewLinkPool.Has(entity)) return;
+            ref var vl = ref viewLinkPool.Get(entity);
+            var view = vl.View != null ? vl.View.GetComponent<ItemPickupView>() : null;
+            if (view != null) view.SetRolledLoot(rarity, itemLevel, affixes);
+        }
+
+        // Drop-rarity weights. Tune freely; affix counts follow rarity in AffixRoller.GetAffixCounts.
         private ItemRarity RollDropRarity()
         {
             float r = Random.value;
@@ -734,16 +755,6 @@ namespace STG.CurveDash
             return ItemRarity.Unique;
         }
 
-        public int SpawnArmorPickup(Vector3 blockPosition, Transform parent = null)
-        {
-            var armors = GetAllItemsOfType<ArmorItemData>();
-            if (armors.Count > 0)
-            {
-                var randomArmor = armors[Random.Range(0, armors.Count)];
-                return SpawnItemPickup(blockPosition, randomArmor, parent);
-            }
-            return -1;
-        }
 
         public int SpawnGemPickup(Vector3 blockPosition, Transform parent = null)
         {
