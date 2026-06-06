@@ -24,6 +24,11 @@ namespace STG.CurveDash
         public ItemRarity RolledRarity = ItemRarity.Normal;
         public int RolledItemLevel = 0;
 
+        // AbilityData asset names of gems socketed into THIS item at runtime. Stored per-instance and
+        // round-tripped through save/load so sockets survive equipment swaps and game restarts.
+        // PlayerView (which owns the catalog) resolves these names back to AbilityData on equip.
+        public System.Collections.Generic.List<string> SocketedGemAbilityNames = new System.Collections.Generic.List<string>();
+
         public bool HasRolledAffixes => RolledAffixes != null && RolledAffixes.Count > 0;
 
         /// <summary>Rarity to display: the rolled rarity when this is looted gear, else the base asset's.</summary>
@@ -63,6 +68,14 @@ namespace STG.CurveDash
                 }
                 data["RolledAffixes"] = affixes;
             }
+
+            if (SocketedGemAbilityNames != null && SocketedGemAbilityNames.Count > 0)
+            {
+                var gems = new System.Collections.Generic.List<object>();
+                foreach (var n in SocketedGemAbilityNames)
+                    if (!string.IsNullOrEmpty(n)) gems.Add(n);
+                data["SocketedGems"] = gems;
+            }
         }
 
         public override void SetObjectData(System.Collections.Generic.Dictionary<string, object> data)
@@ -86,6 +99,13 @@ namespace STG.CurveDash
                     var affixType = d.ContainsKey("AffixType") ? (AffixType)System.Convert.ToInt32(d["AffixType"]) : AffixType.Prefix;
                     RolledAffixes.Add(new StatModifier(type, value, name, affixType));
                 }
+            }
+
+            SocketedGemAbilityNames = new System.Collections.Generic.List<string>();
+            if (data.ContainsKey("SocketedGems") && data["SocketedGems"] is System.Collections.Generic.List<object> gems)
+            {
+                foreach (var g in gems)
+                    if (g != null) SocketedGemAbilityNames.Add(g.ToString());
             }
 
             // Rebuild every stat property from the restored payload so it survives later SyncData calls.

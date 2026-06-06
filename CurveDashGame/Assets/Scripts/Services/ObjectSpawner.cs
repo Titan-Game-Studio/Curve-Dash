@@ -142,7 +142,9 @@ namespace STG.CurveDash
             combat.CurrentWeapon = null;
             combat.CooldownTimer = 0f;
 
-            // 1. Trang bị Vũ khí Khởi đầu & Kỹ năng Active
+            // Hand the starter kit to a player who has no weapon. The routine itself confirms (after
+            // Devion finishes loading) that no weapon exists in Equipment or the bag before granting,
+            // so it never overwrites looted gear and self-heals if the player ends up weaponless.
             if (assetCatalog != null && assetCatalog.MasterItemCatalog != null)
             {
                 var weapons = assetCatalog.MasterItemCatalog.Items.OfType<WeaponData>().ToList();
@@ -150,32 +152,10 @@ namespace STG.CurveDash
                 {
                     var normalWeapons = weapons.Where(w => w.Rarity == ItemRarity.Normal).ToList();
                     var starterWeapon = normalWeapons.Count > 0 ? normalWeapons[UnityEngine.Random.Range(0, normalWeapons.Count)] : weapons[0];
-                    var instance = new WeaponInstance(starterWeapon, starterWeapon.Rarity);
-                    
-                    // Tìm một kỹ năng Active để gắn vào vũ khí
-                    var loadedAbilities = Resources.LoadAll<AbilityData>("");
-                    PoEAbility starterActive = null;
-                    foreach (var ab in loadedAbilities)
-                    {
-                        if (ab is PoEAbility active)
-                        {
-                            starterActive = active;
-                            break;
-                        }
-                    }
-                    if (starterActive != null)
-                    {
-                        instance.DynamicAbilities.Add(starterActive);
-                    }
-
-                    // Do not auto-equip weapon at start
-                    combat.CurrentWeapon = null;
 
                     var playerView = gameObject.GetComponent<PlayerView>();
                     if (playerView != null)
-                    {
-                        playerView.StartCoroutine(GiveStarterEquipmentRoutine(starterWeapon, starterActive));
-                    }
+                        playerView.StartCoroutine(GiveStarterEquipmentRoutine(starterWeapon));
                 }
             }
 
@@ -183,300 +163,141 @@ namespace STG.CurveDash
             return entity;
         }
 
-        private System.Collections.IEnumerator GiveStarterEquipmentRoutine(WeaponData starterWeapon, PoEAbility starterActive)
+        // True if the player already has a weapon (equipped OR in the bag). The starter kit is only
+        // granted when there is none, so a weaponless player always gets something to fight with —
+        // while any looted gear they already own (amulets, armor, boots, etc.) is left untouched.
+        private static bool HasAnyWeapon()
         {
-            UnityEngine.Debug.Log("<color=orange>[StarterEquipment] Step 1: Clearing old saved PlayerPrefs for Inventory/Equipment to start fresh.</color>");
-            UnityEngine.PlayerPrefs.DeleteKey("Inventory");
-            UnityEngine.PlayerPrefs.DeleteKey("Equipment");
-            UnityEngine.PlayerPrefs.DeleteKey("Actionbar");
-            UnityEngine.PlayerPrefs.Save();
+            return ContainerHasWeapon("Equipment") || ContainerHasWeapon("Inventory");
+        }
 
-            // Chờ đến khi Devion UI hoàn toàn tỉnh dậy và InventoryManager tải xong dữ liệu
-            while (DevionGames.InventorySystem.InventoryManager.current == null || !DevionGames.InventorySystem.InventoryManager.IsLoaded)
+        private static bool ContainerHasWeapon(string containerName)
+        {
+            foreach (var c in DevionGames.UIWidgets.WidgetUtility.FindAll<DevionGames.InventorySystem.ItemContainer>(containerName))
             {
+                if (c == null) continue;
+                foreach (var s in c.Slots)
+                {
+                    if (s == null || s.IsEmpty || s.ObservedItem == null) continue;
+                    if (s.ObservedItem is CurveDashEquipmentAdapter adapter && adapter.OriginalEquipmentData is WeaponData)
+                    {
+                        UnityEngine.Debug.Log($"<color=yellow>[StarterEquipment] Existing weapon '{s.ObservedItem.Name}' found in '{containerName}' — starter kit not needed.</color>");
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        // Hands out the one-time, first-run starter kit — exactly ONE weapon, a small Life flask, a
+        // Mana flask and one active skill gem — into the Inventory bag (not auto-equipped). NON-destructive:
+        // waits for Devion to finish loading, bails (just flagging) if a kit was already granted or any
+        // gear already exists, and calls InventoryManager.Save() right after so Devion's own load/save
+        // cycle can't overwrite the freshly granted items.
+        private System.Collections.IEnumerator GiveStarterEquipmentRoutine(WeaponData starterWeapon)
+        {
+            UnityEngine.Debug.Log($"<color=orange>[StarterEquipment] Routine started for weapon '{starterWeapon?.name ?? "null"}'. Waiting for Devion to load…</color>");
+
+            // Wait (capped) until Devion has woken up and finished loading. IsLoaded is set to
+            // !HasSavedData() on init, so when saved data exists it only flips true after a Load()
+            // fires onDataLoaded. In a single-scene boot no Load may ever fire, which would hang this
+            // routine forever — so we time out and proceed; HasAnySavedGear() below still guards gear.
+            const float timeout = 5f;
+            float t = 0f;
+            while ((DevionGames.InventorySystem.InventoryManager.current == null
+                    || !DevionGames.InventorySystem.InventoryManager.IsLoaded)
+                   && t < timeout)
+            {
+                t += Time.unscaledDeltaTime;
                 yield return null;
             }
 
-            // Chờ đến khi các UI Container đăng ký vào WidgetUtility
-            while (DevionGames.UIWidgets.WidgetUtility.FindAll<DevionGames.InventorySystem.ItemContainer>("Equipment").Length == 0 ||
-                   DevionGames.UIWidgets.WidgetUtility.FindAll<DevionGames.InventorySystem.ItemContainer>("Inventory").Length == 0)
+            t = 0f;
+            while ((DevionGames.UIWidgets.WidgetUtility.FindAll<DevionGames.InventorySystem.ItemContainer>("Equipment").Length == 0 ||
+                    DevionGames.UIWidgets.WidgetUtility.FindAll<DevionGames.InventorySystem.ItemContainer>("Inventory").Length == 0)
+                   && t < timeout)
             {
+                t += Time.unscaledDeltaTime;
                 yield return null;
             }
 
-            UnityEngine.Debug.Log("<color=orange>[StarterEquipment] Step 2: Devion UI Containers are fully loaded! Wiping runtime container slots.</color>");
-            DevionGames.InventorySystem.ItemContainer.RemoveItems("Equipment");
-            DevionGames.InventorySystem.ItemContainer.RemoveItems("Inventory");
-            DevionGames.InventorySystem.ItemContainer.RemoveItems("Actionbar");
+            // Let any in-flight Devion load / scene-change settle before we touch the containers,
+            // otherwise its load can land AFTER our additions and wipe them.
+            yield return new UnityEngine.WaitForSecondsRealtime(0.35f);
 
-            yield return new UnityEngine.WaitForSeconds(0.2f); // Chờ 0.2s đảm bảo giao diện đã dọn dẹp sạch sẽ
+            UnityEngine.Debug.Log($"<color=orange>[StarterEquipment] After wait: IsLoaded={DevionGames.InventorySystem.InventoryManager.IsLoaded}, HasAnyWeapon={HasAnyWeapon()}, Database={(DevionGames.InventorySystem.InventoryManager.Database != null)}</color>");
 
-            UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Step 3: Giving starter item '{starterWeapon.name}' into Inventory bag!</color>");
-            if (DevionGames.InventorySystem.InventoryManager.Database != null)
+            // Grant only when the player has no weapon at all — leaves any looted gear untouched.
+            if (HasAnyWeapon())
             {
-                // Thêm vũ khí vào Inventory
-                var devionAdapter = starterWeapon.DevionAdapter;
-                if (devionAdapter == null)
-                {
-                    string targetName = starterWeapon.name + "_Adapter";
-                    foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
-                    {
-                        if (dbItem != null && dbItem.name == targetName)
-                        {
-                            devionAdapter = dbItem;
-                            starterWeapon.DevionAdapter = dbItem;
-                            break;
-                        }
-                    }
-                }
-
-                if (devionAdapter != null)
-                {
-                    var devionInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(devionAdapter);
-                    if (devionInstance != null)
-                    {
-                        bool added = DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", devionInstance);
-                        UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Starter weapon added to Inventory result: {added}</color>");
-                    }
-                }
-
-                // Nếu vũ khí khởi đầu là cung (Bow) -> Tự động thêm Tên (Arrow) vào túi đồ
-                if (starterWeapon is BowData)
-                {
-                    var arrows = GetAllItemsOfType<OffHandData>().Where(o => o.SubType == OffHandType.Arrow).ToList();
-                    if (arrows.Count > 0)
-                    {
-                        var starterArrow = arrows[UnityEngine.Random.Range(0, arrows.Count)];
-                        HelperAddStarterItemToInventory(starterArrow);
-                    }
-                }
-                // Nếu vũ khí khởi đầu là kiếm 1 tay (One-Handed Sword) -> Tự động thêm Khiên (Shield) vào túi đồ
-                else if (starterWeapon is OneHandedWeaponData)
-                {
-                    var shields = GetAllItemsOfType<OffHandData>().Where(o => o.SubType == OffHandType.Shield).ToList();
-                    if (shields.Count > 0)
-                    {
-                        var starterShield = shields[UnityEngine.Random.Range(0, shields.Count)];
-                        HelperAddStarterItemToInventory(starterShield);
-                    }
-                }
-
-                // Thêm bộ full các item giáp (Head, Body, Hands, Feet) vào bộ trang bị khởi đầu
-                var allArmors = assetCatalog.MasterItemCatalog.Items.OfType<ArmorItemData>().ToList();
-                if (allArmors.Count > 0)
-                {
-                    var slotsToEquip = new List<EquipmentSlot> { EquipmentSlot.Head, EquipmentSlot.Body, EquipmentSlot.Hands, EquipmentSlot.Feet };
-                    foreach (var slotType in slotsToEquip)
-                    {
-                        var candidateArmors = allArmors.Where(a => a.Slot == slotType).ToList();
-                        if (candidateArmors.Count > 0)
-                        {
-                            // Ưu tiên giáp Normal hoặc chọn ngẫu nhiên
-                            var normalArmors = candidateArmors.Where(a => a.Rarity == ItemRarity.Normal).ToList();
-                            var starterArmor = normalArmors.Count > 0 
-                                ? normalArmors[UnityEngine.Random.Range(0, normalArmors.Count)] 
-                                : candidateArmors[UnityEngine.Random.Range(0, candidateArmors.Count)];
-                            
-                            var armorAdapter = starterArmor.DevionAdapter;
-                            if (armorAdapter == null)
-                            {
-                                string targetName = starterArmor.name + "_Adapter";
-                                foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
-                                {
-                                    if (dbItem != null && dbItem.name == targetName)
-                                    {
-                                        armorAdapter = dbItem;
-                                        starterArmor.DevionAdapter = dbItem;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if (armorAdapter != null)
-                            {
-                                var armorInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(armorAdapter);
-                                if (armorInstance != null)
-                                {
-                                    // Cưỡng bức đồng bộ dữ liệu runtime để tên, icon, và prefab được cập nhật chuẩn xác
-                                    if (armorInstance is CurveDashEquipmentAdapter equipAdapter)
-                                    {
-                                        equipAdapter.SyncData();
-                                    }
-                                    
-                                    // Thêm trực tiếp vào Inventory theo yêu cầu (không tự động mặc sẵn)
-                                    bool added = DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", armorInstance);
-                                    UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Added starter armor '{starterArmor.name}' to Inventory bag. Result: {added}</color>");
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Thêm Belt khởi đầu (Normal rarity ưu tiên)
-                var allBelts = GetAllItemsOfType<BeltItemData>();
-                if (allBelts.Count > 0)
-                {
-                    var normalBelts = allBelts.Where(b => b.Rarity == ItemRarity.Normal).ToList();
-                    var starterBelt = normalBelts.Count > 0 ? normalBelts[0] : allBelts[0];
-                    HelperAddStarterItemToInventory(starterBelt);
-                    UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Added starter Belt '{starterBelt.name}' to Inventory.</color>");
-                }
-
-                // Thêm Amulet khởi đầu (Normal rarity ưu tiên)
-                var allAmulets = GetAllItemsOfType<AmuletItemData>();
-                if (allAmulets.Count > 0)
-                {
-                    var normalAmulets = allAmulets.Where(a => a.Rarity == ItemRarity.Normal).ToList();
-                    var starterAmulet = normalAmulets.Count > 0 ? normalAmulets[0] : allAmulets[0];
-                    HelperAddStarterItemToInventory(starterAmulet);
-                    UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Added starter Amulet '{starterAmulet.name}' to Inventory.</color>");
-                }
-
-                // Thêm Ring1 và Ring2 khởi đầu
-                var allRings = GetAllItemsOfType<RingItemData>();
-                foreach (var ringSlot in new[] { EquipmentSlot.Ring1, EquipmentSlot.Ring2 })
-                {
-                    var slotRings = allRings.Where(r => r.Slot == ringSlot).ToList();
-                    if (slotRings.Count > 0)
-                    {
-                        var normalRings = slotRings.Where(r => r.Rarity == ItemRarity.Normal).ToList();
-                        var starterRing = normalRings.Count > 0 ? normalRings[0] : slotRings[0];
-                        HelperAddStarterItemToInventory(starterRing);
-                        UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Added starter Ring '{starterRing.name}' ({ringSlot}) to Inventory.</color>");
-                    }
-                }
-
-                // Thêm 3 Flask khởi đầu: 1 Life + 1 Utility (nếu có) + fallback
-                var allFlasks = GetAllItemsOfType<FlaskItemData>();
-                if (allFlasks.Count > 0)
-                {
-                    var starterFlasks = new System.Collections.Generic.List<FlaskItemData>();
-                    var lifeFlask    = allFlasks.FirstOrDefault(f => f.FlaskType == FlaskType.Life);
-                    var utilityFlask = allFlasks.FirstOrDefault(f => f.FlaskType == FlaskType.Utility);
-                    var manaFlask    = allFlasks.FirstOrDefault(f => f.FlaskType == FlaskType.Mana);
-                    if (lifeFlask    != null) starterFlasks.Add(lifeFlask);
-                    if (utilityFlask != null) starterFlasks.Add(utilityFlask);
-                    if (manaFlask    != null && starterFlasks.Count < 3) starterFlasks.Add(manaFlask);
-                    // Điền đủ 3 nếu chưa đủ
-                    foreach (var f in allFlasks)
-                    {
-                        if (starterFlasks.Count >= 3) break;
-                        if (!starterFlasks.Contains(f)) starterFlasks.Add(f);
-                    }
-                    foreach (var flask in starterFlasks)
-                    {
-                        HelperAddStarterItemToInventory(flask);
-                        UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Added starter Flask '{flask.name}' to Inventory.</color>");
-                    }
-                }
-
-                // Thêm kỹ năng Active vào Actionbar
-                if (starterActive != null)
-                {
-                    foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
-                    {
-                        if (dbItem != null && (dbItem.name.Contains("Cleave") || dbItem.name.Contains(starterActive.AbilityName)))
-                        {
-                            var skillInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(dbItem);
-                            if (skillInstance != null)
-                            {
-                                DevionGames.InventorySystem.ItemContainer.AddItem("Actionbar", skillInstance);
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                // 2. Thêm 1 active gem và 1 support gem phù hợp vào Inventory khởi đầu
-                var allGems = GetAllItemsOfType<GemItemData>();
-                if (allGems != null && allGems.Count > 0)
-                {
-                    GemItemData starterActiveGem = null;
-                    GemItemData starterSupportGem = null;
-                    bool isRanged = (starterWeapon is BowData);
-
-                    var skillGems = allGems.Where(g => g.GemType == GemType.Skill).ToList();
-                    var supportGems = allGems.Where(g => g.GemType == GemType.Support).ToList();
-
-                    if (skillGems.Count > 0)
-                    {
-                        var matchedActiveGems = skillGems.Where(g => {
-                            if (g.EmbeddedAbility is PoEAbility poeAb)
-                            {
-                                if (isRanged) return poeAb.SkillType == PoEAbilityType.Ranged || poeAb.SkillType == PoEAbilityType.Spell;
-                                else return poeAb.SkillType == PoEAbilityType.Melee || poeAb.SkillType == PoEAbilityType.Spell;
-                            }
-                            return true;
-                        }).ToList();
-
-                        if (matchedActiveGems.Count > 0)
-                            starterActiveGem = matchedActiveGems[UnityEngine.Random.Range(0, matchedActiveGems.Count)];
-                        else
-                            starterActiveGem = skillGems[UnityEngine.Random.Range(0, skillGems.Count)];
-                    }
-
-                    if (supportGems.Count > 0)
-                    {
-                        starterSupportGem = supportGems[UnityEngine.Random.Range(0, supportGems.Count)];
-                    }
-
-                    if (starterActiveGem != null)
-                    {
-                        var gemAdapter = starterActiveGem.DevionAdapter;
-                        if (gemAdapter == null)
-                        {
-                            string targetName = starterActiveGem.name + "_Adapter";
-                            foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
-                            {
-                                if (dbItem != null && dbItem.name == targetName)
-                                {
-                                    gemAdapter = dbItem;
-                                    starterActiveGem.DevionAdapter = dbItem;
-                                    break;
-                                }
-                            }
-                        }
-                        if (gemAdapter != null)
-                        {
-                            var devionInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(gemAdapter);
-                            if (devionInstance != null)
-                            {
-                                DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", devionInstance);
-                                UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Active gem '{starterActiveGem.name}' added to Inventory!</color>");
-                            }
-                        }
-                    }
-
-                    if (starterSupportGem != null)
-                    {
-                        var gemAdapter = starterSupportGem.DevionAdapter;
-                        if (gemAdapter == null)
-                        {
-                            string targetName = starterSupportGem.name + "_Adapter";
-                            foreach (var dbItem in DevionGames.InventorySystem.InventoryManager.Database.items)
-                            {
-                                if (dbItem != null && dbItem.name == targetName)
-                                {
-                                    gemAdapter = dbItem;
-                                    starterSupportGem.DevionAdapter = dbItem;
-                                    break;
-                                }
-                            }
-                        }
-                        if (gemAdapter != null)
-                        {
-                            var devionInstance = DevionGames.InventorySystem.InventoryManager.CreateInstance(gemAdapter);
-                            if (devionInstance != null)
-                            {
-                                DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", devionInstance);
-                                UnityEngine.Debug.Log($"<color=lime>[StarterEquipment] Support gem '{starterSupportGem.name}' added to Inventory!</color>");
-                            }
-                        }
-                    }
-                }
+                UnityEngine.Debug.Log("<color=orange>[StarterEquipment] Player already has a weapon — starter kit skipped.</color>");
+                yield break;
             }
 
-            UnityEngine.Debug.Log("<color=green>[StarterEquipment] All starter items successfully populated! Ready for gameplay.</color>");
+            if (starterWeapon == null || DevionGames.InventorySystem.InventoryManager.Database == null)
+            {
+                UnityEngine.Debug.LogWarning("<color=red>[StarterEquipment] Aborted: starterWeapon or Devion Database is null.</color>");
+                yield break;
+            }
+
+            UnityEngine.Debug.Log("<color=lime>[StarterEquipment] First run — granting minimal starter kit (1 weapon + Life/Mana flask + 1 active gem).</color>");
+
+            // 1 weapon.
+            HelperAddStarterItemToInventory(starterWeapon);
+
+            // 1 small Life flask + 1 Mana flask.
+            var allFlasks = GetAllItemsOfType<FlaskItemData>();
+            var lifeFlask = PickSmallestFlask(allFlasks, FlaskType.Life);
+            var manaFlask = PickSmallestFlask(allFlasks, FlaskType.Mana);
+            if (lifeFlask != null) HelperAddStarterItemToInventory(lifeFlask);
+            if (manaFlask != null) HelperAddStarterItemToInventory(manaFlask);
+
+            // 1 active skill gem, matched to the weapon's combat style when possible.
+            var activeGem = PickStarterActiveGem(starterWeapon);
+            if (activeGem != null) HelperAddStarterItemToInventory(activeGem);
+
+            // Persist immediately so Devion's autosave/load cycle can't overwrite the granted items.
+            DevionGames.InventorySystem.InventoryManager.Save();
+
+            UnityEngine.Debug.Log("<color=green>[StarterEquipment] Minimal starter kit granted and saved.</color>");
+        }
+
+        // Picks the smallest/lowest-tier flask of a type, preferring names hinting at a minor tier.
+        private FlaskItemData PickSmallestFlask(List<FlaskItemData> flasks, FlaskType type)
+        {
+            if (flasks == null) return null;
+            var ofType = flasks.Where(f => f != null && f.FlaskType == type).ToList();
+            if (ofType.Count == 0) return null;
+
+            string[] smallHints = { "small", "minor", "lesser", "tiny" };
+            foreach (var hint in smallHints)
+            {
+                var match = ofType.FirstOrDefault(f =>
+                    f.name.ToLower().Contains(hint) ||
+                    (f.ItemName != null && f.ItemName.ToLower().Contains(hint)));
+                if (match != null) return match;
+            }
+            return ofType[0];
+        }
+
+        // Picks one active (Skill) gem, preferring one whose embedded ability matches the weapon's range.
+        private GemItemData PickStarterActiveGem(WeaponData weapon)
+        {
+            var skillGems = GetAllItemsOfType<GemItemData>().Where(g => g != null && g.GemType == GemType.Skill).ToList();
+            if (skillGems.Count == 0) return null;
+
+            bool isRanged = (weapon is BowData);
+            var matched = skillGems.Where(g =>
+            {
+                if (g.EmbeddedAbility is PoEAbility poeAb)
+                    return isRanged
+                        ? (poeAb.SkillType == PoEAbilityType.Ranged || poeAb.SkillType == PoEAbilityType.Spell)
+                        : (poeAb.SkillType == PoEAbilityType.Melee  || poeAb.SkillType == PoEAbilityType.Spell);
+                return true;
+            }).ToList();
+
+            var pool = matched.Count > 0 ? matched : skillGems;
+            return pool[UnityEngine.Random.Range(0, pool.Count)];
         }
 
         public int SpawnStartPlatform(Color color)

@@ -18,6 +18,7 @@ namespace STG.CurveDash
 
         private readonly EcsFilter playerFilter;
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
+        private readonly GameStateService gameState;
 
         // Remaining effect time per currently-equipped aura. <= 0 means "recast this frame".
         private readonly Dictionary<PoEAbility, float> _remaining = new Dictionary<PoEAbility, float>();
@@ -26,9 +27,10 @@ namespace STG.CurveDash
         private readonly List<PoEAbility> _activeAuras = new List<PoEAbility>();
         private readonly List<PoEAbility> _staleAuras = new List<PoEAbility>();
 
-        public AuraSystem(EcsWorld world)
+        public AuraSystem(EcsWorld world, GameStateService gameState)
         {
             this.world = world;
+            this.gameState = gameState;
 
             playerFilter = world.Filter<PlayerComponent>().Inc<PlayerCombatComponent>().Inc<ViewLinkComponent>().End();
             viewLinkPool = world.GetPool<ViewLinkComponent>();
@@ -36,6 +38,9 @@ namespace STG.CurveDash
 
         public void Tick()
         {
+            // Auras are gameplay self-buffs — don't cast their VFX while the world is frozen.
+            if (!gameState.IsPlaying) return;
+
             float dt = Time.deltaTime;
 
             foreach (var playerEntity in playerFilter)

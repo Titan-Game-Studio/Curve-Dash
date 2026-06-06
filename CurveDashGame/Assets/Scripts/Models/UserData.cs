@@ -9,6 +9,10 @@ namespace STG.CurveDash
         public int TotalCoins = 0;
         public string CurrentCharacterId = "Knight_Default";
 
+        // Persistent character progression — carries level/XP across runs and deaths (RPG-style).
+        public int CharacterLevel = 1;
+        public int CharacterExp = 0;
+
         
         // Cấu trúc Equipment mới (PoE Style)
         // Key là EquipmentSlot, Value là ID của ScriptableObject (hoặc index)

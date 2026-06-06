@@ -17,6 +17,7 @@ namespace STG.CurveDash
         private readonly GameSettings gameSettings;
         private readonly MonsterCatalog monsterCatalog;
         private readonly AreaLevelService areaLevelService;
+        private readonly GameStateService gameState;
 
         private Vector3 lastSpawnPos;
         private readonly Queue<int> liveBlocksEntities = new Queue<int>();
@@ -32,7 +33,7 @@ namespace STG.CurveDash
 
         public BlockSystem(EcsWorld world, ObjectSpawner spawner,
             GameplayStrategiesProvider gameplayStrategies, GameSettings gameSettings, MonsterCatalog monsterCatalog,
-            AreaLevelService areaLevelService)
+            AreaLevelService areaLevelService, GameStateService gameState)
         {
             this.world = world;
             this.spawner = spawner;
@@ -40,6 +41,7 @@ namespace STG.CurveDash
             this.gameSettings = gameSettings;
             this.monsterCatalog = monsterCatalog;
             this.areaLevelService = areaLevelService;
+            this.gameState = gameState;
 
 
             blockPool = world.GetPool<BlockComponent>();
@@ -139,7 +141,7 @@ namespace STG.CurveDash
             {
                 SpawnObstacle(block);
             }
-            else if (Random.value < 0.15f) // 15% chance to spawn a monster on any block that doesn't have other items
+            else if (gameState.IsPlaying && Random.value < 0.15f) // 15% chance to spawn a monster — only once the game is actually being played
             {
                 SpawnMonster(block);
             }

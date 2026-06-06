@@ -72,6 +72,11 @@ namespace STG.CurveDash
                         break;
                 }
 
+                // Persist the new socket layout onto the equipped items' adapters (+ save) so gems
+                // survive equipment swaps and game restarts.
+                if (result.Success)
+                    GetPlayerView()?.PersistSocketedGems();
+
                 // Gem lives in Inventory, not Equipment — remove from the correct container
                 if (result.Success && _inventoryContainer != null)
                 {
@@ -83,47 +88,15 @@ namespace STG.CurveDash
                 if (result.ResultType == GemSocketResultType.Replaced && result.ReplacedAbility != null)
                     ReturnGemToInventory(result.ReplacedAbility);
 
-                // Active skill gems: sync the Actionbar to reflect newly socketed abilities
-                if (result.Success && gemData.GemType == GemType.Skill && gemData.EmbeddedAbility != null)
-                {
-                    if (result.ResultType == GemSocketResultType.Replaced && result.ReplacedAbility != null)
-                        RemoveAbilityFromActionbar(result.ReplacedAbility);
-
-                    AddAbilityToActionbar(gemData.EmbeddedAbility);
-                }
+                // Rebuild the Actionbar from the live sockets so it reflects the new layout (handles
+                // socket, replace, and the displaced-gem case in one pass).
+                if (result.Success)
+                    GetPlayerView()?.SyncActionbarToSockets();
             }
             else
             {
                 Debug.LogWarning($"[GemUseHandler] Item '{item.name}' is not a GemItemData – ignored.");
             }
-        }
-
-        private void AddAbilityToActionbar(AbilityData ability)
-        {
-            if (ability == null) return;
-            var db = InventoryManager.Database;
-            if (db == null) return;
-
-            foreach (var dbItem in db.items)
-            {
-                if (dbItem == null) continue;
-                if (dbItem.Name.IndexOf(ability.AbilityName, System.StringComparison.OrdinalIgnoreCase) >= 0
-                    || dbItem.name.IndexOf(ability.AbilityName, System.StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    var instance = InventoryManager.CreateInstance(dbItem);
-                    if (instance != null)
-                    {
-                        // Show the skill's own icon, not the gem or database default icon
-                        if (ability.Icon != null)
-                            instance.Icon = ability.Icon;
-
-                        ItemContainer.AddItem("Actionbar", instance);
-                        Debug.Log($"<color=cyan>[GemUseHandler] Added '{ability.AbilityName}' to Actionbar (icon from AbilityData).</color>");
-                    }
-                    return;
-                }
-            }
-            Debug.LogWarning($"[GemUseHandler] No Devion skill found for ability '{ability.AbilityName}' — Actionbar not updated.");
         }
 
         private void ReturnGemToInventory(AbilityData replacedAbility)
@@ -177,24 +150,6 @@ namespace STG.CurveDash
             else
             {
                 Debug.LogWarning($"[GemUseHandler] No Devion adapter found for gem '{gem.name}' — gem may be lost.");
-            }
-        }
-
-        private void RemoveAbilityFromActionbar(AbilityData ability)
-        {
-            if (ability == null) return;
-            var actionbar = DevionGames.UIWidgets.WidgetUtility.Find<ItemContainer>("Actionbar");
-            if (actionbar == null) return;
-
-            foreach (var s in actionbar.Slots)
-            {
-                if (s.IsEmpty || s.ObservedItem == null) continue;
-                if (s.ObservedItem.Name.IndexOf(ability.AbilityName, System.StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    actionbar.RemoveItem(s.ObservedItem, 1);
-                    Debug.Log($"<color=cyan>[GemUseHandler] Removed '{ability.AbilityName}' from Actionbar (replaced by new gem).</color>");
-                    return;
-                }
             }
         }
     }

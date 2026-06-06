@@ -103417,7 +103417,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_StatsHandler: Player Stats
-  m_Stat: {fileID: 8638698396938483210, guid: bf775f72e1ae0e040bd94b251618cd04, type: 2}
+  m_Stat: {fileID: -2558327947788714437, guid: bf775f72e1ae0e040bd94b251618cd04, type: 2}
   m_FreePoints: {fileID: 0}
   m_StatName: {fileID: 0}
   m_StatBar: {fileID: 787139344}

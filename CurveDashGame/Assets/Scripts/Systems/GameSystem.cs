@@ -47,6 +47,9 @@ namespace STG.CurveDash
         private readonly EcsPool<GameStateComponent> gameStatePool;
         private readonly EcsPool<ViewLinkComponent> viewLinkPool;
 
+        // Enemies present in the scene — used to freeze/unfreeze their animators with the game state.
+        private readonly EcsFilter enemyFilter;
+
         [Inject] private IAdService adService;
         [Inject] private AssetManager assetManager;
 
@@ -85,6 +88,8 @@ namespace STG.CurveDash
             viewLinkPool = world.GetPool<ViewLinkComponent>();
 
             playerLevelUpFilter = world.Filter<PlayerLevelUpComponent>().End();
+
+            enemyFilter = world.Filter<EnemyComponent>().Inc<ViewLinkComponent>().End();
         }
 
         public bool HasGameState()
@@ -255,7 +260,11 @@ namespace STG.CurveDash
                 case GameState.GameOver:
                     gameStateComponent.GameOverTimer -= Time.deltaTime;
                     if (gameStateComponent.GameOverTimer <= 0)
+                    {
                         ChangeState(GameState.GameEnd);
+                        // Freeze the world on the results screen, mirroring the Title screen.
+                        SetWorldFrozen(true);
+                    }
                     break;
                 case GameState.GameEnd:
                 {
@@ -343,7 +352,11 @@ namespace STG.CurveDash
 
             blockSystem.CreateStartBlocks(GetPartsCountInBlock());
             spawner.SpawnPlayer(new Vector3(0, BallSpawnHeight, 0), GetBallSpeedForCurrentLevel());
-            
+
+            // Flush freshly-spawned transforms into the physics engine so SphereCast-based
+            // ground checks (e.g. the auto-run ChangeDirection on GameStart) work this same frame.
+            Physics.SyncTransforms();
+
             if (playerFilter.GetEntitiesCount() > 0)
             {
                 var ballEntity = playerFilter.GetRawEntities()[0];
@@ -351,6 +364,10 @@ namespace STG.CurveDash
                 var ballView = viewLink.Transform.GetComponent<PlayerView>();
                 if (ballView != null) ballView.SetRunning(false);
             }
+
+            // Scene is built but not yet playing → freeze the whole world (monsters stand still,
+            // animations paused) so the Title screen reads as "ready", not "already running".
+            SetWorldFrozen(true);
         }
 
         private void ChangeState(GameState state)
@@ -401,7 +418,10 @@ namespace STG.CurveDash
             audioPlayer.Play(audioSettings.GameStartSound);
             ChangeState(GameState.Playing);
             PlayBackgroundMusic();
-            
+
+            // World comes alive: resume monster/player animations frozen at Title.
+            SetWorldFrozen(false);
+
             if (playerFilter.GetEntitiesCount() > 0)
             {
                 var ballEntity = playerFilter.GetRawEntities()[0];
@@ -409,6 +429,11 @@ namespace STG.CurveDash
                 var ballView = viewLink.Transform.GetComponent<PlayerView>();
                 // Debug.Log($"[GameStart] Found player entity: {ballEntity}, ballView is {(ballView != null ? "valid" : "null")}");
                 if (ballView != null) ballView.SetRunning(true);
+
+                // Auto-run on the very first tap: kick the player into motion immediately
+                // (same direction the first in-game tap would pick) so a single tap both
+                // starts the game AND gets the player moving — no dead second tap.
+                ballSystem.ChangeDirection(ballEntity);
             }
             // else Debug.LogWarning("[GameStart] playerFilter is empty!");
         }
@@ -440,6 +465,36 @@ namespace STG.CurveDash
         private int GetPartsCountInBlock()
         {
             return 10;
+        }
+
+        /// <summary>
+        /// Freezes or resumes the visible world (player + every spawned monster) by toggling
+        /// their Animator speed. Combined with the GameStateService gate on the movement/combat
+        /// systems, this makes non-Playing states (Title, GameEnd) render as a still, "ready"
+        /// scene instead of looking like the game is already in progress.
+        /// </summary>
+        private void SetWorldFrozen(bool frozen)
+        {
+            float speed = frozen ? 0f : 1f;
+
+            foreach (var enemy in enemyFilter)
+            {
+                ref var link = ref viewLinkPool.Get(enemy);
+                ApplyAnimatorSpeed(link.Transform, speed);
+            }
+
+            foreach (var player in playerFilter)
+            {
+                ref var link = ref viewLinkPool.Get(player);
+                ApplyAnimatorSpeed(link.Transform, speed);
+            }
+        }
+
+        private static void ApplyAnimatorSpeed(Transform root, float speed)
+        {
+            if (root == null) return;
+            foreach (var animator in root.GetComponentsInChildren<Animator>(true))
+                animator.speed = speed;
         }
     }
 }

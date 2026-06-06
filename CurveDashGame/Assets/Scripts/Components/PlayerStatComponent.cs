@@ -3,9 +3,10 @@ namespace STG.CurveDash
     public struct PlayerStatComponent
     {
         // --- Core resources ---
-        public int Score;
+        public int Score;       // per-run score (resets each run; drives HighScore)
         public int HighScore;
-        public int Level;
+        public int Level;       // persistent character level (carries across runs)
+        public int Exp;         // persistent XP into the CURRENT level (0..ScoreForNextLevel)
         public int Gold;
         public float CurrentLife;
         public float MaxLife;

@@ -35,6 +35,18 @@ namespace STG.CurveDash
         private readonly Dictionary<int, GameObject> _cachedAuras = new Dictionary<int, GameObject>();
         private readonly Dictionary<string, GameObject> _cachedCharacters = new Dictionary<string, GameObject>();
 
+        // One runtime WeaponInstance per physical equipped item. Equipping/unequipping (or any
+        // equipment change that triggers a loadout rebuild) re-runs BuildWeaponInstance, which would
+        // otherwise create a brand-new instance and drop everything socketed at runtime. Caching by the
+        // item's Devion adapter keeps its socketed gems (DynamicAbilities) and rolled stats intact
+        // across swaps, so previously-linked gems are never lost.
+        private readonly Dictionary<CurveDashEquipmentAdapter, WeaponInstance> _weaponInstanceCache = new Dictionary<CurveDashEquipmentAdapter, WeaponInstance>();
+
+        // Auto-socketing "testing" skill/support gems into empty weapons was a dev convenience, but it
+        // fights the real gem flow: it re-seeds gems every equip and churns against the gems the player
+        // socketed / popped back to the bag. Gems are now fully player-driven, so keep this off.
+        private static readonly bool AutoSocketTestingGems = false;
+
         public WeaponInstance GetWeapon() { return CurrentWeaponInstance; }
 
         public List<AbilityData> GetArmorRuntimeSockets(EquipmentSlot slot) { return _armorRuntimeSockets.ContainsKey(slot) ? _armorRuntimeSockets[slot] : new List<AbilityData>(); }
@@ -217,6 +229,8 @@ namespace STG.CurveDash
             if (_equipmentContainer != null)
                 foreach (var s in _equipmentContainer.Slots) s.Repaint();
             SyncCharacterInfoStats();
+            // Keep the Actionbar in step with whatever active gems are now socketed (equip/unequip).
+            SyncActionbarToSockets();
         }
 
         private void RebuildEquippedItemsFromContainer()
@@ -242,6 +256,8 @@ namespace STG.CurveDash
                         if (_dataManager?.UserData?.EquippedItems != null)
                             _dataManager.UserData.EquippedItems[armor.Slot] = armor.name;
                         EnsureArmorSlotEntry(armor.Slot);
+                        // Restore gems socketed in a previous session (persisted on the adapter).
+                        RestoreArmorSockets(armor.Slot, adapter);
                         Debug.Log($"<color=cyan>[PlayerView] Rebuild: found armor '{armor.name}' defense={armor.Defense} in slot {i}</color>");
                     }
                     else if (adapter.OriginalEquipmentData is BeltItemData belt)
@@ -266,7 +282,8 @@ namespace STG.CurveDash
                     else if (adapter.OriginalEquipmentData is WeaponData weaponBase && CurrentWeaponInstance == null)
                     {
                         var instance = BuildWeaponInstance(adapter, weaponBase);
-                        ItemPickupSystem.AutoLinkTestingAbilities(instance, weaponBase, _assetManager?.MasterItemCatalog);
+                        if (AutoSocketTestingGems && instance.DynamicAbilities.Count == 0)
+                            ItemPickupSystem.AutoLinkTestingAbilities(instance, weaponBase, _assetManager?.MasterItemCatalog);
                         CurrentWeaponInstance = instance;
                         adapter.SyncAffixes(instance.Affixes);
                         Debug.Log($"<color=cyan>[PlayerView] Rebuild: found weapon '{weaponBase.name}' minDmg={instance.FinalMinDamage} maxDmg={instance.FinalMaxDamage} in slot {i}</color>");
@@ -294,6 +311,36 @@ namespace STG.CurveDash
 
             int armorCount = _dataManager?.UserData?.EquippedItems?.Count ?? 0;
             Debug.Log($"<color=cyan>[PlayerView] RebuildEquippedItemsFromContainer done: {armorCount} armor piece(s), weapon={CurrentWeaponInstance?.BaseData?.name ?? "none"}</color>");
+
+            // Make the restored armor/belt visible on the character now (if the model is already loaded).
+            // If the model loads later, OnVisualLoaded re-applies these from the same EquippedItems data.
+            ApplyEquippedArmorVisuals();
+
+            // After load, the Actionbar must reflect the gems restored onto the equipped items.
+            SyncActionbarToSockets();
+        }
+
+        // Re-applies the modular armor/belt meshes for whatever is in UserData.EquippedItems. Safe to call
+        // both after a save-rebuild and from OnVisualLoaded — SetPartByName is idempotent, and a null model
+        // simply no-ops until OnVisualLoaded runs. Weapons are handled by their own Equip() calls.
+        private void ApplyEquippedArmorVisuals()
+        {
+            if (_modularView == null) return;
+            if (_dataManager?.UserData?.EquippedItems == null || _assetManager == null) return;
+
+            foreach (var kvp in _dataManager.UserData.EquippedItems)
+            {
+                var item = _assetManager.GetItem(kvp.Value);
+                if (item is ArmorItemData armor)
+                {
+                    _modularView.SetPartByName(armor.Slot, armor.MeshPartName, armor.ModularPartIndex);
+                }
+                else if (item is BeltItemData belt)
+                {
+                    _modularView.SetPartByName(EquipmentSlot.Belt, belt.MeshPartName, belt.ModularPartIndex);
+                    _beltFlaskService.SetBelt(belt);
+                }
+            }
         }
 
 #if UNITY_EDITOR
@@ -302,7 +349,7 @@ namespace STG.CurveDash
         private System.Collections.IEnumerator ApplyDebugGemsDelayed()
         {
             yield return null;
-            if (CurrentWeaponInstance != null && CurrentWeaponInstance.DynamicAbilities.Count == 0)
+            if (AutoSocketTestingGems && CurrentWeaponInstance != null && CurrentWeaponInstance.DynamicAbilities.Count == 0)
             {
                 var catalog = _assetManager?.MasterItemCatalog;
                 ItemPickupSystem.AutoLinkTestingAbilities(CurrentWeaponInstance, CurrentWeaponInstance.BaseData, catalog);
@@ -499,6 +546,9 @@ namespace STG.CurveDash
                             _dataManager.UserData.EquippedItems[armor.Slot] = armor.name;
                         }
                         EnsureArmorSlotEntry(armor.Slot);
+                        // Restore this piece's previously-socketed gems (persisted on the adapter)
+                        // so swapping armor in and out keeps its gems.
+                        RestoreArmorSockets(armor.Slot, adapter);
                         if (_modularView != null)
                         {
                             _modularView.SetPartByName(armor.Slot, armor.MeshPartName, armor.ModularPartIndex);
@@ -534,7 +584,8 @@ namespace STG.CurveDash
                         if (equippable is WeaponData weaponBase)
                         {
                             var instance = BuildWeaponInstance(adapter, weaponBase);
-                            ItemPickupSystem.AutoLinkTestingAbilities(instance, weaponBase, _assetManager?.MasterItemCatalog);
+                            if (AutoSocketTestingGems && instance.DynamicAbilities.Count == 0)
+                                ItemPickupSystem.AutoLinkTestingAbilities(instance, weaponBase, _assetManager?.MasterItemCatalog);
                             this.CurrentWeaponInstance = instance;
 
                             // Update adapter properties so Devion item UI reflects affix values.
@@ -621,7 +672,12 @@ namespace STG.CurveDash
                         {
                             _dataManager.UserData.EquippedItems.Remove(armor.Slot);
                         }
+                        // Pop this piece's socketed gems back to the bag, then clear its sockets so they
+                        // aren't restored again on re-equip.
+                        if (_armorRuntimeSockets.TryGetValue(armor.Slot, out var armorGems))
+                            ReturnSocketedGemsToInventory(armorGems);
                         _armorRuntimeSockets.Remove(armor.Slot);
+                        adapter.SocketedGemAbilityNames?.Clear();
                         if (_modularView != null)
                         {
                             _modularView.SetPart(armor.Slot, -1);
@@ -650,6 +706,15 @@ namespace STG.CurveDash
                     {
                         if (equippable is WeaponData)
                         {
+                            // Pop the removed weapon's socketed gems back to the bag, then drop its
+                            // cached instance + persisted sockets so nothing is restored on re-equip.
+                            if (_weaponInstanceCache.TryGetValue(adapter, out var removedInstance) && removedInstance != null)
+                                ReturnSocketedGemsToInventory(removedInstance.DynamicAbilities);
+                            else if (CurrentWeaponInstance != null)
+                                ReturnSocketedGemsToInventory(CurrentWeaponInstance.DynamicAbilities);
+                            _weaponInstanceCache.Remove(adapter);
+                            adapter.SocketedGemAbilityNames?.Clear();
+
                             this.CurrentWeaponInstance = null;
                             if (_dataManager?.UserData?.EquippedItems != null)
                             {
@@ -756,6 +821,10 @@ namespace STG.CurveDash
             // Mana regeneration: 5 mana/sec
             if (_playerStatService != null)
                 _playerStatService.AddMana(5f * Time.deltaTime);
+
+            // Energy Shield recharge (PoE-style: refills after a no-damage delay)
+            if (_playerStatService != null)
+                _playerStatService.TickShieldRecharge(Time.deltaTime);
 
             // Flask auto-use tick (belt-linked and equipment-slot flasks)
             if (_beltFlaskService.HasAnyFlask && _playerStatService != null)
@@ -866,9 +935,211 @@ namespace STG.CurveDash
         /// </summary>
         private WeaponInstance BuildWeaponInstance(CurveDashEquipmentAdapter adapter, WeaponData weaponBase)
         {
-            if (adapter != null && adapter.HasRolledAffixes)
-                return WeaponInstance.FromRolled(weaponBase, adapter.RolledRarity, adapter.RolledItemLevel, adapter.RolledAffixes);
-            return new WeaponInstance(weaponBase, weaponBase.Rarity);
+            // Reuse the cached instance for this exact item so its runtime state — socketed gems
+            // (DynamicAbilities) and rolled damage — survives equipment swaps. Without this, swapping
+            // any gear rebuilds the weapon from scratch and previously-linked gems disappear.
+            if (adapter != null
+                && _weaponInstanceCache.TryGetValue(adapter, out var cached)
+                && cached != null
+                && cached.BaseData == weaponBase)
+            {
+                return cached;
+            }
+
+            WeaponInstance instance = (adapter != null && adapter.HasRolledAffixes)
+                ? WeaponInstance.FromRolled(weaponBase, adapter.RolledRarity, adapter.RolledItemLevel, adapter.RolledAffixes)
+                : new WeaponInstance(weaponBase, weaponBase.Rarity);
+
+            // Restore gems socketed in a previous session (persisted on the adapter). Leaving the list
+            // empty when there are none lets the caller auto-seed testing gems for a brand-new weapon.
+            if (adapter != null && adapter.SocketedGemAbilityNames != null && adapter.SocketedGemAbilityNames.Count > 0)
+            {
+                instance.DynamicAbilities.Clear();
+                foreach (var gemName in adapter.SocketedGemAbilityNames)
+                {
+                    var ability = ResolveAbilityByName(gemName);
+                    if (ability != null) instance.DynamicAbilities.Add(ability);
+                }
+            }
+
+            if (adapter != null)
+                _weaponInstanceCache[adapter] = instance;
+
+            return instance;
+        }
+
+        // Rebuilds an armor slot's runtime sockets from the gems persisted on its adapter, so a piece
+        // keeps its gems when re-equipped (and across save/load).
+        private void RestoreArmorSockets(EquipmentSlot slot, CurveDashEquipmentAdapter adapter)
+        {
+            var list = new List<AbilityData>();
+            if (adapter != null && adapter.SocketedGemAbilityNames != null)
+            {
+                foreach (var gemName in adapter.SocketedGemAbilityNames)
+                {
+                    var ability = ResolveAbilityByName(gemName);
+                    if (ability != null) list.Add(ability);
+                }
+            }
+            _armorRuntimeSockets[slot] = list;
+        }
+
+        /// <summary>
+        /// Writes the current runtime sockets (weapon DynamicAbilities + each armor slot) back onto
+        /// their Devion adapters and triggers a save, so socketed gems survive equipment swaps and
+        /// game restarts. Called by GemUseHandler after a gem is successfully socketed.
+        /// </summary>
+        public void PersistSocketedGems()
+        {
+            if (_equipmentContainer == null) return;
+
+            foreach (var s in _equipmentContainer.Slots)
+            {
+                if (s == null || s.IsEmpty || s.ObservedItem == null) continue;
+                if (!(s.ObservedItem is CurveDashEquipmentAdapter adapter) || adapter.OriginalEquipmentData == null) continue;
+
+                if (adapter.OriginalEquipmentData is WeaponData weaponBase)
+                {
+                    // Only the main weapon owns the runtime WeaponInstance; skip an off-hand dual-wield sword.
+                    if (CurrentWeaponInstance != null && CurrentWeaponInstance.BaseData == weaponBase)
+                        adapter.SocketedGemAbilityNames = AbilityNames(CurrentWeaponInstance.DynamicAbilities);
+                }
+                else if (adapter.OriginalEquipmentData is ArmorItemData armor)
+                {
+                    adapter.SocketedGemAbilityNames = _armorRuntimeSockets.TryGetValue(armor.Slot, out var list)
+                        ? AbilityNames(list)
+                        : new List<string>();
+                }
+            }
+
+            DevionGames.InventorySystem.InventoryManager.Save();
+        }
+
+        /// <summary>
+        /// Pops socketed gems back into the Inventory bag (PoE-style) so unequipping or swapping an item
+        /// never destroys its gems. Each socketed AbilityData is mapped back to its GemItemData and a
+        /// fresh Devion instance is added to the "Inventory" container. Non-gem abilities (e.g. a base
+        /// weapon skill that isn't backed by a gem item) are skipped.
+        /// </summary>
+        private void ReturnSocketedGemsToInventory(System.Collections.Generic.IEnumerable<AbilityData> abilities)
+        {
+            if (abilities == null) return;
+            var catalog = _assetManager?.MasterItemCatalog;
+            if (catalog == null || catalog.Items == null) return;
+
+            var db = DevionGames.InventorySystem.InventoryManager.Database;
+
+            foreach (var ability in abilities)
+            {
+                if (ability == null) continue;
+
+                // Map the socketed ability back to the gem item that carries it.
+                GemItemData gem = null;
+                foreach (var item in catalog.Items)
+                    if (item is GemItemData g && g.EmbeddedAbility == ability) { gem = g; break; }
+                if (gem == null) continue; // not a socketable gem → nothing to return
+
+                var adapter = gem.DevionAdapter;
+                if (adapter == null && db != null)
+                {
+                    string targetName = gem.name + "_Adapter";
+                    foreach (var dbItem in db.items)
+                        if (dbItem != null && dbItem.name == targetName) { adapter = dbItem; gem.DevionAdapter = dbItem; break; }
+                }
+                if (adapter == null) continue;
+
+                var instance = DevionGames.InventorySystem.InventoryManager.CreateInstance(adapter);
+                if (instance != null)
+                {
+                    DevionGames.InventorySystem.ItemContainer.AddItem("Inventory", instance);
+                    Debug.Log($"<color=cyan>[Gems] Returned gem '{gem.name}' to Inventory after unequip.</color>");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Rebuilds the Actionbar so it shows exactly the active (Skill) gems currently socketed across
+        /// the equipped weapon and armor. Called on every socket change — socket, unequip (gems popped
+        /// back to the bag) and after load — so the Actionbar never drifts out of sync with the sockets.
+        /// </summary>
+        public void SyncActionbarToSockets()
+        {
+            var actionbar = DevionGames.UIWidgets.WidgetUtility.Find<DevionGames.InventorySystem.ItemContainer>("Actionbar");
+            if (actionbar == null) return;
+
+            var db = DevionGames.InventorySystem.InventoryManager.Database;
+            if (db == null) return;
+
+            // Clear, then re-add one Actionbar entry per socketed active (non-Aura) skill.
+            DevionGames.InventorySystem.ItemContainer.RemoveItems("Actionbar");
+
+            var actives = new List<AbilityData>();
+            if (CurrentWeaponInstance != null) CollectActiveSkills(CurrentWeaponInstance.DynamicAbilities, actives);
+            foreach (var kvp in _armorRuntimeSockets) CollectActiveSkills(kvp.Value, actives);
+
+            foreach (var ability in actives)
+                AddAbilityToActionbar(ability, db);
+
+            Debug.Log($"<color=cyan>[Actionbar] Synced to {actives.Count} socketed active skill(s).</color>");
+        }
+
+        // Adds every active (non-Aura) PoE skill from a socket list into dest (no duplicates).
+        private static void CollectActiveSkills(List<AbilityData> source, List<AbilityData> dest)
+        {
+            if (source == null) return;
+            foreach (var ab in source)
+                if (ab is PoEAbility poe && poe.SkillType != PoEAbilityType.Aura && !dest.Contains(ab))
+                    dest.Add(ab);
+        }
+
+        // Finds the Devion skill item matching an ability and drops a fresh instance into the Actionbar.
+        private void AddAbilityToActionbar(AbilityData ability, DevionGames.InventorySystem.ItemDatabase db)
+        {
+            if (ability == null || db == null) return;
+            foreach (var dbItem in db.items)
+            {
+                if (dbItem == null) continue;
+                if (dbItem.Name.IndexOf(ability.AbilityName, System.StringComparison.OrdinalIgnoreCase) >= 0
+                    || dbItem.name.IndexOf(ability.AbilityName, System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    var instance = DevionGames.InventorySystem.InventoryManager.CreateInstance(dbItem);
+                    if (instance != null)
+                    {
+                        if (ability.Icon != null) instance.Icon = ability.Icon; // show the skill's own icon
+                        DevionGames.InventorySystem.ItemContainer.AddItem("Actionbar", instance);
+                    }
+                    return;
+                }
+            }
+        }
+
+        // Resolves a saved AbilityData asset name back to the live AbilityData. Searches socketable gems
+        // in the master catalog first, then the broader ability pool used for auto-linking.
+        private AbilityData ResolveAbilityByName(string abilityName)
+        {
+            if (string.IsNullOrEmpty(abilityName)) return null;
+
+            var catalog = _assetManager?.MasterItemCatalog;
+            if (catalog != null && catalog.Items != null)
+            {
+                foreach (var item in catalog.Items)
+                    if (item is GemItemData gem && gem.EmbeddedAbility != null && gem.EmbeddedAbility.name == abilityName)
+                        return gem.EmbeddedAbility;
+            }
+
+            foreach (var ab in ItemPickupSystem.GetAvailableAbilities(catalog))
+                if (ab != null && ab.name == abilityName) return ab;
+
+            return null;
+        }
+
+        private static List<string> AbilityNames(List<AbilityData> abilities)
+        {
+            var names = new List<string>();
+            if (abilities != null)
+                foreach (var a in abilities)
+                    if (a != null) names.Add(a.name);
+            return names;
         }
 
         public void Equip(EquippableData item)

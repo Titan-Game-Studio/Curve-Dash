@@ -9,6 +9,7 @@ namespace STG.CurveDash
     public class PlayerStatService
     {
         private readonly EcsWorld world;
+        private readonly DataManager dataManager;
 
         public const int ScoreForCrystal = 1;
         public const int Damege = 1;
@@ -16,19 +17,27 @@ namespace STG.CurveDash
         public const int ScoreForStep = 1;
         public const int ScoreForNextLevel = 300; // Score (exp) needed to advance one level.
 
-        // Exp earned into the CURRENT level: cumulative Score minus everything spent reaching this level.
-        // Clamped to [0, ScoreForNextLevel] so the "x / threshold" bar never shows a negative or overflow.
+        // --- PoE-style Energy Shield recharge ---
+        // ES starts recharging after this many seconds without taking any damage, then refills at
+        // ShieldRechargeFractionPerSec of maximum ES per second. Any damage resets the delay.
+        public const float ShieldRechargeDelay = 2f;
+        public const float ShieldRechargeFractionPerSec = 1f / 3f; // ~33% of max ES / sec → full in ~3s
+        private float _timeSinceLastDamage = 0f;
+
+        // Exp into the CURRENT level, clamped to [0, ScoreForNextLevel] so the "x / threshold" bar
+        // never shows a negative or overflow. Exp is persistent and decoupled from the per-run Score.
         private static int ExpIntoCurrentLevel(in PlayerStatComponent c) =>
-            Mathf.Clamp(c.Score - (c.Level - 1) * ScoreForNextLevel, 0, ScoreForNextLevel);
+            Mathf.Clamp(c.Exp, 0, ScoreForNextLevel);
         private bool hasPushedInitialStats = false;
 
         private readonly EcsPool<PlayerStatComponent> playerStatPool;
         private readonly EcsPool<PlayerLevelUpComponent> playerLevelUpPool;
         private readonly EcsFilter playerStatFilter;
 
-        public PlayerStatService(EcsWorld world)
+        public PlayerStatService(EcsWorld world, DataManager dataManager)
         {
             this.world = world;
+            this.dataManager = dataManager;
 
             playerStatPool = world.GetPool<PlayerStatComponent>();
             playerLevelUpPool = world.GetPool<PlayerLevelUpComponent>();
@@ -47,11 +56,16 @@ namespace STG.CurveDash
         {
             var playerStat = playerStatFilter.GetRawEntities()[0];
             ref var playerStatComponent = ref playerStatPool.Get(playerStat);
-            playerStatComponent.Score += score;
-            if (playerStatComponent.Score > playerStatComponent.Level * ScoreForNextLevel)
+
+            playerStatComponent.Score += score;   // per-run score (HighScore)
+            playerStatComponent.Exp += score;     // persistent XP into current level
+
+            bool leveled = false;
+            while (playerStatComponent.Exp >= ScoreForNextLevel)
             {
+                playerStatComponent.Exp -= ScoreForNextLevel;
                 playerStatComponent.Level++;
-                playerLevelUpPool.Add(playerStat);
+                leveled = true;
                 AddLife(20f);
                 AddMana(10f);
                 GrantFreePoints();
@@ -59,6 +73,19 @@ namespace STG.CurveDash
                 // shows the real level (its built-in Exp→Level system is not used here).
                 PushLevelToDevion(playerStatComponent.Level);
             }
+
+            if (leveled && !playerLevelUpPool.Has(playerStat))
+                playerLevelUpPool.Add(playerStat);
+
+            // Persist level/XP so progression carries across runs and deaths. Only write on a ding to
+            // avoid hammering PlayerPrefs every step; GameEnd saves the partial XP at run end.
+            if (dataManager?.UserData != null)
+            {
+                dataManager.UserData.CharacterLevel = playerStatComponent.Level;
+                dataManager.UserData.CharacterExp = playerStatComponent.Exp;
+                if (leveled) dataManager.SaveData();
+            }
+
             // Push AFTER any level-up so the bar shows progress into the NEW level (resets on ding).
             if (cachedExpStat != null) cachedExpStat.BaseValue = ExpIntoCurrentLevel(playerStatComponent);
         }
@@ -145,11 +172,37 @@ namespace STG.CurveDash
             SyncWithDevionGames(ref playerStatComponent, true);
         }
 
-        public bool TakeDamage(float damage, Action onDeath = null)
+        // PoE-style Energy Shield recharge. Call once per frame. After ShieldRechargeDelay seconds
+        // without taking damage, ES refills at ShieldRechargeFractionPerSec of maximum per second.
+        public void TickShieldRecharge(float deltaTime)
+        {
+            if (playerStatFilter.GetEntitiesCount() == 0) return;
+
+            var playerStat = playerStatFilter.GetRawEntities()[0];
+            ref var comp = ref playerStatPool.Get(playerStat);
+
+            _timeSinceLastDamage += deltaTime;
+
+            // Nothing to recharge (no shield stat) or already full → just keep counting the delay.
+            if (comp.MaxEnergyShield <= 0f) return;
+
+            SyncWithDevionGames(ref comp, false);
+            if (comp.CurrentEnergyShield >= comp.MaxEnergyShield) return;
+
+            // Still inside the post-damage delay window → no recharge yet.
+            if (_timeSinceLastDamage < ShieldRechargeDelay) return;
+
+            float recharge = comp.MaxEnergyShield * ShieldRechargeFractionPerSec * deltaTime;
+            comp.CurrentEnergyShield = Mathf.Min(comp.MaxEnergyShield, comp.CurrentEnergyShield + recharge);
+            SyncWithDevionGames(ref comp, true);
+        }
+
+        // bypassShield: chaos-style damage ignores Energy Shield and hits Life directly (PoE rule).
+        public bool TakeDamage(float damage, Action onDeath = null, bool bypassShield = false)
         {
             var playerStat = playerStatFilter.GetRawEntities()[0];
             ref var playerStatComponent = ref playerStatPool.Get(playerStat);
-            
+
             if (playerStatComponent.InvincibleTimer > 0f)
             {
                 // Ignore damage during invincibility frame
@@ -160,10 +213,23 @@ namespace STG.CurveDash
             SyncWithDevionGames(ref playerStatComponent, false);
 
             float oldLife = playerStatComponent.CurrentLife;
-            UnityEngine.Debug.Log($"<color=orange>[PlayerStatService] TakeDamage CALLED: damage={damage}, currentLife before={oldLife}</color>");
+            float oldShield = playerStatComponent.CurrentEnergyShield;
 
-            playerStatComponent.CurrentLife -= damage;
+            // PoE-style mitigation: Energy Shield absorbs incoming damage before Life. Whatever the
+            // shield can't soak overflows to Life. Chaos damage (bypassShield) skips the shield entirely.
+            float remaining = damage;
+            if (!bypassShield && playerStatComponent.CurrentEnergyShield > 0f)
+            {
+                float absorbed = Mathf.Min(playerStatComponent.CurrentEnergyShield, remaining);
+                playerStatComponent.CurrentEnergyShield -= absorbed;
+                remaining -= absorbed;
+            }
+
+            UnityEngine.Debug.Log($"<color=orange>[PlayerStatService] TakeDamage CALLED: damage={damage}, shield before={oldShield}, currentLife before={oldLife}, lifeDamage={remaining}</color>");
+
+            playerStatComponent.CurrentLife -= remaining;
             playerStatComponent.InvincibleTimer = 1.5f; // 1.5 seconds of invincibility iframe
+            _timeSinceLastDamage = 0f;                  // restart the Energy Shield recharge delay
 
             if (playerStatComponent.CurrentLife <= 0)
             {
@@ -172,7 +238,7 @@ namespace STG.CurveDash
                 onDeath?.Invoke();
             }
 
-            UnityEngine.Debug.Log($"<color=orange>[PlayerStatService] TakeDamage AFTER damage: currentLife after={playerStatComponent.CurrentLife}</color>");
+            UnityEngine.Debug.Log($"<color=orange>[PlayerStatService] TakeDamage AFTER damage: shield after={playerStatComponent.CurrentEnergyShield}, currentLife after={playerStatComponent.CurrentLife}</color>");
 
             // Sync updated values back to Devion Games so the UI and database are perfectly updated
             SyncWithDevionGames(ref playerStatComponent, true);
@@ -185,8 +251,12 @@ namespace STG.CurveDash
             hasPushedInitialStats = false;
 
             ref var playerStatComponent = ref playerStatPool.Add(playerStat);
-            playerStatComponent.Level = level;
-            playerStatComponent.Score = 0;
+            // Persistent progression: resume the saved level/XP (carries across runs & deaths).
+            int savedLevel = dataManager?.UserData?.CharacterLevel ?? 1;
+            int savedExp = dataManager?.UserData?.CharacterExp ?? 0;
+            playerStatComponent.Level = Mathf.Max(level, savedLevel);
+            playerStatComponent.Exp = Mathf.Clamp(savedExp, 0, ScoreForNextLevel);
+            playerStatComponent.Score = 0;  // per-run score always starts fresh
             playerStatComponent.Gold = 0;
 
             // Read starting stats from CurveDash_Character_Stats asset; fall back to constants only if DB unavailable
@@ -230,8 +300,16 @@ namespace STG.CurveDash
             if (playerStatComponent.Score > playerStatComponent.HighScore)
                 playerStatComponent.HighScore = playerStatComponent.Score;
 
-            UnityEngine.Debug.Log($"<color=yellow>[PlayerStatService] GameEnd: Score={playerStatComponent.Score}, HighScore={playerStatComponent.HighScore}</color>");
+            UnityEngine.Debug.Log($"<color=yellow>[PlayerStatService] GameEnd: Score={playerStatComponent.Score}, HighScore={playerStatComponent.HighScore}, Level={playerStatComponent.Level}, Exp={playerStatComponent.Exp}</color>");
             StoreResult(playerStatComponent);
+
+            // Persist the run's progression (including partial XP) so nothing is lost on death/quit.
+            if (dataManager?.UserData != null)
+            {
+                dataManager.UserData.CharacterLevel = playerStatComponent.Level;
+                dataManager.UserData.CharacterExp = playerStatComponent.Exp;
+                dataManager.SaveData();
+            }
         }
 
         private const int FreePointsPerLevel = 5;
@@ -311,6 +389,13 @@ namespace STG.CurveDash
                 {
                     UnityEngine.Debug.Log("<color=green>[PlayerStatService] FIRST TIME Sync: Reading from CurveDash_Character_Stats...</color>");
 
+                    // Push the restored Level to Devion FIRST: Heart/Mana max values are formula-driven
+                    // (Heart = base + Level*10 + Str/2), so the level must be live before we read them.
+                    // Otherwise max is computed at level 1, CurrentValue is pinned to that low max, and a
+                    // later pull raises MaxLife while CurrentLife stays low — the HP bar opens non-full on
+                    // restart/revive. Reading after the push guarantees CurrentLife == MaxLife (full HP).
+                    PushLevelToDevion(comp.Level);
+
                     if (cachedHeartStat != null)
                     {
                         float max = cachedHeartStat.Value > 0f ? cachedHeartStat.Value : cachedHeartStat.BaseValue;
@@ -340,7 +425,6 @@ namespace STG.CurveDash
 
                     if (cachedExpStat != null) cachedExpStat.BaseValue = ExpIntoCurrentLevel(comp);
                     PullPlainStats(ref comp);
-                    PushLevelToDevion(comp.Level);
                     hasPushedInitialStats = true;
                     handler.onUpdate?.Invoke();
                 }

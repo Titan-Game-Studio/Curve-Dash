@@ -1,0 +1,20 @@
+=== ModelVisibilityDiag @ t=3.8 ===
+InitializeAsync status=Succeeded
+CHARACTER load 'Assets/URP GanzSe Free Modular Character Pack/Prefabs/Modular Character/GanzSe Free Modular Character Update 1_1.prefab' → status=Succeeded result=GanzSe Free Modular Character Update 1_1 opException=none
+SKIN load 'Tile 1' → status=Succeeded result=Tile 1 opException=none
+
+--- Player(Clone) ---
+renderers=219 enabled&active=9
+  'Base Character Mesh' en=True act=True
+  'FREE SHIELD 3 COLOR 3(Clone)' en=True act=True
+  'FREE ONE HANDED SWORD 3 COLOR 1(Clone)' en=True act=True
+  'Head Armor Type 1 Color 1' en=True act=False
+  'Head Armor Type 1 Color 2' en=True act=False
+  'Head Armor Type 1 Color 3' en=True act=False
+
+--- ObjectsPool ---
+renderers=796 enabled&active=407
+  'ItemPickup(Clone)' en=False act=True
+  'ItemPickup(Clone)' en=False act=True
+  'BlockPart(Clone)' en=False act=True
+  'Tile1' en=True act=True

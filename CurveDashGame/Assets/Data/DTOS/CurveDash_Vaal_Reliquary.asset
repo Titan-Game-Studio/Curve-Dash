@@ -2452,6 +2452,7 @@ MonoBehaviour:
   RolledAffixes: []
   RolledRarity: 0
   RolledItemLevel: 0
+  SocketedGemAbilityNames: []
   references:
     version: 2
     RefIds: []

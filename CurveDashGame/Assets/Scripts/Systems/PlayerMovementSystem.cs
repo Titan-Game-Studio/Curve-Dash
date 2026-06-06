@@ -12,6 +12,7 @@ namespace STG.CurveDash
         private readonly AudioPlayer audioPlayer;
         private readonly AudioSettings audioSettings;
         private readonly GameSettings gameSettings;
+        private readonly GameStateService gameState;
 
         private readonly EcsPool<PlayerComponent> playerPool;
         private readonly EcsPool<BlockComponent> blockPool;
@@ -41,12 +42,13 @@ namespace STG.CurveDash
         private int _edgeCheckGraceFrames = 0;
 
         public PlayerMovementSystem(EcsWorld world, AudioPlayer audioPlayer, AudioSettings audioSettings,
-            GameSettings gameSettings)
+            GameSettings gameSettings, GameStateService gameState)
         {
             this.world = world;
             this.audioPlayer = audioPlayer;
             this.audioSettings = audioSettings;
             this.gameSettings = gameSettings;
+            this.gameState = gameState;
 
             playerPool = world.GetPool<PlayerComponent>();
             blockPool = world.GetPool<BlockComponent>();
@@ -111,6 +113,11 @@ namespace STG.CurveDash
 
         public void Tick()
         {
+            // Freeze the player while not actively playing (Title / GameOver / GameEnd).
+            // ChangeDirection() is still callable externally so GameSystem can kick off the
+            // auto-run the instant the game starts.
+            if (!gameState.IsPlaying) return;
+
             foreach (var ball in playerFilter)
                 Update(ball);
         }

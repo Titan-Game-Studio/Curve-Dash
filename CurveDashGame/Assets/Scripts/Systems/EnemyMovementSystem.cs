@@ -10,10 +10,12 @@ namespace STG.CurveDash
         private readonly EcsFilter _enemyFilter;
         private readonly EcsPool<EnemyComponent> _enemyPool;
         private readonly EcsPool<ViewLinkComponent> _viewLinkPool;
+        private readonly GameStateService _gameState;
 
-        public EnemyMovementSystem(EcsWorld world)
+        public EnemyMovementSystem(EcsWorld world, GameStateService gameState)
         {
             _world = world;
+            _gameState = gameState;
             _enemyFilter = world.Filter<EnemyComponent>().Inc<ViewLinkComponent>().Exc<EnemyDeadEvent>().End();
             _enemyPool = world.GetPool<EnemyComponent>();
             _viewLinkPool = world.GetPool<ViewLinkComponent>();
@@ -21,6 +23,9 @@ namespace STG.CurveDash
 
         public void Tick()
         {
+            // Monsters stay frozen until the game is actually being played.
+            if (!_gameState.IsPlaying) return;
+
             Vector3 playerPos = Vector3.zero;
             bool foundPlayer = false;
             var playerFilter = _world.Filter<PlayerComponent>().Inc<ViewLinkComponent>().End();

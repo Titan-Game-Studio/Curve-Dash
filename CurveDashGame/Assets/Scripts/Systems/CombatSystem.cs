@@ -21,6 +21,7 @@ namespace STG.CurveDash
         private readonly GemLevelService _gemLevelService;
         private readonly PlayerStatService _playerStatService;
         private readonly BeltFlaskService _beltFlaskService;
+        private readonly GameStateService _gameState;
 
         // World units the enemy is shoved per point of KnockbackForce rolled on the weapon.
         private const float KnockbackUnitsPerForce = 0.1f;
@@ -32,12 +33,13 @@ namespace STG.CurveDash
         // Fraction of elemental damage that lands after a resistance %. 30 res → 0.7; -20 res → 1.2.
         private static float ResistMultiplier(float resistPercent) => 1f - Mathf.Min(resistPercent, MaxResistance) / 100f;
 
-        public CombatSystem(EcsWorld world, GemLevelService gemLevelService, PlayerStatService playerStatService, BeltFlaskService beltFlaskService)
+        public CombatSystem(EcsWorld world, GemLevelService gemLevelService, PlayerStatService playerStatService, BeltFlaskService beltFlaskService, GameStateService gameState)
         {
             this.world = world;
             _gemLevelService = gemLevelService;
             _playerStatService = playerStatService;
             _beltFlaskService = beltFlaskService;
+            _gameState = gameState;
             
             playerFilter = world.Filter<PlayerComponent>().Inc<PlayerCombatComponent>().Inc<ViewLinkComponent>().End();
             enemyFilter = world.Filter<EnemyHealthComponent>().Inc<EnemyComponent>().Inc<ViewLinkComponent>().Exc<EnemyDeadEvent>().End();
@@ -52,6 +54,9 @@ namespace STG.CurveDash
 
         public void Tick()
         {
+            // No combat (enemy facing, player attacks) while the world is frozen at Title / GameEnd.
+            if (!_gameState.IsPlaying) return;
+
             // Smoothly rotate nearby enemies to face the player
             foreach (var playerEntity in playerFilter)
             {
@@ -82,6 +87,19 @@ namespace STG.CurveDash
             foreach (var playerEntity in playerFilter)
             {
                 ref var combat = ref combatPool.Get(playerEntity);
+
+                // Bridge the equipped weapon (owned by PlayerView, updated on equip and on gem socket)
+                // into the ECS combat component every tick. After the equipment system moved into
+                // Devion/PlayerView, nothing else sets combat.CurrentWeapon anymore — so without this it
+                // stays null: the player fights unarmed and weapon-socketed gem abilities never fire.
+                {
+                    ref var weaponLink = ref viewLinkPool.Get(playerEntity);
+                    if (weaponLink.Transform != null)
+                    {
+                        var pv = weaponLink.Transform.GetComponent<PlayerView>();
+                        if (pv != null) combat.CurrentWeapon = pv.GetWeapon();
+                    }
+                }
 
                 // Determine attack parameters (support unarmed fallback if no weapon equipped)
                 float attackRange = 2.0f; // Default unarmed attack range
@@ -150,7 +168,8 @@ namespace STG.CurveDash
 
                     if (playerViewComponent != null)
                     {
-                        playerViewComponent.CurrentWeaponInstance = combat.CurrentWeapon;
+                        // combat.CurrentWeapon is now sourced FROM PlayerView at the top of the tick,
+                        // so PlayerView already holds the authoritative weapon — no write-back needed.
                         // Get animation synchronization parameters from the weapon or use fallback values
                         bool useAnimationEvent = false;
                         float attackHitDelay = 0.25f; // default unarmed delay
