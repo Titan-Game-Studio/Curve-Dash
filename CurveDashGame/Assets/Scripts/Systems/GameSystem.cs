@@ -300,13 +300,16 @@ namespace STG.CurveDash
             {
                 foreach (var obstacleHit in playerHitObstacleFilter)
                 {
-                    playerStatService.TakeDamage(10f, GameOver);
+                    if (playerStatService.TakeDamage(10f, GameOver))
+                        ShowPlayerDamageNumber(10f);
                 }
 
                 foreach (var enemyHit in playerHitByEnemyFilter)
                 {
                     if (playerStatService.TakeDamage(15f, GameOver))
                     {
+                        ShowPlayerDamageNumber(15f);
+
                         var ball = playerFilter.GetRawEntities()[0];
                         ref var viewLink = ref viewLinkPool.Get(ball);
                         var ballView = viewLink.Transform.GetComponent<PlayerView>();
@@ -327,6 +330,19 @@ namespace STG.CurveDash
                 playerComponent.Speed = GetBallSpeedForCurrentLevel();
                 playerComponent.Size = GetBallSizeForCurrentLevel();
             }
+        }
+
+        // Pops a red floating damage number above the player when they take a hit.
+        private void ShowPlayerDamageNumber(float amount)
+        {
+            var players = playerFilter.GetRawEntities();
+            if (players.Length == 0) return;
+
+            ref var viewLink = ref viewLinkPool.Get(players[0]);
+            if (viewLink.Transform == null) return;
+
+            Vector3 popPos = viewLink.Transform.position + Vector3.up * 1.5f;
+            Views.FloatingDamageNumber.Spawn(popPos, amount, new Color(1f, 0.25f, 0.2f));
         }
 
         private void ClearScene()

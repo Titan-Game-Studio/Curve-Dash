@@ -651,7 +651,13 @@ namespace STG.CurveDash
                 if (monsterView != null)
                 {
                     monsterView.FlashWhite(0.25f);
+                    monsterView.SetHealth(targetHealth.CurrentHealth, targetHealth.MaxHealth);
                 }
+
+                // Floating damage number above the enemy (orange + "!" on crit, white otherwise).
+                Vector3 dmgPopPos = targetEnemyView.Transform.position + Vector3.up * 2.0f;
+                Color dmgColor = isCrit ? new Color(1f, 0.55f, 0f) : Color.white;
+                STG.CurveDash.Views.FloatingDamageNumber.Spawn(dmgPopPos, totalDamage, dmgColor, isCrit);
             }
 
             // 7. Auras are NOT triggered on hit anymore. They are persistent, duration-based
