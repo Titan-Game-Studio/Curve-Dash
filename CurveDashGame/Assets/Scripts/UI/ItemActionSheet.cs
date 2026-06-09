@@ -39,6 +39,11 @@ namespace STG.CurveDash
         private ItemSlot _slot;
         private Item _item;
 
+        // A clone of Devion's own tooltip, reused as the second "Equipped" details box for comparison.
+        private DevionGames.UIWidgets.Tooltip _compareTooltip;
+        // Width (canvas units) both tooltips use in compare mode so the pair fits side by side.
+        private float _compareWidth = 300f;
+
         private void Awake()
         {
             _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
@@ -122,15 +127,34 @@ namespace STG.CurveDash
             if (tt == null || _item == null) { Close(); return; }
 
             var slot = _slot;           // capture before we hide the sheet
+            bool inEquipment = slot != null && slot.Container != null && slot.Container.Name == "Equipment";
             ShowRoot(false);            // hide our sheet so the (lower-canvas) tooltip is visible
             if (_catcher != null) _catcher.SetActive(true);
 
-            tt.Show(DevionGames.UnityTools.ColorString(_item.DisplayName, _item.Rarity.Color),
-                    _item.Description, _item.Icon, _item.GetPropertyInfo());
+            // When inspecting a BAG item, also show the currently-equipped item of the same slot in a
+            // SECOND Devion tooltip (a clone of Devion's own tooltip) so the player can compare. Skipped
+            // when nothing comparable is equipped, or when inspecting an equipped item itself.
+            Item equipped = inEquipment ? null : FindEquippedCounterpart(_item);
+            string title = DevionGames.UnityTools.ColorString(_item.DisplayName, _item.Rarity.Color);
 
-            // Devion's tooltip follows Input.mousePosition, which on a tap-driven (mobile) UI parks it
-            // in a random corner. Pin it beside the tapped slot instead.
-            PinTooltipNextToSlot(tt, slot);
+            if (equipped != null)
+            {
+                // Two Devion tooltips side by side: equipped on the left, inspected item on the right.
+                // Narrow both so the pair fits the screen without overlapping.
+                _compareWidth = ComputeCompareWidth(tt);
+                tt.Show(title, _item.Description, _item.Icon, _item.GetPropertyInfo(), _compareWidth, true);
+                EnsureTooltipFollowDisabled(tt);
+                PlaceTooltipHalf(tt, leftHalf: false);
+                ShowEquippedCompare(equipped);
+            }
+            else
+            {
+                tt.Show(title, _item.Description, _item.Icon, _item.GetPropertyInfo());
+                HideCompareTooltip();
+                // Devion's tooltip follows Input.mousePosition, which on a tap-driven (mobile) UI parks it
+                // in a random corner. Pin it beside the tapped slot instead.
+                PinTooltipNextToSlot(tt, slot);
+            }
         }
 
         private void DismissTooltip()
@@ -138,7 +162,147 @@ namespace STG.CurveDash
             var tt = InventoryManager.UI != null ? InventoryManager.UI.tooltip : null;
             if (tt != null) tt.Close();
             RestoreTooltipFollow(tt);
+            HideCompareTooltip();
             if (_catcher != null) _catcher.SetActive(false);
+        }
+
+        // ---------------------------------------------------------------- equipped-item comparison
+
+        // Finds the currently-equipped item that occupies the same logical slot as the inspected bag item,
+        // so its details can be shown side-by-side. Returns null when nothing comparable is equipped.
+        private Item FindEquippedCounterpart(Item bagItem)
+        {
+            if (!(bagItem is CurveDashEquipmentAdapter bagAdapter) || bagAdapter.OriginalEquipmentData == null)
+                return null;
+
+            string key = CompareKey(bagAdapter.OriginalEquipmentData);
+            if (key == null) return null; // not an equippable kind we compare (gem/currency/flask/etc.)
+
+            var equipment = DevionGames.UIWidgets.WidgetUtility.Find<ItemContainer>("Equipment");
+            if (equipment == null) return null;
+
+            foreach (var s in equipment.Slots)
+            {
+                if (s == null || s.IsEmpty || s.ObservedItem == null || s.ObservedItem == bagItem) continue;
+                if (s.ObservedItem is CurveDashEquipmentAdapter eqAdapter
+                    && eqAdapter.OriginalEquipmentData != null
+                    && CompareKey(eqAdapter.OriginalEquipmentData) == key)
+                {
+                    return s.ObservedItem;
+                }
+            }
+            return null;
+        }
+
+        // Groups items into comparable slot categories. Armor compares within its own slot; rings compare to
+        // any equipped ring. Returns null for items that have no meaningful "equipped counterpart".
+        private static string CompareKey(ItemData data)
+        {
+            switch (data)
+            {
+                case WeaponData _:    return "weapon";
+                case OffHandData _:   return "offhand";
+                case ArmorItemData a: return "armor:" + a.Slot;
+                case RingItemData _:  return "ring";
+                case AmuletItemData _:return "amulet";
+                case BeltItemData _:  return "belt";
+                default:              return null;
+            }
+        }
+
+        // Shows the equipped item in the cloned Devion tooltip. The very first time, the clone has just
+        // been Instantiated and its slot cache (built in the widget's Start/OnStart) isn't ready yet, so we
+        // defer the first Show by one frame; afterwards it's reused immediately.
+        private void ShowEquippedCompare(Item equipped)
+        {
+            var source = InventoryManager.UI != null ? InventoryManager.UI.tooltip : null;
+            bool firstCreate = _compareTooltip == null;
+            var clone = GetOrCreateCompareTooltip(source);
+            if (clone == null) return;
+
+            if (firstCreate)
+                StartCoroutine(ShowCompareNextFrame(equipped));
+            else
+                DriveCompareTooltip(clone, equipped);
+        }
+
+        private System.Collections.IEnumerator ShowCompareNextFrame(Item equipped)
+        {
+            yield return null; // let the clone's Start/OnStart run so its slot cache is initialized
+            // Only show if the comparison view is still up (the tooltip dismiss catcher is active).
+            if (_compareTooltip != null && _catcher != null && _catcher.activeSelf)
+                DriveCompareTooltip(_compareTooltip, equipped);
+        }
+
+        private void DriveCompareTooltip(DevionGames.UIWidgets.Tooltip clone, Item equipped)
+        {
+            if (clone == null || equipped == null) return;
+            ForceDisableFollow(clone); // ours is positioned manually, never mouse-follows
+
+            // Title is just the item name (same as the inspected tooltip); the "Equipped" tag moves to the
+            // bottom as the last line so both titles read consistently.
+            var pairs = new System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<string, string>>(
+                equipped.GetPropertyInfo());
+            pairs.Add(new System.Collections.Generic.KeyValuePair<string, string>("", "")); // spacer
+            pairs.Add(new System.Collections.Generic.KeyValuePair<string, string>(
+                "<color=#9aa0aa><i>Equipped</i></color>", ""));
+
+            clone.Show(DevionGames.UnityTools.ColorString(equipped.DisplayName, equipped.Rarity.Color),
+                       equipped.Description, equipped.Icon, pairs, _compareWidth, true);
+            PlaceTooltipHalf(clone, leftHalf: true); // left of centre, beside the inspected item's tooltip
+        }
+
+        // Lazily clones Devion's tooltip the first time, then reuses it. Returns null if there is no
+        // source tooltip to clone.
+        private DevionGames.UIWidgets.Tooltip GetOrCreateCompareTooltip(DevionGames.UIWidgets.Tooltip source)
+        {
+            if (_compareTooltip != null) return _compareTooltip;
+            if (source == null) return null;
+
+            var cloneGo = Instantiate(source.gameObject, source.transform.parent);
+            cloneGo.name = "CompareTooltip(Clone)"; // distinct name so WidgetUtility.Find never returns it
+            _compareTooltip = cloneGo.GetComponent<DevionGames.UIWidgets.Tooltip>();
+            SanitizeClonedSlots(_compareTooltip);
+            return _compareTooltip;
+        }
+
+        // We clone the live tooltip AFTER it has shown the inspected item, so its runtime StringPairSlot
+        // rows (the inspected item's stats) get copied into the clone and would linger as duplicate content.
+        // Remove every cloned slot row except the prefab template; Devion rebuilds rows cleanly on Show().
+        private void SanitizeClonedSlots(DevionGames.UIWidgets.Tooltip clone)
+        {
+            if (clone == null) return;
+            var field = typeof(DevionGames.UIWidgets.Tooltip).GetField("m_SlotPrefab", _ttFlags);
+            var template = field?.GetValue(clone) as Component;
+            if (template == null) return;
+
+            var parent = template.transform.parent;
+            if (parent == null) return;
+
+            var slotType = template.GetType();
+            for (int i = parent.childCount - 1; i >= 0; i--)
+            {
+                var child = parent.GetChild(i);
+                if (child.gameObject == template.gameObject) continue;       // keep the template
+                if (child.GetComponent(slotType) != null) Destroy(child.gameObject);
+            }
+        }
+
+        private void HideCompareTooltip()
+        {
+            if (_compareTooltip != null) _compareTooltip.Close();
+        }
+
+        // Width (canvas units) for each tooltip in compare mode: half the canvas width minus a gap/margins,
+        // clamped so it stays readable and never wider than Devion's default. Guarantees the two boxes fit
+        // side by side without overlapping.
+        private float ComputeCompareWidth(DevionGames.UIWidgets.Tooltip tt)
+        {
+            var canvas = tt != null ? tt.GetComponentInParent<Canvas>() : null;
+            float scale = (canvas == null || canvas.scaleFactor <= 0f) ? 1f : canvas.scaleFactor;
+            float canvasWidthUnits = Screen.width / scale;
+            float w = (canvasWidthUnits - 96f) * 0.5f; // 96 units ≈ centre gap + side margins
+            return Mathf.Clamp(w, 220f, 300f);
         }
 
         // ---------- tooltip positioning (place beside the slot, not under the mouse) ----------
@@ -158,18 +322,8 @@ namespace STG.CurveDash
             var slotRT = slot.transform as RectTransform;
             if (rt == null || canvas == null || slotRT == null) return;
 
-            // Stop the per-frame mouse-follow so our placement sticks; remember the value to restore it
-            // (PC hover should keep following the cursor).
-            var tType = typeof(DevionGames.UIWidgets.Tooltip);
-            if (_ttFollowField == null) _ttFollowField = tType.GetField("m_UpdatePosition", _ttFlags);
-            if (_ttActiveField == null) _ttActiveField = tType.GetField("_updatePosition", _ttFlags);
-            if (_ttFollowField != null)
-            {
-                _ttFollowSaved = (bool)_ttFollowField.GetValue(tt);
-                _ttFollowField.SetValue(tt, false);
-                _ttFollowOverridden = true;
-            }
-            if (_ttActiveField != null) _ttActiveField.SetValue(tt, false);
+            // Stop the per-frame mouse-follow so our placement sticks (restored on dismiss for PC hover).
+            EnsureTooltipFollowDisabled(tt);
 
             // Make sure the tooltip has its final size before we measure it.
             LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
@@ -211,6 +365,68 @@ namespace STG.CurveDash
             if (!_ttFollowOverridden || tt == null || _ttFollowField == null) return;
             _ttFollowField.SetValue(tt, _ttFollowSaved);
             _ttFollowOverridden = false;
+        }
+
+        // Disables Devion's per-frame mouse-follow (remembering the value so RestoreTooltipFollow can undo it).
+        private void EnsureTooltipFollowDisabled(DevionGames.UIWidgets.Tooltip tt)
+        {
+            if (tt == null) return;
+            var tType = typeof(DevionGames.UIWidgets.Tooltip);
+            if (_ttFollowField == null) _ttFollowField = tType.GetField("m_UpdatePosition", _ttFlags);
+            if (_ttActiveField == null) _ttActiveField = tType.GetField("_updatePosition", _ttFlags);
+            if (_ttFollowField != null && !_ttFollowOverridden)
+            {
+                _ttFollowSaved = (bool)_ttFollowField.GetValue(tt);
+                _ttFollowOverridden = true;
+            }
+            _ttFollowField?.SetValue(tt, false);
+            _ttActiveField?.SetValue(tt, false);
+        }
+
+        // Disables mouse-follow on the clone outright (we own it and always position it manually, so no
+        // need to remember/restore its previous value).
+        private void ForceDisableFollow(DevionGames.UIWidgets.Tooltip tt)
+        {
+            if (tt == null) return;
+            var tType = typeof(DevionGames.UIWidgets.Tooltip);
+            if (_ttFollowField == null) _ttFollowField = tType.GetField("m_UpdatePosition", _ttFlags);
+            if (_ttActiveField == null) _ttActiveField = tType.GetField("_updatePosition", _ttFlags);
+            _ttFollowField?.SetValue(tt, false);
+            _ttActiveField?.SetValue(tt, false);
+        }
+
+        // Places a tooltip just to the left or right of screen centre, so the equipped clone and the
+        // inspected item's tooltip sit directly next to each other (each offset from centre by its own
+        // half-width plus half the gap). TOP edges are aligned to a common line so the two boxes line up
+        // at the top regardless of differing heights. Clamped fully on screen.
+        private void PlaceTooltipHalf(DevionGames.UIWidgets.Tooltip tt, bool leftHalf)
+        {
+            if (tt == null) return;
+            var rt = tt.GetComponent<RectTransform>();
+            var canvas = tt.GetComponentInParent<Canvas>();
+            if (rt == null || canvas == null) return;
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+
+            var cam = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+            float scale = canvas.scaleFactor <= 0f ? 1f : canvas.scaleFactor;
+            Vector2 ttSize = rt.rect.size * scale;
+            float halfW = ttSize.x * 0.5f;
+            float halfH = ttSize.y * 0.5f;
+            const float margin = 16f;
+            const float gap = 28f;
+            const float topFraction = 0.85f; // shared top edge for both tooltips (near the top of the screen)
+
+            float cx = Screen.width * 0.5f;
+            float x = leftHalf ? cx - gap * 0.5f - halfW : cx + gap * 0.5f + halfW;
+            float y = Screen.height * topFraction - halfH; // centre placed so the TOP edge sits on the shared line
+
+            x = Mathf.Clamp(x, halfW + margin, Screen.width  - halfW - margin);
+            y = Mathf.Clamp(y, halfH + margin, Screen.height - halfH - margin);
+
+            var canvasRT = canvas.transform as RectTransform;
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRT, new Vector2(x, y), cam, out var lp))
+                tt.transform.position = canvas.transform.TransformPoint(lp);
         }
 
         // ---------------------------------------------------------------- UI scaffold
