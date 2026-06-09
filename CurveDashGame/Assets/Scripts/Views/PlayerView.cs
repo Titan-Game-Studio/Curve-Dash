@@ -1058,6 +1058,111 @@ namespace STG.CurveDash
         }
 
         /// <summary>
+        /// Maps a socketed <see cref="AbilityData"/> back to the <see cref="GemItemData"/> that carries it,
+        /// scanning the master item catalog. Returns null for innate (non-gem) abilities. Used by the
+        /// interactive socket UI to show a gem's socket colour and stats.
+        /// </summary>
+        public GemItemData FindGemByAbility(AbilityData ability)
+        {
+            if (ability == null) return null;
+            var catalog = _assetManager?.MasterItemCatalog;
+            if (catalog?.Items == null) return null;
+            foreach (var item in catalog.Items)
+                if (item is GemItemData g && g.EmbeddedAbility == ability) return g;
+            return null;
+        }
+
+        /// <summary>
+        /// Removes a player-socketed gem (runtime ability) from the given equipment slot, pops it back to
+        /// the Inventory bag, persists the new layout and re-syncs the Actionbar. Only runtime sockets are
+        /// touched — innate abilities baked into the item asset are never removed. Returns true on success.
+        /// Called by the interactive socket UI (GemTreePanel).
+        /// </summary>
+        public bool UnsocketGem(EquipmentSlot slot, AbilityData ability)
+        {
+            if (ability == null) return false;
+
+            bool removed;
+            if (slot == EquipmentSlot.MainHand)
+                removed = CurrentWeaponInstance != null && CurrentWeaponInstance.DynamicAbilities.Remove(ability);
+            else
+                removed = _armorRuntimeSockets.TryGetValue(slot, out var list) && list.Remove(ability);
+
+            if (!removed) return false;
+
+            ReturnSocketedGemsToInventory(new[] { ability });
+            PersistSocketedGems();
+            SyncActionbarToSockets();
+            return true;
+        }
+
+        /// <summary>
+        /// Sockets a gem into the first empty runtime socket of the given slot, persists and re-syncs.
+        /// Does NOT touch the Devion gem instance in the bag — the caller removes the consumed gem item.
+        /// Returns false if the slot is full or the gem carries no ability. Used by the socket popup.
+        /// </summary>
+        public bool SocketGemIntoSlot(EquipmentSlot slot, GemItemData gem)
+        {
+            if (gem == null || gem.EmbeddedAbility == null) return false;
+            var list = RuntimeListForSlot(slot, create: true);
+            if (list == null || list.Count >= MaxSocketsForSlot(slot)) return false;
+
+            list.Add(gem.EmbeddedAbility);
+            PersistSocketedGems();
+            SyncActionbarToSockets();
+            return true;
+        }
+
+        /// <summary>
+        /// Replaces the gem ability currently in a slot with a new gem (same socket position), popping the
+        /// old gem back to the bag. The caller removes the consumed new gem item from the bag. Returns false
+        /// if the old ability is not socketed here. Used by the socket popup's "replace" action.
+        /// </summary>
+        public bool ReplaceGemAtSlot(EquipmentSlot slot, AbilityData oldAbility, GemItemData newGem)
+        {
+            if (oldAbility == null || newGem == null || newGem.EmbeddedAbility == null) return false;
+            var list = RuntimeListForSlot(slot, create: false);
+            if (list == null) return false;
+            int idx = list.IndexOf(oldAbility);
+            if (idx < 0) return false;
+
+            list[idx] = newGem.EmbeddedAbility;
+            ReturnSocketedGemsToInventory(new[] { oldAbility });
+            PersistSocketedGems();
+            SyncActionbarToSockets();
+            return true;
+        }
+
+        /// <summary>Max sockets for a slot: the weapon's MaxSockets for MainHand, else the equipped armor/off-hand's.</summary>
+        public int MaxSocketsForSlot(EquipmentSlot slot)
+        {
+            if (slot == EquipmentSlot.MainHand)
+                return CurrentWeaponInstance?.BaseData != null ? CurrentWeaponInstance.BaseData.MaxSockets : 0;
+
+            if (_dataManager?.UserData?.EquippedItems != null && _assetManager != null
+                && _dataManager.UserData.EquippedItems.TryGetValue(slot, out string itemId))
+            {
+                var item = _assetManager.GetItem(itemId);
+                if (item is ArmorItemData armor) return armor.MaxSockets;
+                if (item is OffHandData off) return off.MaxSockets;
+            }
+            return 0;
+        }
+
+        // The actual mutable runtime socket list backing a slot — weapon DynamicAbilities for MainHand,
+        // else the armor/off-hand runtime dictionary entry. Returns null when there is nothing to back it.
+        private List<AbilityData> RuntimeListForSlot(EquipmentSlot slot, bool create)
+        {
+            if (slot == EquipmentSlot.MainHand)
+                return CurrentWeaponInstance?.DynamicAbilities;
+            if (_armorRuntimeSockets.TryGetValue(slot, out var list)) return list;
+            if (!create) return null;
+            var fresh = new List<AbilityData>();
+            _armorRuntimeSockets[slot] = fresh;
+            return fresh;
+        }
+
+        /// <summary>
         /// Rebuilds the Actionbar so it shows exactly the active (Skill) gems currently socketed across
         /// the equipped weapon and armor. Called on every socket change — socket, unequip (gems popped
         /// back to the bag) and after load — so the Actionbar never drifts out of sync with the sockets.

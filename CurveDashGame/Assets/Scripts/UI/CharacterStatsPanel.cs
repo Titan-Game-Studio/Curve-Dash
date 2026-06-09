@@ -199,6 +199,10 @@ namespace STG.CurveDash
 
             _sb.Append("<size=30><b>Character Stats</b></size>\n");
 
+            // PoE-style summary up top: the two numbers that actually matter, derived so the player never
+            // has to add stats up by hand.
+            AppendSummary(handler);
+
             var shown = new HashSet<Stat>();
             foreach (var group in Groups)
             {
@@ -222,6 +226,40 @@ namespace STG.CurveDash
             }
 
             _label.text = _sb.ToString();
+        }
+
+        // Derived headline numbers, PoE-style: DPS (avg hit × attack speed × crit factor) and Effective HP
+        // (Life + Energy Shield). Computed from the live stat sheet so they always reflect gear + gems.
+        private void AppendSummary(StatsHandler handler)
+        {
+            float min  = GetVal(handler, "Min Damage");
+            float max  = GetVal(handler, "Max Damage");
+            float spd  = GetVal(handler, "Attack Speed");
+            float critC = GetVal(handler, "Critical Strike");      // %
+            float critM = GetVal(handler, "Critical Multiplier");  // %, e.g. 150 = 150%
+            if (critM <= 0f) critM = 150f;
+
+            float avgHit = (min + max) * 0.5f;
+            float critFactor = 1f + Mathf.Clamp01(critC / 100f) * (critM / 100f - 1f);
+            float dps = avgHit * Mathf.Max(spd, 0f) * critFactor;
+
+            float life   = GetVal(handler, "Heart");
+            float shield = GetVal(handler, "Shield");
+            float ehp    = life + shield;
+
+            AppendHeader("Summary");
+            _sb.Append("<color=#cfd2dc>DPS:</color>  <b><color=#ffd24d>").Append(dps.ToString("0")).Append("</color></b>\n");
+            _sb.Append("<color=#cfd2dc>Effective HP:</color>  <b>").Append(ehp.ToString("0")).Append("</b>");
+            if (shield > 0f)
+                _sb.Append("  <size=20><color=#8a8f9c>(").Append(life.ToString("0")).Append(" + ")
+                   .Append(shield.ToString("0")).Append(" ES)</color></size>");
+            _sb.Append("\n");
+        }
+
+        private static float GetVal(StatsHandler handler, string name)
+        {
+            var stat = handler.GetStat(name);
+            return stat != null ? stat.Value : 0f;
         }
 
         private void AppendHeader(string title)

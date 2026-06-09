@@ -83,6 +83,12 @@ namespace DevionGames.InventorySystem
         protected ScrollRect m_ParentScrollRect;
         protected bool m_IsMouseKey;
 
+        // Curve-Dash hook: when set, a (non-drag) tap on a filled slot is routed here instead of running
+        // the default Use()/equip behaviour, so the game can pop its own action sheet. Return true to mark
+        // the tap as handled (suppressing Devion's default). Uses only framework types so this stays inside
+        // the DevionGames assembly (game code cannot be referenced from here).
+        public static System.Func<ItemSlot, bool> TapInterceptor;
+
 
         protected override void Start()
         {
@@ -217,6 +223,10 @@ namespace DevionGames.InventorySystem
         {
             if (!eventData.dragging)
             {
+                // Curve-Dash: a tap on a filled slot opens the game's action sheet instead of equipping.
+                if (TapInterceptor != null && ObservedItem != null && TapInterceptor(this))
+                    return;
+
                 Stack stack = InventoryManager.UI.stack;
 
                 bool isUnstacking = stack != null && stack.item != null;
@@ -265,7 +275,7 @@ namespace DevionGames.InventorySystem
                         {
                             menu.AddMenuItem("Unstack", Unstack);
                         }
-                        
+
                         menu.AddMenuItem("Drop", DropItem);
 
                         menu.Show();
