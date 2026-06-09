@@ -106,6 +106,12 @@ namespace STG.CurveDash
         public WeaponInstance CurrentWeaponInstance { get; set; }
 
         /// <summary>
+        /// Feet-level anchor that follows the character. Aura VFX parent to this so they sit under the
+        /// player and travel with them, instead of being stamped at a fixed world position on cast.
+        /// </summary>
+        public Transform AuraAnchor => _auraContainerTransform;
+
+        /// <summary>
         /// Retrieves all abilities socketed inside equipped armor pieces (Helmet, Chest, Gloves, Boots)
         /// using the DataManager's UserData and AssetManager's catalog.
         /// </summary>
@@ -2030,8 +2036,19 @@ namespace STG.CurveDash
                 foreach (var statName in AffixStatMapper.AllDevionStatNames)
                 {
                     if (CharSheetStatSkip.Contains(statName)) continue;
-                    float innate = _innateStatBase.TryGetValue(statName, out float b) ? b : 0f;
                     float bonus  = statBonuses.TryGetValue(statName, out float v) ? v : 0f;
+
+                    // STR/DEX/INT BaseValue is owned by the progression system: authored base +
+                    // per-level auto-growth (PlayerStatService modifier) + manually-allocated Free Points
+                    // (Devion UI writes BaseValue and persists it). Apply the gear bonus as a Flat MODIFIER
+                    // so re-syncing on every equip/startup never wipes those points (the old bug).
+                    if (AttributeStatNames.Contains(statName))
+                    {
+                        ApplyGearAttributeModifier(handler, statName, bonus);
+                        continue;
+                    }
+
+                    float innate = _innateStatBase.TryGetValue(statName, out float b) ? b : 0f;
                     TrySetStatBase(handler, statName, innate + bonus);
                 }
 
@@ -2051,6 +2068,12 @@ namespace STG.CurveDash
         // growing the max never resets current life/mana. Everything else is gear-aggregated.
         private static readonly System.Collections.Generic.HashSet<string> CharSheetStatSkip =
             new System.Collections.Generic.HashSet<string> { "Shield", "Min Damage", "Max Damage" };
+
+        // Attributes whose BaseValue is owned by the progression system (level growth + manual Free Points).
+        // Gear bonuses for these are applied as modifiers, never written into BaseValue (which would wipe
+        // allocated/leveled points on the next equip/startup sync).
+        private static readonly System.Collections.Generic.HashSet<string> AttributeStatNames =
+            new System.Collections.Generic.HashSet<string> { "Strength", "Dexterity", "Intelligence" };
 
         // Innate (gear-free) base values, captured once so equipment bonuses ADD on top instead of
         // overwriting authored bases (e.g. Critical Multiplier = 150, Movement Speed = 100).
@@ -2086,6 +2109,19 @@ namespace STG.CurveDash
                         (statBonuses.TryGetValue(mapping.DevionStatName, out float cur) ? cur : 0f) + mod.Value;
                 }
             }
+        }
+
+        // Applies the summed gear bonus for an attribute (Strength/Dexterity/Intelligence) as a single Flat
+        // modifier tagged with this PlayerView as the source, replacing any previous gear modifier. The
+        // stat's BaseValue (authored + level growth + manual points) is left untouched.
+        private void ApplyGearAttributeModifier(DevionGames.StatSystem.StatsHandler handler, string statName, float bonus)
+        {
+            var stat = handler.GetStat(statName);
+            if (stat == null) return;
+            stat.RemoveModifiersFromSource(this);
+            if (Mathf.Abs(bonus) > 0.0001f)
+                stat.AddModifier(new DevionGames.StatSystem.StatModifier(
+                    bonus, DevionGames.StatSystem.StatModType.Flat, this));
         }
 
         private void TrySetStatBase(DevionGames.StatSystem.StatsHandler handler, string statName, float value)

@@ -39,7 +39,11 @@ namespace STG.CurveDash
             {
                 ref var enemy = ref enemyPool.Get(obstacle);
                 if (enemy.Data != null)
+                {
+                    // Killing a monster is the ONLY source of EXP. Score (HighScore) is granted too.
                     playerStatService.AddScore((int)enemy.Data.ExperienceReward);
+                    playerStatService.AddExp((int)enemy.Data.ExperienceReward);
+                }
 
                 if (viewLinkPool.Has(obstacle))
                 {

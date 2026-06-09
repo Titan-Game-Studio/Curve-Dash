@@ -15,7 +15,27 @@ namespace STG.CurveDash
         public const int Damege = 1;
         public const int MaxHeart = 5;
         public const int ScoreForStep = 1;
-        public const int ScoreForNextLevel = 300; // Score (exp) needed to advance one level.
+        // --- Leveling / EXP ---
+        // EXP is earned ONLY by killing monsters (granted by ObstacleSystem on enemy death). The per-run
+        // Score (HighScore) is separate and still accrues from steps/coins/kills via AddScore.
+        public const int BaseExpToLevel = 300;        // EXP to go from level 1 → 2.
+        public const int LevelsToDoubleExp = 10;      // EXP requirement DOUBLES every this many levels.
+
+        // Each character level auto-grants this many points to Strength, Dexterity AND Intelligence.
+        // Applied as a Devion stat MODIFIER (not BaseValue) so it never wipes manually-allocated points.
+        public const float AttributeGrowthPerLevel = 3f;
+
+        /// <summary>
+        /// EXP required to advance FROM <paramref name="level"/> to the next. Smooth geometric curve that
+        /// rises a little each level (×2^(1/LevelsToDoubleExp) ≈ +7%/level) and doubles exactly every
+        /// <see cref="LevelsToDoubleExp"/> levels:  req = Base × 2^((level-1)/LevelsToDoubleExp).
+        /// </summary>
+        public static int ExpToNextLevel(int level)
+        {
+            if (level < 1) level = 1;
+            double req = BaseExpToLevel * System.Math.Pow(2.0, (level - 1) / (double)LevelsToDoubleExp);
+            return Mathf.Max(1, (int)System.Math.Round(req));
+        }
 
         // --- PoE-style Energy Shield recharge ---
         // ES starts recharging after this many seconds without taking any damage, then refills at
@@ -24,11 +44,15 @@ namespace STG.CurveDash
         public const float ShieldRechargeFractionPerSec = 1f / 3f; // ~33% of max ES / sec → full in ~3s
         private float _timeSinceLastDamage = 0f;
 
-        // Exp into the CURRENT level, clamped to [0, ScoreForNextLevel] so the "x / threshold" bar
+        // Exp into the CURRENT level, clamped to [0, ExpToNextLevel(level)] so the "x / threshold" bar
         // never shows a negative or overflow. Exp is persistent and decoupled from the per-run Score.
         private static int ExpIntoCurrentLevel(in PlayerStatComponent c) =>
-            Mathf.Clamp(c.Exp, 0, ScoreForNextLevel);
+            Mathf.Clamp(c.Exp, 0, ExpToNextLevel(c.Level));
         private bool hasPushedInitialStats = false;
+
+        // Source token tagging the per-level attribute growth modifier so we can replace it cleanly
+        // (RemoveModifiersFromSource) without touching gear modifiers or the manually-allocated BaseValue.
+        private readonly object _attributeGrowthSource = new object();
 
         private readonly EcsPool<PlayerStatComponent> playerStatPool;
         private readonly EcsPool<PlayerLevelUpComponent> playerLevelUpPool;
@@ -52,33 +76,53 @@ namespace STG.CurveDash
             return ref playerStatComponent;
         }
 
+        // Per-run score only (drives HighScore). EXP/leveling is intentionally NOT granted here anymore —
+        // experience comes solely from killing monsters via AddExp, so steps and coins no longer level you.
         public void AddScore(int score)
         {
             var playerStat = playerStatFilter.GetRawEntities()[0];
             ref var playerStatComponent = ref playerStatPool.Get(playerStat);
+            playerStatComponent.Score += score;
+        }
 
-            playerStatComponent.Score += score;   // per-run score (HighScore)
-            playerStatComponent.Exp += score;     // persistent XP into current level
+        /// <summary>
+        /// Grants experience and handles leveling. This is the ONLY source of EXP — called from the
+        /// enemy-death path so killing monsters is the sole way to level. Handles multi-level-ups,
+        /// per-level rewards (life/mana + Free Points) and persistence.
+        /// </summary>
+        public void AddExp(int amount)
+        {
+            if (amount <= 0) return;
+
+            var playerStat = playerStatFilter.GetRawEntities()[0];
+            ref var playerStatComponent = ref playerStatPool.Get(playerStat);
+
+            playerStatComponent.Exp += amount;
 
             bool leveled = false;
-            while (playerStatComponent.Exp >= ScoreForNextLevel)
+            int guard = 0; // safety net against a pathological curve causing an endless loop
+            while (playerStatComponent.Exp >= ExpToNextLevel(playerStatComponent.Level) && guard++ < 1000)
             {
-                playerStatComponent.Exp -= ScoreForNextLevel;
+                playerStatComponent.Exp -= ExpToNextLevel(playerStatComponent.Level);
                 playerStatComponent.Level++;
                 leveled = true;
                 AddLife(20f);
                 AddMana(10f);
-                GrantFreePoints();
+                // 1 Free Point per level, +1 bonus on every 10th level.
+                GrantFreePoints(1 + (playerStatComponent.Level % 10 == 0 ? 1 : 0));
                 // Mirror the authoritative level onto the Devion "Level" stat so the character sheet
                 // shows the real level (its built-in Exp→Level system is not used here).
                 PushLevelToDevion(playerStatComponent.Level);
             }
 
+            // Refresh the per-level attribute growth modifier to match the new level.
+            if (leveled) ApplyAttributeLevelGrowth(playerStatComponent.Level);
+
             if (leveled && !playerLevelUpPool.Has(playerStat))
                 playerLevelUpPool.Add(playerStat);
 
             // Persist level/XP so progression carries across runs and deaths. Only write on a ding to
-            // avoid hammering PlayerPrefs every step; GameEnd saves the partial XP at run end.
+            // avoid hammering PlayerPrefs; GameEnd saves any partial XP at run end.
             if (dataManager?.UserData != null)
             {
                 dataManager.UserData.CharacterLevel = playerStatComponent.Level;
@@ -107,16 +151,49 @@ namespace STG.CurveDash
             }
         }
 
-        private void GrantFreePoints()
+        // Re-applies the per-level attribute growth as a Flat modifier on Strength/Dexterity/Intelligence.
+        // Deterministic from Level (= (Level-1) × AttributeGrowthPerLevel), so it is correct after a restart
+        // (recomputed from the persisted level) and never double-counts. Manually-allocated points live in
+        // BaseValue and are untouched; gear bonuses are separate modifiers from PlayerView.
+        private void ApplyAttributeLevelGrowth(int level)
         {
             try
             {
+                var handler = DevionGames.StatSystem.StatsManager.GetStatsHandler("Player Stats");
+                if (handler == null) return;
+
+                float growth = Mathf.Max(0, level - 1) * AttributeGrowthPerLevel;
+                ApplyGrowthModifier(handler.GetStat("Strength"), growth);
+                ApplyGrowthModifier(handler.GetStat("Dexterity"), growth);
+                ApplyGrowthModifier(handler.GetStat("Intelligence"), growth);
+                handler.onUpdate?.Invoke();
+            }
+            catch (System.Exception ex)
+            {
+                UnityEngine.Debug.LogWarning($"[PlayerStatService] ApplyAttributeLevelGrowth failed: {ex.Message}");
+            }
+        }
+
+        private void ApplyGrowthModifier(DevionGames.StatSystem.Stat stat, float growth)
+        {
+            if (stat == null) return;
+            stat.RemoveModifiersFromSource(_attributeGrowthSource);
+            if (growth > 0f)
+                stat.AddModifier(new DevionGames.StatSystem.StatModifier(
+                    growth, DevionGames.StatSystem.StatModType.Flat, _attributeGrowthSource));
+        }
+
+        private void GrantFreePoints(int amount)
+        {
+            try
+            {
+                if (amount <= 0) return;
                 if (cachedFreePointsStat == null)
                 {
                     var handler = DevionGames.StatSystem.StatsManager.GetStatsHandler("Player Stats");
                     cachedFreePointsStat = handler?.GetStat("Free Points");
                 }
-                cachedFreePointsStat?.Add(FreePointsPerLevel);
+                cachedFreePointsStat?.Add(amount);
             }
             catch (System.Exception ex)
             {
@@ -255,7 +332,7 @@ namespace STG.CurveDash
             int savedLevel = dataManager?.UserData?.CharacterLevel ?? 1;
             int savedExp = dataManager?.UserData?.CharacterExp ?? 0;
             playerStatComponent.Level = Mathf.Max(level, savedLevel);
-            playerStatComponent.Exp = Mathf.Clamp(savedExp, 0, ScoreForNextLevel);
+            playerStatComponent.Exp = Mathf.Clamp(savedExp, 0, ExpToNextLevel(playerStatComponent.Level));
             playerStatComponent.Score = 0;  // per-run score always starts fresh
             playerStatComponent.Gold = 0;
 
@@ -311,8 +388,6 @@ namespace STG.CurveDash
                 dataManager.SaveData();
             }
         }
-
-        private const int FreePointsPerLevel = 5;
 
         private DevionGames.StatSystem.StatsHandler cachedHandler;
         // Attributes (have CurrentValue)
@@ -395,6 +470,10 @@ namespace STG.CurveDash
                     // later pull raises MaxLife while CurrentLife stays low — the HP bar opens non-full on
                     // restart/revive. Reading after the push guarantees CurrentLife == MaxLife (full HP).
                     PushLevelToDevion(comp.Level);
+
+                    // Apply per-level attribute growth now that the player has spawned and the level is live.
+                    // (Recomputed from the restored level, so it's correct across runs/deaths.)
+                    ApplyAttributeLevelGrowth(comp.Level);
 
                     if (cachedHeartStat != null)
                     {

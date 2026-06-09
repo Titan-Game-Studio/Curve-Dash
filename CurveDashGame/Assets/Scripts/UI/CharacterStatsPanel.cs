@@ -271,8 +271,13 @@ namespace STG.CurveDash
         {
             string value;
             if (stat.Name == "Exp")
-                // Exp holds progress into the current level — show it as "x / threshold".
-                value = Mathf.RoundToInt(stat.Value) + " / " + PlayerStatService.ScoreForNextLevel;
+            {
+                // Exp holds progress into the current level — show it as "x / threshold", where the
+                // threshold is the EXP needed to advance FROM the current level (now level-dependent).
+                var lvlStat = StatsManager.GetStatsHandler(HandlerName)?.GetStat("Level");
+                int level = lvlStat != null ? Mathf.RoundToInt(lvlStat.Value) : 1;
+                value = Mathf.RoundToInt(stat.Value) + " / " + PlayerStatService.ExpToNextLevel(level);
+            }
             else if (stat is DevionGames.StatSystem.Attribute attr)
                 value = Mathf.RoundToInt(attr.CurrentValue) + " / " + Mathf.RoundToInt(attr.Value);
             else

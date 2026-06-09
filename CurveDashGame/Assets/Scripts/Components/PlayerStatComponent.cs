@@ -6,7 +6,7 @@ namespace STG.CurveDash
         public int Score;       // per-run score (resets each run; drives HighScore)
         public int HighScore;
         public int Level;       // persistent character level (carries across runs)
-        public int Exp;         // persistent XP into the CURRENT level (0..ScoreForNextLevel)
+        public int Exp;         // persistent XP into the CURRENT level (0..ExpToNextLevel(Level))
         public int Gold;
         public float CurrentLife;
         public float MaxLife;
