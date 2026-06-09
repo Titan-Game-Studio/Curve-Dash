@@ -30,6 +30,15 @@ namespace STG.CurveDash
         // PoE-style elemental resistance cap: resistance above this is wasted; negative resist amplifies.
         private const float MaxResistance = 75f;
 
+        // --- Attribute & level damage scaling (tunable) ---
+        // Strength → increased PHYSICAL (base/weapon) damage; Intelligence → increased ELEMENTAL damage;
+        // each character Level → flat % increased TOTAL damage; Dexterity → increased attack speed (which
+        // in this combat model also raises how often skills are cast).
+        private const float PhysPercentPerStrength      = 0.5f; // +0.5% physical damage per Strength
+        private const float ElePercentPerIntelligence   = 0.5f; // +0.5% elemental damage per Intelligence
+        private const float DamagePercentPerLevel        = 3f;   // +3% total damage per character level
+        private const float AttackSpeedPercentPerDexterity = 0.2f; // +0.2% attack speed per Dexterity
+
         // Fraction of elemental damage that lands after a resistance %. 30 res → 0.7; -20 res → 1.2.
         private static float ResistMultiplier(float resistPercent) => 1f - Mathf.Min(resistPercent, MaxResistance) / 100f;
 
@@ -112,6 +121,14 @@ namespace STG.CurveDash
 
                     attackSpeed = combat.CurrentWeapon.FinalAttackSpeed;
                     if (attackSpeed < 0.1f) attackSpeed = 1.0f; // Safe minimum attack speed
+                }
+
+                // Dexterity grants increased attack speed. Note: skill casts are gated by attack speed in
+                // this combat model, so this also speeds up how often socketed skills fire.
+                if (_playerStatService != null)
+                {
+                    float dex = _playerStatService.GetPlayerStat().Dexterity;
+                    attackSpeed *= 1f + dex * AttackSpeedPercentPerDexterity / 100f;
                 }
 
                 if (combat.CooldownTimer > 0)
@@ -379,10 +396,31 @@ namespace STG.CurveDash
                                          // Sort enemies by distance to hit closest targets first
                                          enemiesInCone.Sort((a, b) => a.distSq.CompareTo(b.distSq));
 
-                                         int hitCount = Mathf.Min(enemiesInCone.Count, effectiveTargets);
-                                         for (int i = 0; i < hitCount; i++)
+                                         // Projectiles and Pierce/Chain are resolved as two SEPARATE passes:
+                                         //
+                                         // 1) Projectile pass — fire finalProjectileCount shots, distributed across
+                                         //    the cone enemies closest-first and WRAPPING. Surplus projectiles pile
+                                         //    back onto the closest enemies, so a lone monster struck by all 3
+                                         //    projectiles takes 3 separate hits, while a pack gets one shot each.
+                                         //
+                                         // 2) Pierce/Chain pass — reach bonusTargets ADDITIONAL distinct enemies
+                                         //    further back (one extra hit each). These never stack onto enemies the
+                                         //    projectiles already hit, so pierce/chain only widen the spread, never
+                                         //    multi-hit a single target.
+                                         if (enemiesInCone.Count > 0)
                                          {
-                                             targetsToHit.Add(enemiesInCone[i].entity);
+                                             for (int i = 0; i < finalProjectileCount; i++)
+                                             {
+                                                 targetsToHit.Add(enemiesInCone[i % enemiesInCone.Count].entity);
+                                             }
+
+                                             int projectileReach = Mathf.Min(finalProjectileCount, enemiesInCone.Count);
+                                             for (int i = 0; i < bonusTargets; i++)
+                                             {
+                                                 int idx = projectileReach + i;
+                                                 if (idx >= enemiesInCone.Count) break;
+                                                 targetsToHit.Add(enemiesInCone[idx].entity);
+                                             }
                                          }
                                      }
                                  }
@@ -484,6 +522,14 @@ namespace STG.CurveDash
                 baseDamage = Random.Range(5f, 10f);
             }
 
+            // 1c. Attribute scaling: Strength boosts physical (base) damage, Intelligence boosts elemental.
+            if (_playerStatService != null)
+            {
+                var attrStat = _playerStatService.GetPlayerStat();
+                baseDamage      *= 1f + attrStat.Strength     * PhysPercentPerStrength    / 100f;
+                elementalDamage *= 1f + attrStat.Intelligence * ElePercentPerIntelligence / 100f;
+            }
+
             // 2. Add Off-hand / Shield Bonus Damage
             if (playerViewComponent != null)
             {
@@ -566,6 +612,14 @@ namespace STG.CurveDash
 
                     totalDamage = (totalDamage + skillFlat) * skillMultiplier;
                 }
+            }
+
+            // 3.6. Level scaling: each character level adds a flat % to total damage, so a high-level
+            //      character hits meaningfully harder with the same weapon.
+            if (_playerStatService != null)
+            {
+                int lvl = _playerStatService.GetPlayerStat().Level;
+                totalDamage *= 1f + Mathf.Max(0, lvl - 1) * DamagePercentPerLevel / 100f;
             }
 
             // 4. Critical Hit — driven by the character's stats (CurveDash_Character_Stats),
@@ -655,7 +709,10 @@ namespace STG.CurveDash
                 }
 
                 // Floating damage number above the enemy (orange + "!" on crit, white otherwise).
-                Vector3 dmgPopPos = targetEnemyView.Transform.position + Vector3.up * 2.0f;
+                // Small horizontal jitter so multiple projectile hits on the same enemy show as
+                // separate numbers instead of stacking on the exact same spot.
+                Vector3 dmgPopPos = targetEnemyView.Transform.position + Vector3.up * 2.0f
+                                  + new Vector3(Random.Range(-0.4f, 0.4f), Random.Range(-0.2f, 0.2f), 0f);
                 Color dmgColor = isCrit ? new Color(1f, 0.55f, 0f) : Color.white;
                 STG.CurveDash.Views.FloatingDamageNumber.Spawn(dmgPopPos, totalDamage, dmgColor, isCrit);
             }
