@@ -23,9 +23,19 @@ namespace STG.CurveDash
         private readonly Dictionary<GameObject, List<GameObject>> _pools = new Dictionary<GameObject, List<GameObject>>();
 
         /// <summary>
-        /// Sinh ra hiệu ứng từ Pool. Tự động tái sử dụng nếu đã tồn tại các thực thể nhàn rỗi.
+        /// Sinh ra hiệu ứng từ Pool tại vị trí world. Tự động tái sử dụng nếu đã tồn tại các thực thể nhàn rỗi.
         /// </summary>
         public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation)
+            => SpawnInternal(prefab, position, rotation, null, false);
+
+        /// <summary>
+        /// Sinh hiệu ứng và gắn (parent) vào <paramref name="parent"/> với toạ độ/ xoay cục bộ — hiệu ứng sẽ
+        /// đi theo parent (vd: aura sinh dưới chân và bám theo nhân vật). Vẫn tái sử dụng từ Pool như bình thường.
+        /// </summary>
+        public GameObject SpawnAttached(GameObject prefab, Transform parent, Vector3 localPosition, Quaternion localRotation)
+            => SpawnInternal(prefab, localPosition, localRotation, parent, true);
+
+        private GameObject SpawnInternal(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent, bool useLocal)
         {
             if (prefab == null) return null;
 
@@ -55,22 +65,32 @@ namespace STG.CurveDash
             // Nếu không có đối tượng rảnh, tiến hành Instantiate mới
             if (instance == null)
             {
-                instance = Instantiate(prefab, position, rotation);
+                instance = Instantiate(prefab);
                 list.Add(instance);
 
                 // Gắn helper tự động Deactive khi Particle phát xong
-                var helper = instance.GetComponent<VfxPoolHelper>();
-                if (helper == null)
+                if (instance.GetComponent<VfxPoolHelper>() == null)
                 {
-                    helper = instance.AddComponent<VfxPoolHelper>();
+                    instance.AddComponent<VfxPoolHelper>();
                 }
+            }
+
+            // Đặt parent + toạ độ. Khi có parent, hiệu ứng bám theo parent; khi không, trả về world-space.
+            var t = instance.transform;
+            if (parent != null)
+            {
+                t.SetParent(parent, false);
+                if (useLocal) { t.localPosition = position; t.localRotation = rotation; }
+                else { t.position = position; t.rotation = rotation; }
             }
             else
             {
-                instance.transform.position = position;
-                instance.transform.rotation = rotation;
-                instance.SetActive(true);
+                if (t.parent != null) t.SetParent(null, false); // gỡ khỏi parent cũ (vd: lần trước bám theo nhân vật)
+                t.position = position;
+                t.rotation = rotation;
             }
+
+            instance.SetActive(true);
 
             // Reset và chạy lại toàn bộ Particle System con
             var particles = instance.GetComponentsInChildren<ParticleSystem>();

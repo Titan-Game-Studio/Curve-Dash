@@ -23,6 +23,11 @@ namespace STG.CurveDash
         // Remaining effect time per currently-equipped aura. <= 0 means "recast this frame".
         private readonly Dictionary<PoEAbility, float> _remaining = new Dictionary<PoEAbility, float>();
 
+        // Live VFX instances per aura (cast/impact + support extras), parented to the player's feet anchor.
+        // We recycle these before each recast so the looping aura never stacks duplicate copies, and
+        // deactivate them when the aura is unequipped.
+        private readonly Dictionary<PoEAbility, List<GameObject>> _vfx = new Dictionary<PoEAbility, List<GameObject>>();
+
         // Reused per tick to detect auras that got unequipped so we can drop their timers.
         private readonly List<PoEAbility> _activeAuras = new List<PoEAbility>();
         private readonly List<PoEAbility> _staleAuras = new List<PoEAbility>();
@@ -68,8 +73,26 @@ namespace STG.CurveDash
 
                     if (timeLeft <= 0f)
                     {
-                        // Effect expired (or first time) → recast at the player's position.
-                        aura.Execute(playerGo, playerView.Transform.position);
+                        // Effect expired (or first time) → recast attached to the player's feet anchor so the
+                        // aura sits under the character and follows them. Recycle the previous cast's VFX first
+                        // so re-casting the looping aura reuses the pooled instances instead of stacking copies.
+                        if (!_vfx.TryGetValue(aura, out var instances))
+                        {
+                            instances = new List<GameObject>();
+                            _vfx[aura] = instances;
+                        }
+                        else
+                        {
+                            foreach (var go in instances)
+                                if (go != null) go.SetActive(false);
+                            instances.Clear();
+                        }
+
+                        Transform anchor = (playerViewComponent != null && playerViewComponent.AuraAnchor != null)
+                            ? playerViewComponent.AuraAnchor
+                            : playerView.Transform;
+                        aura.CastAura(playerGo, anchor, instances);
+
                         // Duration modifiers (the aura's own SelfModifiers + compatible support gems) extend it.
                         timeLeft = Mathf.Max(0.1f, aura.Duration * EffectiveDurationMultiplier(aura, playerViewComponent));
                     }
@@ -77,7 +100,7 @@ namespace STG.CurveDash
                     _remaining[aura] = timeLeft;
                 }
 
-                // Forget timers for auras that are no longer equipped.
+                // Forget timers — and tear down VFX — for auras that are no longer equipped.
                 _staleAuras.Clear();
                 foreach (var kvp in _remaining)
                 {
@@ -85,7 +108,15 @@ namespace STG.CurveDash
                         _staleAuras.Add(kvp.Key);
                 }
                 foreach (var stale in _staleAuras)
+                {
                     _remaining.Remove(stale);
+                    if (_vfx.TryGetValue(stale, out var instances))
+                    {
+                        foreach (var go in instances)
+                            if (go != null) go.SetActive(false);
+                        _vfx.Remove(stale);
+                    }
+                }
             }
         }
 

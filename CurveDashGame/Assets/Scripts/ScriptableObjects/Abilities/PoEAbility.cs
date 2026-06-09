@@ -118,15 +118,12 @@ namespace STG.CurveDash
             
             if (SkillType == PoEAbilityType.Aura)
             {
-                Vector3 auraPos = user.transform.position;
-                if (CastVFX != null)
-                    VfxSystem.RequestSpawn(CastVFX, auraPos, Quaternion.identity);
-                foreach (var extraVfx in extraCastVFXs)
-                    VfxSystem.RequestSpawn(extraVfx, auraPos, Quaternion.identity);
-                if (ImpactVFX != null)
-                    VfxSystem.RequestSpawn(ImpactVFX, auraPos, Quaternion.identity);
-                foreach (var extraVfx in extraImpactVFXs)
-                    VfxSystem.RequestSpawn(extraVfx, auraPos, Quaternion.identity);
+                // Auras are ground effects: parent them to the player's feet anchor so they spawn under
+                // the character and follow them, instead of being stamped at a fixed world position.
+                Transform anchor = (playerView != null && playerView.AuraAnchor != null)
+                    ? playerView.AuraAnchor
+                    : (user != null ? user.transform : null);
+                SpawnAuraVfx(anchor, extraCastVFXs, extraImpactVFXs, null);
                 return;
             }
 
@@ -176,6 +173,67 @@ namespace STG.CurveDash
             {
                 VfxSystem.RequestSpawn(extraVfx, targetPosition, baseRotation);
             }
+        }
+
+        /// <summary>
+        /// Casts this aura's visuals attached to <paramref name="anchor"/> (the player's feet anchor) so they
+        /// follow the character. Resolves the compatible support gems' extra VFX, then spawns the cast/impact
+        /// effects. Any spawned instances are appended to <paramref name="spawnedOut"/> so the caller
+        /// (<see cref="AuraSystem"/>) can recycle them before the next recast — preventing the looping aura
+        /// from stacking duplicate copies over time. Safe to call only for <see cref="PoEAbilityType.Aura"/>.
+        /// </summary>
+        public void CastAura(GameObject user, Transform anchor, System.Collections.Generic.List<GameObject> spawnedOut)
+        {
+            var extraCastVFXs = new System.Collections.Generic.List<GameObject>();
+            var extraImpactVFXs = new System.Collections.Generic.List<GameObject>();
+
+            var playerView = user != null ? user.GetComponent<PlayerView>() : null;
+            if (playerView != null)
+            {
+                var allAbilities = new System.Collections.Generic.List<AbilityData>();
+                if (playerView.CurrentWeaponInstance != null)
+                    allAbilities.AddRange(playerView.CurrentWeaponInstance.GetAbilities());
+                allAbilities.AddRange(playerView.GetEquippedArmorAbilities());
+
+                foreach (var ab in allAbilities)
+                {
+                    if (ab is SupportAbilityData support && support.IsCompatible(this))
+                    {
+                        if (support.ExtraCastVFX != null) extraCastVFXs.Add(support.ExtraCastVFX);
+                        if (support.ExtraImpactVFX != null) extraImpactVFXs.Add(support.ExtraImpactVFX);
+                    }
+                }
+            }
+
+            SpawnAuraVfx(anchor, extraCastVFXs, extraImpactVFXs, spawnedOut);
+        }
+
+        // Spawns the aura's cast + impact VFX (plus the support gems' extras) parented to the feet anchor,
+        // so each effect follows the player. When anchor is null we fall back to a world spawn at origin.
+        private void SpawnAuraVfx(Transform anchor,
+                                  System.Collections.Generic.List<GameObject> extraCastVFXs,
+                                  System.Collections.Generic.List<GameObject> extraImpactVFXs,
+                                  System.Collections.Generic.List<GameObject> spawnedOut)
+        {
+            SpawnAttachedTracked(CastVFX, anchor, spawnedOut);
+            if (extraCastVFXs != null)
+                foreach (var extraVfx in extraCastVFXs)
+                    SpawnAttachedTracked(extraVfx, anchor, spawnedOut);
+
+            SpawnAttachedTracked(ImpactVFX, anchor, spawnedOut);
+            if (extraImpactVFXs != null)
+                foreach (var extraVfx in extraImpactVFXs)
+                    SpawnAttachedTracked(extraVfx, anchor, spawnedOut);
+        }
+
+        private static void SpawnAttachedTracked(GameObject prefab, Transform anchor,
+                                                 System.Collections.Generic.List<GameObject> spawnedOut)
+        {
+            if (prefab == null) return;
+            GameObject go = anchor != null
+                ? VfxPoolManager.Instance.SpawnAttached(prefab, anchor, Vector3.zero, Quaternion.identity)
+                : VfxPoolManager.Instance.Spawn(prefab, Vector3.zero, Quaternion.identity);
+            spawnedOut?.Add(go);
         }
     }
 }
