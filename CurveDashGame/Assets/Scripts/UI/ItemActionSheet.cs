@@ -121,18 +121,96 @@ namespace STG.CurveDash
             var tt = InventoryManager.UI != null ? InventoryManager.UI.tooltip : null;
             if (tt == null || _item == null) { Close(); return; }
 
+            var slot = _slot;           // capture before we hide the sheet
             ShowRoot(false);            // hide our sheet so the (lower-canvas) tooltip is visible
             if (_catcher != null) _catcher.SetActive(true);
 
             tt.Show(DevionGames.UnityTools.ColorString(_item.DisplayName, _item.Rarity.Color),
                     _item.Description, _item.Icon, _item.GetPropertyInfo());
+
+            // Devion's tooltip follows Input.mousePosition, which on a tap-driven (mobile) UI parks it
+            // in a random corner. Pin it beside the tapped slot instead.
+            PinTooltipNextToSlot(tt, slot);
         }
 
         private void DismissTooltip()
         {
             var tt = InventoryManager.UI != null ? InventoryManager.UI.tooltip : null;
             if (tt != null) tt.Close();
+            RestoreTooltipFollow(tt);
             if (_catcher != null) _catcher.SetActive(false);
+        }
+
+        // ---------- tooltip positioning (place beside the slot, not under the mouse) ----------
+
+        private const System.Reflection.BindingFlags _ttFlags =
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+        private static System.Reflection.FieldInfo _ttFollowField;   // protected bool m_UpdatePosition
+        private static System.Reflection.FieldInfo _ttActiveField;   // private  bool _updatePosition
+        private bool _ttFollowSaved;
+        private bool _ttFollowOverridden;
+
+        private void PinTooltipNextToSlot(DevionGames.UIWidgets.Tooltip tt, ItemSlot slot)
+        {
+            if (tt == null || slot == null) return;
+            var rt = tt.GetComponent<RectTransform>();
+            var canvas = tt.GetComponentInParent<Canvas>();
+            var slotRT = slot.transform as RectTransform;
+            if (rt == null || canvas == null || slotRT == null) return;
+
+            // Stop the per-frame mouse-follow so our placement sticks; remember the value to restore it
+            // (PC hover should keep following the cursor).
+            var tType = typeof(DevionGames.UIWidgets.Tooltip);
+            if (_ttFollowField == null) _ttFollowField = tType.GetField("m_UpdatePosition", _ttFlags);
+            if (_ttActiveField == null) _ttActiveField = tType.GetField("_updatePosition", _ttFlags);
+            if (_ttFollowField != null)
+            {
+                _ttFollowSaved = (bool)_ttFollowField.GetValue(tt);
+                _ttFollowField.SetValue(tt, false);
+                _ttFollowOverridden = true;
+            }
+            if (_ttActiveField != null) _ttActiveField.SetValue(tt, false);
+
+            // Make sure the tooltip has its final size before we measure it.
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+
+            var cam = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+            float scale = canvas.scaleFactor <= 0f ? 1f : canvas.scaleFactor;
+
+            // Slot bounds in screen pixels.
+            var c = new Vector3[4];
+            slotRT.GetWorldCorners(c);
+            Vector2 slotBL = RectTransformUtility.WorldToScreenPoint(cam, c[0]);
+            Vector2 slotTR = RectTransformUtility.WorldToScreenPoint(cam, c[2]);
+            float slotCenterX = (slotBL.x + slotTR.x) * 0.5f;
+            float slotCenterY = (slotBL.y + slotTR.y) * 0.5f;
+
+            // Tooltip box size in screen pixels (rect.size is in canvas units).
+            Vector2 ttSize = rt.rect.size * scale;
+            float halfW = ttSize.x * 0.5f;
+            float halfH = ttSize.y * 0.5f;
+            const float margin = 16f;
+
+            // Prefer the side with more room: right of the slot when it sits in the left half, else left.
+            float x = slotCenterX < Screen.width * 0.5f
+                ? slotTR.x + margin + halfW
+                : slotBL.x - margin - halfW;
+            float y = slotCenterY;
+
+            // Keep the whole box on screen.
+            x = Mathf.Clamp(x, halfW + margin, Screen.width - halfW - margin);
+            y = Mathf.Clamp(y, halfH + margin, Screen.height - halfH - margin);
+
+            var canvasRT = canvas.transform as RectTransform;
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRT, new Vector2(x, y), cam, out var lp))
+                tt.transform.position = canvas.transform.TransformPoint(lp);
+        }
+
+        private void RestoreTooltipFollow(DevionGames.UIWidgets.Tooltip tt)
+        {
+            if (!_ttFollowOverridden || tt == null || _ttFollowField == null) return;
+            _ttFollowField.SetValue(tt, _ttFollowSaved);
+            _ttFollowOverridden = false;
         }
 
         // ---------------------------------------------------------------- UI scaffold

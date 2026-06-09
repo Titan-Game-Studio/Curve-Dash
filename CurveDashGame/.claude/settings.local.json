@@ -37,7 +37,9 @@
       "Bash(git rm *)",
       "Bash(git stat *)",
       "Bash(git *)",
-      "Bash(xargs grep -l \"Heart\")"
+      "Bash(xargs grep -l \"Heart\")",
+      "PowerShell(git *)",
+      "Bash(python -)"
     ],
     "additionalDirectories": [
       "D:\\UNITY_PROJECTS\\Curve-Dash\\CurveDashGame\\obsidian-unity\\02_Active_Tasks"
