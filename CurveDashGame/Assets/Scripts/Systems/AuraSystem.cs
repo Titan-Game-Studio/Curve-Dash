@@ -44,7 +44,13 @@ namespace STG.CurveDash
         public void Tick()
         {
             // Auras are gameplay self-buffs — don't cast their VFX while the world is frozen.
-            if (!gameState.IsPlaying) return;
+            // Also clear the buff snapshot so the Stats panel doesn't show stale auras on the
+            // Title / Game Over screens.
+            if (!gameState.IsPlaying)
+            {
+                if (ActiveBuffTracker.Auras.Count > 0) ActiveBuffTracker.Auras.Clear();
+                return;
+            }
 
             float dt = Time.deltaTime;
 
@@ -116,6 +122,24 @@ namespace STG.CurveDash
                             if (go != null) go.SetActive(false);
                         _vfx.Remove(stale);
                     }
+                }
+
+                // Publish the live set of active auras for the buff UI. Auras loop while equipped, so we
+                // expose the current cast's remaining time and its full (effective) duration — the UI shows
+                // a depleting timer that refills on each recast.
+                ActiveBuffTracker.Auras.Clear();
+                foreach (var aura in _activeAuras)
+                {
+                    float remaining = _remaining.TryGetValue(aura, out float r) ? r : 0f;
+                    float fullDuration = Mathf.Max(0.1f, aura.Duration * EffectiveDurationMultiplier(aura, playerViewComponent));
+                    ActiveBuffTracker.Auras.Add(new ActiveBuffTracker.AuraBuff
+                    {
+                        Name = string.IsNullOrEmpty(aura.AbilityName) ? aura.name : aura.AbilityName,
+                        Icon = aura.Icon,
+                        Element = aura.Element,
+                        Remaining = remaining,
+                        Duration = fullDuration
+                    });
                 }
             }
         }

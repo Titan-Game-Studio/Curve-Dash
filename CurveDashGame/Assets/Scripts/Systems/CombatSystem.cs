@@ -64,7 +64,8 @@ namespace STG.CurveDash
         public void Tick()
         {
             // No combat (enemy facing, player attacks) while the world is frozen at Title / GameEnd.
-            if (!_gameState.IsPlaying) return;
+            // Clear the cooldown readout too, so the action bar shows no stale sweep on those screens.
+            if (!_gameState.IsPlaying) { PlayerCooldownTracker.Reset(); return; }
 
             // Smoothly rotate nearby enemies to face the player
             foreach (var playerEntity in playerFilter)
@@ -135,6 +136,12 @@ namespace STG.CurveDash
                 // attack rate, not just the animation. Data-driven: any flask with such a Buffs entry works.
                 if (_beltFlaskService != null)
                     attackSpeed *= 1f + _beltFlaskService.SumActiveValue(StatType.IncreasedAttackSpeed) / 100f;
+
+                // Publish the current attack cadence for the action-bar cooldown sweep. attackSpeed is now
+                // final (weapon + dexterity + flask), so the full cooldown is 1 / attackSpeed and the timer
+                // counts down toward ready. Done every frame, before the early-out below, so the sweep stays
+                // live even while the weapon is recharging.
+                PlayerCooldownTracker.Report(combat.CooldownTimer, 1f / attackSpeed);
 
                 if (combat.CooldownTimer > 0)
                 {

@@ -51,6 +51,7 @@ namespace STG.CurveDash
 
             // A belt swap can drop active flasks → re-apply the (now smaller) active-buff set immediately.
             ActiveBuffsChanged?.Invoke();
+            PublishActiveBuffs();
         }
 
         // Restore ChargesGainedOnKill to every flask — call when an enemy is killed.
@@ -100,6 +101,7 @@ namespace STG.CurveDash
             });
             // New flask starts inactive (no buff yet), but signal anyway so consumers stay in sync.
             ActiveBuffsChanged?.Invoke();
+            PublishActiveBuffs();
         }
 
         public void RemoveEquipmentFlask(FlaskItemData flask)
@@ -108,7 +110,10 @@ namespace STG.CurveDash
             // Fire immediately (not via Tick) so an unequipped-while-active flask's buff is cleared even when
             // it was the last flask — once HasAnyFlask is false, Tick stops running and would never signal.
             if (_equipmentFlaskStates.RemoveAll(s => s.Flask == flask) > 0)
+            {
                 ActiveBuffsChanged?.Invoke();
+                PublishActiveBuffs();
+            }
         }
 
         // Aggregates the stat modifiers of every CURRENTLY-ACTIVE flask. This is the single, data-driven
@@ -170,7 +175,38 @@ namespace STG.CurveDash
                 ActiveBuffsChanged?.Invoke();
             }
 
+            // Refresh the buff snapshot every tick so the Stats panel shows live remaining times.
+            PublishActiveBuffs();
+
             return (lifeHeal, manaRestore);
+        }
+
+        // Pushes the currently-active flask effects (belt + equipment) to the shared ActiveBuffTracker so the
+        // Stats panel can list them with live remaining time. Called every Tick (live countdown) and whenever
+        // flask membership changes (SetBelt / add / remove) — the latter covers the case where the last flask
+        // is removed and Tick stops running, which would otherwise leave a stale entry on screen.
+        private void PublishActiveBuffs()
+        {
+            ActiveBuffTracker.Flasks.Clear();
+            AppendActiveBuffs(_beltFlaskStates);
+            AppendActiveBuffs(_equipmentFlaskStates);
+        }
+
+        private static void AppendActiveBuffs(List<BeltFlaskActiveState> states)
+        {
+            foreach (var state in states)
+            {
+                if (!state.IsActive || state.Flask == null) continue;
+                ActiveBuffTracker.Flasks.Add(new ActiveBuffTracker.FlaskBuff
+                {
+                    Name = string.IsNullOrEmpty(state.Flask.ItemName) ? state.Flask.name : state.Flask.ItemName,
+                    Icon = state.Flask.Icon,
+                    Type = state.Flask.FlaskType,
+                    Remaining = state.TimeRemaining,
+                    Duration = state.Flask.Duration,
+                    Buffs = state.Flask.Buffs
+                });
+            }
         }
 
         private void TickList(List<BeltFlaskActiveState> states, float deltaTime,

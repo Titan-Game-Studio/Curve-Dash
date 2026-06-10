@@ -225,6 +225,10 @@ namespace STG.CurveDash
             // otherwise its load can land AFTER our additions and wipe them.
             yield return new UnityEngine.WaitForSecondsRealtime(0.35f);
 
+            // Strip any foreign items the Devion database/save still drags in (demo leftovers such as
+            // "Home Rune", "Bowl", "Scoparius"). Only our own adapters and Currency belong in the bag.
+            PurgeForeignInventoryItems();
+
             UnityEngine.Debug.Log($"<color=orange>[StarterEquipment] After wait: IsLoaded={DevionGames.InventorySystem.InventoryManager.IsLoaded}, HasAnyWeapon={HasAnyWeapon()}, Database={(DevionGames.InventorySystem.InventoryManager.Database != null)}</color>");
 
             // Grant only when the player has no weapon at all — leaves any looted gear untouched.
@@ -260,6 +264,42 @@ namespace STG.CurveDash
             DevionGames.InventorySystem.InventoryManager.Save();
 
             UnityEngine.Debug.Log("<color=green>[StarterEquipment] Minimal starter kit granted and saved.</color>");
+        }
+
+        // Removes every Inventory item that isn't part of our own item system. The shared Devion
+        // database (CurveDash_Vaal_Reliquary) still defines example items (Home Rune, Bowl, Scoparius,
+        // Wood, Axe…) that can leak into the bag through Devion's own save/load. Our real items are
+        // always CurveDashEquipmentAdapter or CurveDashItemAdapter; Currency stacks stay too. Anything
+        // else is a foreign leftover and is stripped, then we persist so it never comes back.
+        private static void PurgeForeignInventoryItems()
+        {
+            var foreign = new List<DevionGames.InventorySystem.Item>();
+            foreach (var c in DevionGames.UIWidgets.WidgetUtility.FindAll<DevionGames.InventorySystem.ItemContainer>("Inventory"))
+            {
+                if (c == null) continue;
+                foreach (var s in c.Slots)
+                {
+                    if (s == null || s.IsEmpty || s.ObservedItem == null) continue;
+                    var item = s.ObservedItem;
+                    bool isOurs = item is CurveDashEquipmentAdapter
+                                  || item is CurveDashItemAdapter
+                                  || item is DevionGames.InventorySystem.Currency;
+                    if (!isOurs && !foreign.Contains(item))
+                        foreign.Add(item);
+                }
+            }
+
+            if (foreign.Count == 0) return;
+
+            foreach (var item in foreign)
+            {
+                UnityEngine.Debug.Log($"<color=red>[StarterEquipment] Removing foreign inventory item '{item.Name}' (type={item.GetType().Name}).</color>");
+                DevionGames.InventorySystem.ItemContainer.RemoveItemCompletely(item);
+            }
+
+            // Persist so Devion's autosave/load cycle can't restore the foreign items next run.
+            DevionGames.InventorySystem.InventoryManager.Save();
+            UnityEngine.Debug.Log($"<color=green>[StarterEquipment] Purged {foreign.Count} foreign inventory item(s) and saved.</color>");
         }
 
         // Picks the smallest/lowest-tier flask of a type, preferring names hinting at a minor tier.

@@ -203,6 +203,10 @@ namespace STG.CurveDash
             // has to add stats up by hand.
             AppendSummary(handler);
 
+            // Currently-active self-buffs (looping auras + active flask effects), so the player can see at a
+            // glance what's boosting them right now and how long flask effects have left.
+            AppendActiveBuffs();
+
             var shown = new HashSet<Stat>();
             foreach (var group in Groups)
             {
@@ -254,6 +258,88 @@ namespace STG.CurveDash
                 _sb.Append("  <size=20><color=#8a8f9c>(").Append(life.ToString("0")).Append(" + ")
                    .Append(shield.ToString("0")).Append(" ES)</color></size>");
             _sb.Append("\n");
+        }
+
+        // Lists the player's currently-active self-buffs: looping auras (shown as persistent) and active
+        // flask effects (shown with a live remaining-time countdown and the stats they grant). Reads the
+        // shared ActiveBuffTracker, which AuraSystem and BeltFlaskService keep up to date every frame.
+        private void AppendActiveBuffs()
+        {
+            AppendHeader("Active Buffs");
+
+            if (!ActiveBuffTracker.HasAny)
+            {
+                _sb.Append("<color=#8a8f9c>None active</color>\n");
+                return;
+            }
+
+            foreach (var aura in ActiveBuffTracker.Auras)
+            {
+                _sb.Append("<color=").Append(ElementHex(aura.Element)).Append(">●</color> <b>")
+                   .Append(aura.Name).Append("</b> <size=20><color=#8a8f9c>(Aura)</color></size>\n");
+            }
+
+            foreach (var flask in ActiveBuffTracker.Flasks)
+            {
+                _sb.Append("<color=#7ad1ff>◆</color> <b>").Append(flask.Name).Append("</b>");
+                if (flask.Remaining > 0f)
+                    _sb.Append(" <color=#ffd24d>").Append(flask.Remaining.ToString("0.0")).Append("s</color>");
+
+                // Depleting time bar so the remaining duration reads at a glance.
+                if (flask.Duration > 0f)
+                {
+                    _sb.Append("  ");
+                    AppendTimeBar(Mathf.Clamp01(flask.Remaining / flask.Duration), "#7ad1ff");
+                }
+
+                // Granted stats followed by how long they last, so the line reads e.g. "+100 Armour for 3.6s".
+                string effects = DescribeFlaskBuffs(flask);
+                if (!string.IsNullOrEmpty(effects))
+                {
+                    _sb.Append("\n   <size=20><color=#9fe08d>").Append(effects).Append("</color>");
+                    if (flask.Remaining > 0f)
+                        _sb.Append("<color=#8a8f9c> for ").Append(flask.Remaining.ToString("0.0")).Append("s</color>");
+                    _sb.Append("</size>");
+                }
+                _sb.Append("\n");
+            }
+        }
+
+        // Renders a compact, continuous depleting bar with rich text: a solid run of full-block glyphs whose
+        // coloured (remaining) and dimmed (elapsed) split shows a buff's time left inside the text-only panel.
+        // Uses U+2588 for both halves so the bar reads as one solid strip regardless of glyph metrics.
+        private void AppendTimeBar(float fraction, string fillHex)
+        {
+            const int cells = 12;
+            int filled = Mathf.Clamp(Mathf.CeilToInt(fraction * cells), 0, cells);
+            _sb.Append("<color=").Append(fillHex).Append(">");
+            for (int i = 0; i < filled; i++) _sb.Append('█');
+            _sb.Append("</color><color=#33384a>");
+            for (int i = filled; i < cells; i++) _sb.Append('█');
+            _sb.Append("</color>");
+        }
+
+        // Joins a flask's active stat modifiers into one readable line, e.g. "+1000 Armour, +40% Movement Speed".
+        private static string DescribeFlaskBuffs(ActiveBuffTracker.FlaskBuff flask)
+        {
+            if (flask.Buffs == null || flask.Buffs.Count == 0) return string.Empty;
+            var parts = new List<string>(flask.Buffs.Count);
+            foreach (var mod in flask.Buffs)
+                if (mod != null) parts.Add(StatTypeFormatter.Describe(mod.Type, mod.Value));
+            return string.Join(", ", parts);
+        }
+
+        // Themed dot colour per aura element so auras read at a glance (fire = red, cold = blue, …).
+        private static string ElementHex(PoEElementType element)
+        {
+            switch (element)
+            {
+                case PoEElementType.Fire:      return "#ff6b4a";
+                case PoEElementType.Cold:      return "#7ad1ff";
+                case PoEElementType.Lightning: return "#ffe24d";
+                case PoEElementType.Chaos:     return "#c77dff";
+                default:                       return "#cfd2dc"; // Physical / fallback
+            }
         }
 
         private static float GetVal(StatsHandler handler, string name)
