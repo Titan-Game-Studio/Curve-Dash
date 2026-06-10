@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace STG.CurveDash
@@ -34,9 +35,13 @@ namespace STG.CurveDash
         [Tooltip("Charges restored each time the player kills an enemy (POE-style).")]
         public int ChargesGainedOnKill = 3;
 
-        [Header("Utility Buffs (Optional)")]
-        public float SpeedModifier = 1.0f;
-        public float AttackSpeedModifier = 1.0f;
+        [Header("Active-Effect Buffs (data-driven)")]
+        [Tooltip("Stat modifiers granted ONLY while this flask's effect is active. Reuses the shared StatType " +
+                 "system so ANY stat works with no new code: sheet stats (Armor, Resistances, Crit, Life Regen, …) " +
+                 "route to the character sheet via AffixStatMapper; Movement Speed (AddedMovementSpeed) and Attack " +
+                 "Speed (IncreasedAttackSpeed) are read by the movement/combat systems. Add entries here to define " +
+                 "new flask effects — e.g. Granite = AddedArmour 1000, Quicksilver = AddedMovementSpeed 40.")]
+        public List<StatModifier> Buffs = new List<StatModifier>();
 
         private void Reset()
         {

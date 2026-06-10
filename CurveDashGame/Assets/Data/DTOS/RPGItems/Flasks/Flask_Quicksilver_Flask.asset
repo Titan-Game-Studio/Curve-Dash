@@ -31,5 +31,8 @@ MonoBehaviour:
   MaxCharges: 60
   ChargesUsedPerUse: 20
   ChargesGainedOnKill: 3
-  SpeedModifier: 1.4
-  AttackSpeedModifier: 1
+  Buffs:
+  - Type: 17
+    Value: 40
+    AffixName: of the Cheetah
+    AffixType: 1

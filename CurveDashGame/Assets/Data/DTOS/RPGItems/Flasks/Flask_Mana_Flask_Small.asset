@@ -31,5 +31,4 @@ MonoBehaviour:
   MaxCharges: 30
   ChargesUsedPerUse: 10
   ChargesGainedOnKill: 3
-  SpeedModifier: 1
-  AttackSpeedModifier: 1
+  Buffs: []

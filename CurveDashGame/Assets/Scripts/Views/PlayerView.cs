@@ -180,6 +180,10 @@ namespace STG.CurveDash
             SyncEquipmentContainerListeners();
             StartCoroutine(SyncCharacterInfoStatsDelayed());
 
+            // Re-apply flask sheet buffs whenever the active-buff set changes (flask activates/expires/(un)equips).
+            if (_beltFlaskService != null)
+                _beltFlaskService.ActiveBuffsChanged += ReapplyFlaskBuffsToSheet;
+
 #if UNITY_EDITOR
             StartCoroutine(ApplyDebugGemsDelayed());
 #endif
@@ -304,9 +308,18 @@ namespace STG.CurveDash
                     {
                         if (_dataManager?.UserData?.EquippedItems != null)
                             _dataManager.UserData.EquippedItems[EquipmentSlot.OffHand] = offhand.name;
-                        
+
                         Debug.Log($"<color=cyan>[PlayerView] Rebuild: found offhand '{offhand.name}' in slot {i}</color>");
                         Equip(offhand);
+                    }
+                    else if (adapter.OriginalEquipmentData is FlaskItemData flask)
+                    {
+                        // Devion restores equipped flasks silently (no OnAddItem), so register them with the
+                        // flask service here on load — otherwise the flask never auto-uses until the player
+                        // manually re-equips it (which is what fires OnDevionEquipmentAdded → AddEquipmentFlask).
+                        _beltFlaskService.AddEquipmentFlask(flask);
+                        ResetFlaskRegionToAll(adapter);
+                        Debug.Log($"<color=cyan>[PlayerView] Rebuild: found flask '{flask.name}' in slot {i}</color>");
                     }
                     else
                     {
@@ -846,11 +859,10 @@ namespace STG.CurveDash
                 if (manaRestore > 0f)
                     _playerStatService.AddMana(manaRestore);
 
-                // Apply flask speed modifiers
-                float speedMod = _beltFlaskService.GetSpeedModifier();
-                float attackSpeedMod = _beltFlaskService.GetAttackSpeedModifier();
-                MovementSpeed *= speedMod;
-                AttackSpeed *= attackSpeedMod;
+                // Flask BUFFS are NOT applied here. Sheet stats (armor, resistances, crit, …) are pushed to the
+                // Devion character sheet by ReapplyFlaskBuffsToSheet, driven by the BeltFlaskService
+                // ActiveBuffsChanged event; movement/attack speed are read directly from the same active-buff
+                // data by PlayerMovementSystem and CombatSystem. Adding a new flask effect needs only data.
             }
         }
 
@@ -872,6 +884,10 @@ namespace STG.CurveDash
             if (_inventoryContainerRef != null)
             {
                 _inventoryContainerRef.OnTryUseItem -= OnInventoryTryUseItem;
+            }
+            if (_beltFlaskService != null)
+            {
+                _beltFlaskService.ActiveBuffsChanged -= ReapplyFlaskBuffsToSheet;
             }
 
             _skinCts?.Cancel();
@@ -2122,6 +2138,46 @@ namespace STG.CurveDash
             if (Mathf.Abs(bonus) > 0.0001f)
                 stat.AddModifier(new DevionGames.StatSystem.StatModifier(
                     bonus, DevionGames.StatSystem.StatModType.Flat, this));
+        }
+
+        // Private source token so we only ever touch OUR flask modifiers on the sheet (never gear/level ones).
+        private readonly object _flaskBuffSource = new object();
+
+        // Re-applies every currently-active flask buff onto the Devion character sheet as Flat modifiers,
+        // tagged by _flaskBuffSource. Fully generic via AffixStatMapper: any StatType a flask grants maps to
+        // its sheet stat(s) with zero per-stat code. Called on BeltFlaskService.ActiveBuffsChanged, so it runs
+        // only when a flask activates/expires or is (un)equipped — never every frame. Wipe-then-re-add keeps
+        // it idempotent; gear/affix Armor lives in BaseValue and is untouched. Movement/attack speed are
+        // consumed by the ECS systems directly, so their (non-existent or damage-coupled) sheet mappings here
+        // are simply a no-op or display-only — the real effect is applied there.
+        private void ReapplyFlaskBuffsToSheet()
+        {
+            var handler = DevionGames.StatSystem.StatsManager.GetStatsHandler("Player Stats");
+            if (handler == null) return;
+
+            // 1. Clear our previous flask modifiers from every sheet stat the mapper can write to.
+            foreach (var statName in AffixStatMapper.AllDevionStatNames)
+                handler.GetStat(statName)?.RemoveModifiersFromSource(_flaskBuffSource);
+
+            // 2. Re-add Flat contributions for the buffs that are active right now.
+            if (_beltFlaskService != null)
+            {
+                foreach (var mod in _beltFlaskService.GetActiveModifiers())
+                {
+                    if (mod == null) continue;
+                    foreach (var mapping in AffixStatMapper.GetMappings(mod.Type))
+                    {
+                        // Only Flat sheet contributions are mirrored here — same rule SyncCharacterInfoStats
+                        // uses for gear. PercentMult mappings (damage, attack speed) are owned by the weapon/
+                        // combat path and must not be double-applied to the sheet.
+                        if (mapping.Contribution != AffixStatMapper.ContributionType.FlatAdd) continue;
+                        handler.GetStat(mapping.DevionStatName)?.AddModifier(new DevionGames.StatSystem.StatModifier(
+                            mod.Value, DevionGames.StatSystem.StatModType.Flat, _flaskBuffSource));
+                    }
+                }
+            }
+
+            handler.onUpdate?.Invoke();
         }
 
         private void TrySetStatBase(DevionGames.StatSystem.StatsHandler handler, string statName, float value)

@@ -23,24 +23,34 @@ namespace STG.CurveDash
 
         public IReadOnlyList<BeltFlaskActiveState> FlaskStates => _beltFlaskStates;
 
+        // Raised whenever the set of currently-active flask buffs may have changed: a flask activated or
+        // expired, or one was equipped/unequipped. Consumers (PlayerView) re-apply the aggregated buffs to
+        // the character sheet on this signal, so application is event-driven, not polled every frame.
+        public event System.Action ActiveBuffsChanged;
+        private bool _activeSetDirty;
+
         public void SetBelt(BeltItemData belt)
         {
             _equippedBelt = belt;
             _beltFlaskStates.Clear();
 
-            if (belt == null) return;
-
-            foreach (var flask in belt.FlaskSlots)
+            if (belt != null)
             {
-                if (flask == null) continue;
-                _beltFlaskStates.Add(new BeltFlaskActiveState
+                foreach (var flask in belt.FlaskSlots)
                 {
-                    Flask = flask,
-                    CurrentCharges = flask.MaxCharges,
-                    TimeRemaining = 0f,
-                    IsActive = false
-                });
+                    if (flask == null) continue;
+                    _beltFlaskStates.Add(new BeltFlaskActiveState
+                    {
+                        Flask = flask,
+                        CurrentCharges = flask.MaxCharges,
+                        TimeRemaining = 0f,
+                        IsActive = false
+                    });
+                }
             }
+
+            // A belt swap can drop active flasks → re-apply the (now smaller) active-buff set immediately.
+            ActiveBuffsChanged?.Invoke();
         }
 
         // Restore ChargesGainedOnKill to every flask — call when an enemy is killed.
@@ -88,46 +98,59 @@ namespace STG.CurveDash
                 TimeRemaining = 0f,
                 IsActive = false
             });
+            // New flask starts inactive (no buff yet), but signal anyway so consumers stay in sync.
+            ActiveBuffsChanged?.Invoke();
         }
 
         public void RemoveEquipmentFlask(FlaskItemData flask)
         {
             if (flask == null) return;
-            _equipmentFlaskStates.RemoveAll(s => s.Flask == flask);
+            // Fire immediately (not via Tick) so an unequipped-while-active flask's buff is cleared even when
+            // it was the last flask — once HasAnyFlask is false, Tick stops running and would never signal.
+            if (_equipmentFlaskStates.RemoveAll(s => s.Flask == flask) > 0)
+                ActiveBuffsChanged?.Invoke();
         }
 
-        // Returns combined movement speed multiplier from all active utility flasks.
-        public float GetSpeedModifier()
+        // Aggregates the stat modifiers of every CURRENTLY-ACTIVE flask. This is the single, data-driven
+        // source of flask buffs: sheet stats are pushed to the character sheet by the consumer (via
+        // AffixStatMapper), while ECS systems read specific StatTypes via SumActiveValue. A new flask effect
+        // needs only data — a Buffs entry on the asset — and no new code anywhere.
+        public List<StatModifier> GetActiveModifiers()
         {
-            float mod = 1f;
-            foreach (var state in _beltFlaskStates)
-            {
-                if (state.IsActive && state.Flask.FlaskType == FlaskType.Utility && state.Flask.SpeedModifier != 1f)
-                    mod *= state.Flask.SpeedModifier;
-            }
-            foreach (var state in _equipmentFlaskStates)
-            {
-                if (state.IsActive && state.Flask.FlaskType == FlaskType.Utility && state.Flask.SpeedModifier != 1f)
-                    mod *= state.Flask.SpeedModifier;
-            }
-            return mod;
+            var result = new List<StatModifier>();
+            CollectActiveModifiers(_beltFlaskStates, result);
+            CollectActiveModifiers(_equipmentFlaskStates, result);
+            return result;
         }
 
-        // Returns combined attack speed multiplier from all active utility flasks.
-        public float GetAttackSpeedModifier()
+        private static void CollectActiveModifiers(List<BeltFlaskActiveState> states, List<StatModifier> dest)
         {
-            float mod = 1f;
-            foreach (var state in _beltFlaskStates)
+            foreach (var state in states)
             {
-                if (state.IsActive && state.Flask.FlaskType == FlaskType.Utility && state.Flask.AttackSpeedModifier != 1f)
-                    mod *= state.Flask.AttackSpeedModifier;
+                if (!state.IsActive || state.Flask == null || state.Flask.Buffs == null) continue;
+                foreach (var mod in state.Flask.Buffs)
+                    if (mod != null) dest.Add(mod);
             }
-            foreach (var state in _equipmentFlaskStates)
+        }
+
+        // Summed Value of one StatType across all active flasks. Used by ECS systems (movement/combat) that
+        // consume a stat directly instead of from the Devion sheet — e.g. AddedMovementSpeed (PlayerMovement)
+        // and IncreasedAttackSpeed (Combat). Returns 0 when no active flask grants it.
+        public float SumActiveValue(StatType type)
+        {
+            return SumActiveValue(_beltFlaskStates, type) + SumActiveValue(_equipmentFlaskStates, type);
+        }
+
+        private static float SumActiveValue(List<BeltFlaskActiveState> states, StatType type)
+        {
+            float sum = 0f;
+            foreach (var state in states)
             {
-                if (state.IsActive && state.Flask.FlaskType == FlaskType.Utility && state.Flask.AttackSpeedModifier != 1f)
-                    mod *= state.Flask.AttackSpeedModifier;
+                if (!state.IsActive || state.Flask == null || state.Flask.Buffs == null) continue;
+                foreach (var mod in state.Flask.Buffs)
+                    if (mod != null && mod.Type == type) sum += mod.Value;
             }
-            return mod;
+            return sum;
         }
 
         // Tick all flask states. Returns (lifeHeal, manaRestore) to apply this frame.
@@ -138,6 +161,14 @@ namespace STG.CurveDash
 
             TickList(_beltFlaskStates, deltaTime, currentHealth, maxHealth, currentMana, maxMana, ref lifeHeal, ref manaRestore);
             TickList(_equipmentFlaskStates, deltaTime, currentHealth, maxHealth, currentMana, maxMana, ref lifeHeal, ref manaRestore);
+
+            // Fire once per frame after both lists ticked, so a flask flipping active/inactive this frame
+            // re-applies the aggregated buffs exactly once (avoids mutating subscribers mid-iteration).
+            if (_activeSetDirty)
+            {
+                _activeSetDirty = false;
+                ActiveBuffsChanged?.Invoke();
+            }
 
             return (lifeHeal, manaRestore);
         }
@@ -161,7 +192,10 @@ namespace STG.CurveDash
                         manaRestore += recoverPerSec * deltaTime;
 
                     if (state.TimeRemaining <= 0f)
+                    {
                         state.IsActive = false;
+                        _activeSetDirty = true; // effect expired → buffs must be removed
+                    }
                 }
 
                 if (!state.IsActive && state.CurrentCharges >= state.Flask.ChargesUsedPerUse)
@@ -171,6 +205,7 @@ namespace STG.CurveDash
                         state.CurrentCharges -= state.Flask.ChargesUsedPerUse;
                         state.TimeRemaining = state.Flask.Duration;
                         state.IsActive = true;
+                        _activeSetDirty = true; // effect started → buffs must be applied
                     }
                 }
 

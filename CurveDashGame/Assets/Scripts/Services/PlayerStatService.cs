@@ -286,11 +286,23 @@ namespace STG.CurveDash
                 return false;
             }
 
-            // Sync latest values from Devion Games first
+            // Sync latest values from Devion Games first (this also pulls the live Armour total — gear +
+            // affixes + any active flask Armor modifier — into the component).
             SyncWithDevionGames(ref playerStatComponent, false);
 
             float oldLife = playerStatComponent.CurrentLife;
             float oldShield = playerStatComponent.CurrentEnergyShield;
+
+            // PoE-style Armour mitigation: a hit's physical damage is reduced by armour/(armour+10·hit),
+            // capped at 90%. This is the ONLY place Armour matters, so equipped armour AND active flasks
+            // (e.g. a Granite Flask's +Armor) now genuinely lessen incoming hits. Chaos (bypassShield)
+            // ignores armour, matching PoE.
+            if (!bypassShield && playerStatComponent.Armour > 0f && damage > 0f)
+            {
+                float reduction = playerStatComponent.Armour / (playerStatComponent.Armour + 10f * damage);
+                reduction = Mathf.Clamp(reduction, 0f, 0.9f);
+                damage *= 1f - reduction;
+            }
 
             // PoE-style mitigation: Energy Shield absorbs incoming damage before Life. Whatever the
             // shield can't soak overflows to Life. Chaos damage (bypassShield) skips the shield entirely.

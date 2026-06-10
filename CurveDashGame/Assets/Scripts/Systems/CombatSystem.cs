@@ -131,6 +131,11 @@ namespace STG.CurveDash
                     attackSpeed *= 1f + dex * AttackSpeedPercentPerDexterity / 100f;
                 }
 
+                // Active flasks granting IncreasedAttackSpeed (value = % increase) multiply the real combat
+                // attack rate, not just the animation. Data-driven: any flask with such a Buffs entry works.
+                if (_beltFlaskService != null)
+                    attackSpeed *= 1f + _beltFlaskService.SumActiveValue(StatType.IncreasedAttackSpeed) / 100f;
+
                 if (combat.CooldownTimer > 0)
                 {
                     combat.CooldownTimer -= Time.deltaTime;

@@ -646,7 +646,36 @@ namespace STG.CurveDash.Editor
             }
             GUI.backgroundColor = Color.white;
             EditorGUILayout.EndVertical();
+
+            EditorGUILayout.Space();
+            EditorGUILayout.BeginVertical("box");
+            GUILayout.Label("Flask Affix Generator (data-driven)", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox(
+                "Each flask gets a utility affix from the pool (Armour, Movement/Attack Speed, Resistances, " +
+                "Evasion, Crit, Life). The affix maps to a real StatType, so generated flasks actually work " +
+                "with no extra code. AffixName is filled for clean tooltips.", MessageType.Info);
+
+            GUI.backgroundColor = new Color(0.2f, 0.7f, 0.9f);
+            if (GUILayout.Button("🧪 Generate One Flask Per Affix", GUILayout.Height(34)))
+            {
+                int n = GenerateAffixFlaskSet();
+                EditorUtility.DisplayDialog("Success",
+                    $"Generated {n} affix flasks (+ Devion adapters, registered in the ItemDatabase) in {RPG_BASE_PATH}/Flasks.", "OK");
+            }
+
+            _flaskRollCount = Mathf.Clamp(EditorGUILayout.IntField("Random Roll Count", _flaskRollCount), 1, 50);
+            GUI.backgroundColor = new Color(0.6f, 0.4f, 0.9f);
+            if (GUILayout.Button($"🎲 Roll {_flaskRollCount} Random Flasks", GUILayout.Height(34)))
+            {
+                int n = RollRandomFlasks(_flaskRollCount);
+                EditorUtility.DisplayDialog("Success",
+                    $"Rolled {n} random flasks (+ Devion adapters, registered in the ItemDatabase) in {RPG_BASE_PATH}/Flasks.", "OK");
+            }
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.EndVertical();
         }
+
+        private int _flaskRollCount = 8;
 
         private void CreateFlask(string fName, FlaskType type, float rec, float dur, int maxC, int useC, float spd, string desc)
         {
@@ -655,9 +684,177 @@ namespace STG.CurveDash.Editor
 
             var asset = ScriptableObject.CreateInstance<FlaskItemData>();
             asset.ItemName = fName; asset.FlaskType = type; asset.RecoveryAmount = rec; asset.Duration = dur;
-            asset.MaxCharges = maxC; asset.ChargesUsedPerUse = useC; asset.SpeedModifier = spd; asset.Description = desc;
+            asset.MaxCharges = maxC; asset.ChargesUsedPerUse = useC; asset.Description = desc;
+            // 'spd' is a movement-speed multiplier (1.4 = +40%). Express it as a data-driven active buff.
+            if (!Mathf.Approximately(spd, 1f))
+                asset.Buffs.Add(new StatModifier(StatType.AddedMovementSpeed, (spd - 1f) * 100f));
 
             AssetDatabase.CreateAsset(asset, fullPath); AssetDatabase.SaveAssets(); Selection.activeObject = asset;
+        }
+
+        // --- Flask affix pool: each entry is a PoE-style utility suffix bound to a real StatType + value band.
+        // Because it reuses StatType, every generated flask works mechanically with zero extra code: sheet stats
+        // (Armour, Resistances, Evasion, Crit, Life) route through AffixStatMapper; Movement/Attack Speed are
+        // read by the ECS systems. Add a row here to introduce a brand-new flask flavour.
+        private readonly struct FlaskAffixDef
+        {
+            public readonly string Suffix;
+            public readonly StatType Stat;
+            public readonly float Min;
+            public readonly float Max;
+            public FlaskAffixDef(string suffix, StatType stat, float min, float max)
+            { Suffix = suffix; Stat = stat; Min = min; Max = max; }
+        }
+
+        private static readonly FlaskAffixDef[] FlaskAffixPool =
+        {
+            new FlaskAffixDef("of Iron Skin",      StatType.AddedArmour,              800f, 1500f),
+            new FlaskAffixDef("of the Cheetah",    StatType.AddedMovementSpeed,        25f,   40f),
+            new FlaskAffixDef("of the Surgeon",    StatType.IncreasedAttackSpeed,      10f,   20f),
+            new FlaskAffixDef("of Reflexes",       StatType.AddedEvasion,             600f, 1200f),
+            new FlaskAffixDef("of the Lynx",       StatType.IncreasedCriticalChance,   15f,   30f),
+            new FlaskAffixDef("of the Salamander", StatType.AddedFireResistance,       25f,   45f),
+            new FlaskAffixDef("of the Walrus",     StatType.AddedColdResistance,       25f,   45f),
+            new FlaskAffixDef("of Grounding",      StatType.AddedLightningResistance,  25f,   45f),
+            new FlaskAffixDef("of Warding",        StatType.AddedChaosResistance,      20f,   35f),
+            new FlaskAffixDef("of Sealing",        StatType.AddedAllResistances,       10f,   20f),
+            new FlaskAffixDef("of Iron Heart",     StatType.AddedLife,                150f,  400f),
+        };
+
+        // One flask per pool entry, magnitude rolled within the affix's band.
+        private int GenerateAffixFlaskSet()
+        {
+            var created = new List<FlaskItemData>();
+            foreach (var def in FlaskAffixPool)
+            {
+                float val = Mathf.Round(UnityEngine.Random.Range(def.Min, def.Max));
+                created.Add(CreateFlaskWithBuffs("Utility Flask", def.Suffix,
+                    new List<StatModifier> { new StatModifier(def.Stat, val, def.Suffix, AffixType.Suffix) }));
+            }
+            AssetDatabase.SaveAssets();
+            WireFlasksIntoDatabase(created);
+            AssetDatabase.SaveAssets(); AssetDatabase.Refresh();
+            return created.Count;
+        }
+
+        // Procedural variety: N flasks, each a random affix rolled at a random magnitude (filename keeps the
+        // roll so repeats don't overwrite). A 30% chance adds a second, different affix for a "rare" flask.
+        private int RollRandomFlasks(int n)
+        {
+            var created = new List<FlaskItemData>();
+            for (int i = 0; i < n; i++)
+            {
+                var a = FlaskAffixPool[UnityEngine.Random.Range(0, FlaskAffixPool.Length)];
+                float av = Mathf.Round(UnityEngine.Random.Range(a.Min, a.Max));
+                var buffs = new List<StatModifier> { new StatModifier(a.Stat, av, a.Suffix, AffixType.Suffix) };
+                string suffix = a.Suffix;
+
+                if (UnityEngine.Random.value < 0.3f)
+                {
+                    FlaskAffixDef b;
+                    do { b = FlaskAffixPool[UnityEngine.Random.Range(0, FlaskAffixPool.Length)]; } while (b.Stat == a.Stat);
+                    float bv = Mathf.Round(UnityEngine.Random.Range(b.Min, b.Max));
+                    buffs.Add(new StatModifier(b.Stat, bv, b.Suffix, AffixType.Suffix));
+                    suffix = $"{a.Suffix} {b.Suffix}";
+                }
+
+                // Unique tag so multiple rolls of the same affix don't collide on disk.
+                created.Add(CreateFlaskWithBuffs("Utility Flask", $"{suffix} #{i + 1}", buffs));
+            }
+            AssetDatabase.SaveAssets();
+            WireFlasksIntoDatabase(created);
+            AssetDatabase.SaveAssets(); AssetDatabase.Refresh();
+            return created.Count;
+        }
+
+        // Shared builder: a Utility flask carrying arbitrary data-driven buffs, with AffixName set for clean
+        // tooltips and a description auto-built from the same buffs via StatTypeFormatter. Returns the asset
+        // so the caller can wire its Devion adapter + database registration afterwards.
+        private FlaskItemData CreateFlaskWithBuffs(string baseName, string suffix, List<StatModifier> buffs)
+        {
+            string targetFolder = EnsureDirectory(Path.Combine(RPG_BASE_PATH, "Flasks"));
+            string display = string.IsNullOrEmpty(suffix) ? baseName : $"{baseName} {suffix}";
+            string fileSafe = display.Replace(" ", "_").Replace("#", "n");
+            string fullPath = Path.Combine(targetFolder, $"Flask_{fileSafe}.asset").Replace("\\", "/");
+
+            var asset = ScriptableObject.CreateInstance<FlaskItemData>();
+            asset.ItemName = display;
+            asset.FlaskType = FlaskType.Utility;
+            asset.RecoveryAmount = 0f;
+            asset.Duration = 4f;
+            asset.MaxCharges = 60;
+            asset.ChargesUsedPerUse = 30;
+            asset.ChargesGainedOnKill = 3;
+            asset.AutoUseCondition = FlaskAutoUseCondition.WhenFullCharges;
+            asset.Buffs = buffs;
+
+            var sb = new System.Text.StringBuilder();
+            foreach (var b in buffs)
+                if (b != null) sb.AppendLine(StatTypeFormatter.Describe(b.Type, b.Value) + " during effect.");
+            asset.Description = sb.ToString().TrimEnd();
+
+            AssetDatabase.CreateAsset(asset, fullPath);
+            return asset;
+        }
+
+        // Creates/links a Devion CurveDashEquipmentAdapter for each generated flask and registers it in the
+        // Devion ItemDatabase — so generated flasks are immediately usable (equippable into flask slots, shop,
+        // drops). Mirrors the proven CurveDashDatabaseRepair flow: load the DB, resolve the three Flask
+        // equipment regions by their real names, SyncData each adapter, set its regions, back-link the flask's
+        // DevionAdapter, and add the adapter to db.items. Idempotent — re-runs reuse existing adapters/entries.
+        private int WireFlasksIntoDatabase(List<FlaskItemData> flasks)
+        {
+            if (flasks == null || flasks.Count == 0) return 0;
+
+            string[] dbGuids = AssetDatabase.FindAssets("t:ItemDatabase");
+            ItemDatabase db = dbGuids.Length > 0
+                ? AssetDatabase.LoadAssetAtPath<ItemDatabase>(AssetDatabase.GUIDToAssetPath(dbGuids[0]))
+                : null;
+            if (db == null)
+                Debug.LogWarning("[FlaskGen] No ItemDatabase found — adapters created but NOT registered in the database.");
+
+            // Real flask region names live in the DB as "Flask Fist/Second/Third" (see CurveDashDatabaseRepair).
+            // Giving each flask all three lets it slot into any flask slot.
+            var flaskRegions = new List<EquipmentRegion>();
+            if (db?.equipments != null)
+                foreach (var name in new[] { "Flask Fist", "Flask Second", "Flask Third" })
+                {
+                    var r = db.equipments.Find(e => e != null && e.Name == name);
+                    if (r != null) flaskRegions.Add(r);
+                }
+
+            string adapterFolder = EnsureDirectory($"{ADAPTERS_BASE_PATH}/Flasks");
+            int wired = 0;
+
+            foreach (var flask in flasks)
+            {
+                if (flask == null) continue;
+
+                string adapterPath = $"{adapterFolder}/{flask.name}_Adapter.asset";
+                var adapter = AssetDatabase.LoadAssetAtPath<CurveDashEquipmentAdapter>(adapterPath);
+                bool isNew = adapter == null;
+                if (isNew) adapter = ScriptableObject.CreateInstance<CurveDashEquipmentAdapter>();
+
+                adapter.OriginalEquipmentData = flask; // also calls SyncData (category/rarity/properties)
+                adapter.SyncData();
+                if (flaskRegions.Count > 0) adapter.Region = new List<EquipmentRegion>(flaskRegions);
+
+                if (isNew) AssetDatabase.CreateAsset(adapter, adapterPath);
+                else EditorUtility.SetDirty(adapter);
+
+                flask.DevionAdapter = adapter;
+                EditorUtility.SetDirty(flask);
+
+                if (db != null && !db.items.Contains(adapter))
+                {
+                    db.items.Add(adapter);
+                    EditorUtility.SetDirty(db);
+                }
+                wired++;
+            }
+
+            if (db != null) EditorUtility.SetDirty(db);
+            return wired;
         }
 
         private void CreateCurrency(string cName, CurrencyType type, string desc)

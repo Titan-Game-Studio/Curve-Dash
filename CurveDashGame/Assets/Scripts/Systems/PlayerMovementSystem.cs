@@ -13,6 +13,7 @@ namespace STG.CurveDash
         private readonly AudioSettings audioSettings;
         private readonly GameSettings gameSettings;
         private readonly GameStateService gameState;
+        private readonly BeltFlaskService beltFlaskService;
 
         private readonly EcsPool<PlayerComponent> playerPool;
         private readonly EcsPool<BlockComponent> blockPool;
@@ -42,13 +43,14 @@ namespace STG.CurveDash
         private int _edgeCheckGraceFrames = 0;
 
         public PlayerMovementSystem(EcsWorld world, AudioPlayer audioPlayer, AudioSettings audioSettings,
-            GameSettings gameSettings, GameStateService gameState)
+            GameSettings gameSettings, GameStateService gameState, BeltFlaskService beltFlaskService)
         {
             this.world = world;
             this.audioPlayer = audioPlayer;
             this.audioSettings = audioSettings;
             this.gameSettings = gameSettings;
             this.gameState = gameState;
+            this.beltFlaskService = beltFlaskService;
 
             playerPool = world.GetPool<PlayerComponent>();
             blockPool = world.GetPool<BlockComponent>();
@@ -127,11 +129,18 @@ namespace STG.CurveDash
             ref var playerComponent = ref playerPool.Get(ball);
             ref var viewLinkComponent = ref viewLinkPool.Get(ball);
             
+            // Active flasks granting AddedMovementSpeed (Quicksilver-style, value = % increase) speed the
+            // player up. Applied to the base ECS speed here so it reaches BOTH the real translation and the
+            // run-animation factor — the PlayerView.MovementSpeed property is overwritten every frame and
+            // never affected movement. Data-driven: any flask with a Buffs entry of AddedMovementSpeed works.
+            float moveBonusPct = beltFlaskService != null ? beltFlaskService.SumActiveValue(StatType.AddedMovementSpeed) : 0f;
+            float effectiveSpeed = playerComponent.Speed * (1f + moveBonusPct / 100f);
+
             // Lấy PlayerView từ Transform để điều khiển animation dựa theo di chuyển thực tế
             var ballView = viewLinkComponent.Transform != null ? viewLinkComponent.Transform.GetComponent<PlayerView>() : null;
             if (ballView != null)
             {
-                ballView.MovementSpeed = playerComponent.Speed;
+                ballView.MovementSpeed = effectiveSpeed;
             }
 
             if (playerComponent.Direction == Vector3.zero)
@@ -164,7 +173,7 @@ namespace STG.CurveDash
                 }
                 else if (playerComponent.Direction != Vector3.zero)
                 {
-                    Vector3 nextPosition = position + playerComponent.Direction * playerComponent.Speed * Time.deltaTime;
+                    Vector3 nextPosition = position + playerComponent.Direction * effectiveSpeed * Time.deltaTime;
                     if (!CheckEntityUnder(nextPosition, out var nextBlock) || !blockPool.Has(nextBlock))
                     {
                         // Snap precisely to the current block part's center to prevent overshooting
@@ -241,7 +250,7 @@ namespace STG.CurveDash
                 }
             }
 
-            float speed = !fallingPool.Has(ball) ? playerComponent.Speed : 1;
+            float speed = !fallingPool.Has(ball) ? effectiveSpeed : 1;
 
             playerTransform.Translate(playerComponent.Direction * speed * Time.deltaTime, Space.World);
 

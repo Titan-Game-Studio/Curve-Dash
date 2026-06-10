@@ -86,13 +86,21 @@ namespace STG.CurveDash
                     SetOrUpdateProperty("Duration", flask.Duration, Color.white);
                     SetOrUpdateProperty("Max Charges", flask.MaxCharges, Color.white);
                     SetOrUpdateProperty("Charges Per Use", flask.ChargesUsedPerUse, Color.white);
-                    if (flask.SpeedModifier != 1.0f)
+                    // Active-effect buffs are data-driven: list each one generically (no per-stat code).
+                    // With an AffixName the line reads flavour-first ("of the Cheetah: +40% Movement Speed");
+                    // without one it falls back to a clean "Movement Speed: +40%".
+                    if (flask.Buffs != null)
                     {
-                        SetOrUpdateProperty("Speed Modifier", flask.SpeedModifier, Color.yellow);
-                    }
-                    if (flask.AttackSpeedModifier != 1.0f)
-                    {
-                        SetOrUpdateProperty("Attack Speed Modifier", flask.AttackSpeedModifier, Color.yellow);
+                        foreach (var buff in flask.Buffs)
+                        {
+                            if (buff == null) continue;
+                            if (string.IsNullOrEmpty(buff.AffixName))
+                                SetOrUpdateProperty(StatTypeFormatter.DisplayName(buff.Type),
+                                    StatTypeFormatter.FormatValue(buff.Type, buff.Value), Color.yellow);
+                            else
+                                SetOrUpdateProperty(buff.AffixName,
+                                    StatTypeFormatter.Describe(buff.Type, buff.Value), Color.yellow);
+                        }
                     }
                 }
                 else if (m_OriginalItemData is GemItemData gem)
