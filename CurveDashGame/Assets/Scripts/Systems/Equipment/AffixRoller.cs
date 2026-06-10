@@ -113,6 +113,115 @@ namespace STG.CurveDash
             return value;
         }
 
+        // --- Exalted: add ONE more affix to an existing set ------------------------------------
+        // Rolls a single extra affix (one prefix/suffix slot) onto an item that already has affixes,
+        // honouring the PoE Rare cap (3 prefixes + 3 suffixes) and never duplicating a mod group.
+        // Returns the newly added modifier(s) (a hybrid affix yields several) — empty if the item is
+        // full or no eligible affix exists. The caller appends them to the item's RolledAffixes.
+        public static List<StatModifier> RollAdditionalAffix(
+            ItemData item, int itemLevel, IReadOnlyList<StatModifier> existing)
+        {
+            var result = new List<StatModifier>();
+            if (item == null) return result;
+
+            var templates = LoadAllTemplates();
+            if (templates.Count == 0) return result;
+
+            // Rebuild used mod groups + per-type slot usage from the existing affixes. Each distinct
+            // AffixName is one slot; a hybrid affix's several mods share that name so they count once.
+            var usedGroups = new HashSet<string>();
+            var countedAffixNames = new HashSet<string>();
+            int prefixCount = 0, suffixCount = 0;
+            if (existing != null)
+            {
+                foreach (var mod in existing)
+                {
+                    if (mod == null) continue;
+                    usedGroups.Add(GroupKeyFor(templates, mod.AffixName));
+                    if (!string.IsNullOrEmpty(mod.AffixName) && countedAffixNames.Add(mod.AffixName))
+                    {
+                        if (mod.AffixType == AffixType.Prefix) prefixCount++;
+                        else suffixCount++;
+                    }
+                }
+            }
+
+            const int maxPerType = 3; // PoE Rare cap
+            bool prefixOpen = prefixCount < maxPerType;
+            bool suffixOpen = suffixCount < maxPerType;
+            if (!prefixOpen && !suffixOpen) return result;
+
+            AffixType type = (prefixOpen && suffixOpen)
+                ? (Random.value < 0.5f ? AffixType.Prefix : AffixType.Suffix)
+                : (prefixOpen ? AffixType.Prefix : AffixType.Suffix);
+
+            var tags = item.GetAffixTags();
+            var mods = TryRollOne(templates, tags, itemLevel, type, usedGroups);
+
+            // If the chosen type's pool was exhausted, fall back to the other open type.
+            if (mods.Count == 0)
+            {
+                var other = type == AffixType.Prefix ? AffixType.Suffix : AffixType.Prefix;
+                bool otherOpen = other == AffixType.Prefix ? prefixOpen : suffixOpen;
+                if (otherOpen) mods = TryRollOne(templates, tags, itemLevel, other, usedGroups);
+            }
+
+            result.AddRange(mods);
+            return result;
+        }
+
+        // Resolves a rolled modifier's AffixName back to its mod GroupKey (so Exalted won't add a mod
+        // from a group the item already has). Falls back to the name itself when no template matches.
+        private static string GroupKeyFor(IReadOnlyList<AffixData> templates, string affixName)
+        {
+            if (string.IsNullOrEmpty(affixName)) return affixName ?? string.Empty;
+            foreach (var a in templates)
+                if (a != null && a.AffixName == affixName) return a.GroupKey;
+            return affixName;
+        }
+
+        // Weighted single-slot pick of one affix of the given type, excluding already-used groups.
+        // Adds the picked group to usedGroups and returns its rolled modifier(s); empty if none eligible.
+        private static List<StatModifier> TryRollOne(
+            IReadOnlyList<AffixData> templates,
+            IReadOnlyList<ItemTag> itemTags,
+            int itemLevel,
+            AffixType type,
+            HashSet<string> usedGroups)
+        {
+            var entries = new List<(AffixData affix, AffixTier tier, int weight)>();
+            int totalWeight = 0;
+
+            foreach (var affix in templates)
+            {
+                if (affix == null || affix.TypeOfAffix != type) continue;
+                if (usedGroups.Contains(affix.GroupKey)) continue;
+                if (!affix.CanRollOn(itemTags)) continue;
+
+                foreach (var tier in affix.GetEligibleTiers(itemLevel))
+                {
+                    if (tier == null || tier.Weight <= 0) continue;
+                    entries.Add((affix, tier, tier.Weight));
+                    totalWeight += tier.Weight;
+                }
+            }
+
+            if (entries.Count == 0 || totalWeight <= 0) return new List<StatModifier>();
+
+            int roll = Random.Range(0, totalWeight);
+            int acc = 0;
+            foreach (var e in entries)
+            {
+                acc += e.weight;
+                if (roll < acc)
+                {
+                    usedGroups.Add(e.affix.GroupKey);
+                    return e.affix.RollTierMods(e.tier);
+                }
+            }
+            return new List<StatModifier>();
+        }
+
         private static void RollGroup(
             IReadOnlyList<AffixData> templates,
             IReadOnlyList<ItemTag> itemTags,

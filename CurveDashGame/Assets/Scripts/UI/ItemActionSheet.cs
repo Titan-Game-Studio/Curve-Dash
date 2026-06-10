@@ -110,6 +110,13 @@ namespace STG.CurveDash
                 Button("Sockets", new Color(0.42f, 0.30f, 0.55f, 1f), () => { Close(); EquipmentSocketUI.OpenFor(it); });
             }
 
+            // PoE-style crafting: re-roll affixes with currency orbs. Bag gear only (never equipped).
+            if (!inEquipment && ItemRollService.CanRoll(_item))
+            {
+                var it = _item; var s = _slot;
+                Button("Roll", new Color(0.55f, 0.45f, 0.15f, 1f), () => { Close(); ItemRollUI.OpenFor(it, s); });
+            }
+
             if (!inEquipment && _item.IsDroppable)
             {
                 var it = _item;
